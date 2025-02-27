@@ -13,9 +13,11 @@
 
 <div align="center">
 
-| <a href="https://github.com/wesawth3sun"><img src="https://github.com/wesawth3sun.png" width="150" style="border-radius: 50%; border: 4px solid #58A6FF;"></a> | <a href="https://github.com/skvhffpdyd"><img src="https://github.com/skvhffpdyd.png" width="150" style="border-radius: 50%; border: 4px solid #58A6FF;"></a> | <a href="https://github.com/dlfjsld1"><img src="https://github.com/dlfjsld1.png" width="150" style="border-radius: 50%; border: 4px solid #58A6FF;"></a> |
-|-------|-------|-------|
-| **최지선** <br> Backend Developer | **윤상민** <br> Backend Developer | **이태경** <br> Backend Developer |
+| 이름       | 사진                                                                                           | 역할                                |
+|------------|------------------------------------------------------------------------------------------------|-------------------------------------|
+| **최지선** | <a href="https://github.com/wesawth3sun"><img src="https://github.com/wesawth3sun.png" width="150" style="border-radius: 50%; border: 4px solid #58A6FF;"></a> | Team Lead <br> Backend Developer <br> Frontend Developer |
+| **윤상민** | <a href="https://github.com/skvhffpdyd"><img src="https://github.com/skvhffpdyd.png" width="150" style="border-radius: 50%; border: 4px solid #58A6FF;"></a> | Backend Developer <br> Frontend Developer     |
+| **이태경** | <a href="https://github.com/dlfjsld1"><img src="https://github.com/dlfjsld1.png" width="150" style="border-radius: 50%; border: 4px solid #58A6FF;"></a> | Backend Developer <br> Frontend Developer     |
 
 </div>
 
