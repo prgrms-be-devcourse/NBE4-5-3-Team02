@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  toolgether-mysql:
+    image: mysql:8.4.1
+    container_name: toolgether-mysql
+    restart: always
+    ports:
+      - "3306:3306" # MySQL 포트를 localhost와 매핑
+    environment:
+      MYSQL_ROOT_PASSWORD: lldj123414
+      MYSQL_DATABASE: toolgether  # 자동 생성할 DB
+      TZ: Asia/Seoul
+    volumes:
+      - mysql_data:/var/lib/mysql  # MySQL 데이터 유지
+    networks:
+      - toolgether-network
+
+networks:
+  toolgether-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
