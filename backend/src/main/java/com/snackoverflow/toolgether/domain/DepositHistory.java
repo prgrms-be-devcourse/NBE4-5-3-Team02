@@ -1,5 +1,7 @@
 package com.snackoverflow.toolgether.domain;
 
+import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

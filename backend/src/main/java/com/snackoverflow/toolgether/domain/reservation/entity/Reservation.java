@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.domain;
+package com.snackoverflow.toolgether.domain.reservation.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+
+import com.snackoverflow.toolgether.domain.Post;
+import com.snackoverflow.toolgether.domain.User;
 
 @Entity
 @Getter
