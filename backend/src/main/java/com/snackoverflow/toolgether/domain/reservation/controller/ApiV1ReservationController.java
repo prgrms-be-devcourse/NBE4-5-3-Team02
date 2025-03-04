@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/reservations")
 @RequiredArgsConstructor
-public class ReservationController {
+public class ApiV1ReservationController {
 	private final ReservationService reservationService;
 
 	@PostMapping("/request")

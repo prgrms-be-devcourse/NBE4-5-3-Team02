@@ -35,7 +35,7 @@ public class ReservationService {
 	private final UserService userService;
 	private final DepositHistoryService depositHistoryService;
 
-	// 예약 요청
+	// 예약 요청 (일정 충돌 방지 로직 필요)
 	@Transactional
 	public ReservationResponse requestReservation(ReservationRequest reservationRequest) {
 		Post post = postService.findPostById(reservationRequest.postId());
@@ -66,7 +66,7 @@ public class ReservationService {
 		// 예약 승인 시 보증금 결제 -> DepositHistory 추가
 		DepositHistory depositHistory = DepositHistory.builder()
 			.reservation(reservation)
-			.user(reservation.getRenter()) // 보증금은 대여자(renter)가 지불
+			.user(reservation.getRenter()) // 보증금은 대여자가 지불
 			.amount(reservation.getAmount().intValue())
 			.status(DepositStatus.PENDING)
 			.build();
@@ -103,7 +103,7 @@ public class ReservationService {
 		userService.updateUserCredit(renter.getId(), depositHistory.getAmount());
 	}
 
-	// 예약 조회 예외 처리
+	// 예외 처리 포함 예약 조회 메서드
 	private Reservation findReservationByIdOrThrow(Long reservationId) {
 		return reservationRepository.findById(reservationId)
 			.orElseThrow(() -> new ReservationException(ErrorResponse.builder()

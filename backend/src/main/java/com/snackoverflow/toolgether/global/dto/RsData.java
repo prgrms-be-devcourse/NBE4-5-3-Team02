@@ -16,7 +16,7 @@ public class RsData<T> {
 	private String code;
 	@NonNull
 	private String msg;
-	@NonNull
+
 	private T data;
 
 	public RsData(String code, String msg) {
@@ -28,5 +28,4 @@ public class RsData<T> {
 		String statusCodeStr = code.split("-")[0];
 		return Integer.parseInt(statusCodeStr);
 	}
-
 }
