@@ -9,8 +9,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-import com.snackoverflow.toolgether.domain.Post;
-import com.snackoverflow.toolgether.domain.User;
+import com.snackoverflow.toolgether.domain.Post.entity.Post;
+import com.snackoverflow.toolgether.domain.User.entity.User;
 
 @Entity
 @Getter

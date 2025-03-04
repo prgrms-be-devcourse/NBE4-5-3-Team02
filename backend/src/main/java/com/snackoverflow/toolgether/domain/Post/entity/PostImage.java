@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.domain;
+package com.snackoverflow.toolgether.domain.Post.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

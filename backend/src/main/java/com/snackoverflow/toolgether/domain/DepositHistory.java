@@ -1,5 +1,6 @@
 package com.snackoverflow.toolgether.domain;
 
+import com.snackoverflow.toolgether.domain.User.entity.User;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 
 import jakarta.persistence.*;
