@@ -1,5 +1,6 @@
-package com.snackoverflow.toolgether.domain;
+package com.snackoverflow.toolgether.domain.Deposit.entity;
 
+import com.snackoverflow.toolgether.domain.ReturnReason;
 import com.snackoverflow.toolgether.domain.User.entity.User;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 

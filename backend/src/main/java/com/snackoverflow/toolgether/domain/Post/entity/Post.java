@@ -11,7 +11,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-import com.snackoverflow.toolgether.domain.Category;
 import com.snackoverflow.toolgether.domain.PriceType;
 import com.snackoverflow.toolgether.domain.User.entity.User;
 

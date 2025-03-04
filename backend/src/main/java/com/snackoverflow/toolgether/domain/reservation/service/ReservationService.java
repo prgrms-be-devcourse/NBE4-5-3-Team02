@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.snackoverflow.toolgether.domain.Deposit.repository.DepositRepository;
 import com.snackoverflow.toolgether.domain.Post.entity.Post;
 import com.snackoverflow.toolgether.domain.Post.repository.PostRepository;
 import com.snackoverflow.toolgether.domain.User.entity.User;
@@ -23,6 +24,7 @@ public class ReservationService {
 	private final ReservationRepository reservationRepository;
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
+	private final DepositRepository depositRepository;
 
 	@Transactional
 	public ReservationResponse requestReservation(ReservationRequest reservationRequest) {
