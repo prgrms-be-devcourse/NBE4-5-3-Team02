@@ -5,19 +5,20 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.snackoverflow.toolgether.domain.Deposit.entity.DepositHistory;
-import com.snackoverflow.toolgether.domain.Deposit.entity.DepositStatus;
-import com.snackoverflow.toolgether.domain.Deposit.repository.DepositRepository;
-import com.snackoverflow.toolgether.domain.Deposit.service.DepositService;
-import com.snackoverflow.toolgether.domain.Post.entity.Post;
-import com.snackoverflow.toolgether.domain.Post.repository.PostRepository;
-import com.snackoverflow.toolgether.domain.User.entity.User;
-import com.snackoverflow.toolgether.domain.User.repository.UserRepository;
+import com.snackoverflow.toolgether.domain.ReturnReason;
+import com.snackoverflow.toolgether.domain.deposit.entity.DepositHistory;
+import com.snackoverflow.toolgether.domain.deposit.entity.DepositStatus;
+import com.snackoverflow.toolgether.domain.deposit.service.DepositHistoryService;
+import com.snackoverflow.toolgether.domain.post.entity.Post;
+import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
+import com.snackoverflow.toolgether.domain.user.entity.User;
+import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationRequest;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationResponse;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
 import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository;
+import com.snackoverflow.toolgether.domain.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +28,8 @@ public class ReservationService {
 	private final ReservationRepository reservationRepository;
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
-	private final DepositService depositService;
+	private final UserService userService;
+	private final DepositHistoryService depositHistoryService;
 
 	// 예약 요청
 	@Transactional
@@ -70,7 +72,7 @@ public class ReservationService {
 			.status(DepositStatus.PENDING)
 			.build();
 
-		depositService.createDepositHistory(depositHistory);
+		depositHistoryService.createDepositHistory(depositHistory);
 	}
 
 	// 예약 거절
@@ -94,6 +96,17 @@ public class ReservationService {
 	public void completeRental(Long reservationId) {
 		Reservation reservation = reservationRepository.findById(reservationId)
 			.orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+		User renter = userRepository.findById(reservation.getRenter().getId())
+			.orElseThrow(() -> new RuntimeException("Renter not found"));
+
 		reservation.completeRental();
+
+		// 보증금 상태 변경 및 반환 사유 업데이트
+		DepositHistory depositHistory = depositHistoryService.findDepositHistoryByReservationId(reservationId);
+		depositHistoryService.updateDepositHistory(depositHistory.getId(), DepositStatus.RETURNED, ReturnReason.NORMAL_COMPLETION);
+
+		// 사용자 크레딧 업데이트
+		userService.updateUserCredit(renter.getId(), depositHistory.getAmount());
 	}
 }

@@ -1,7 +1,7 @@
-package com.snackoverflow.toolgether.domain.Post.repository;
+package com.snackoverflow.toolgether.domain.post.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.snackoverflow.toolgether.domain.Post.entity.Post;
+import com.snackoverflow.toolgether.domain.post.entity.Post;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 }

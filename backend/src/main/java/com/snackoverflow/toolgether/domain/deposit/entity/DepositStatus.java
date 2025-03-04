@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.domain.Deposit.entity;
+package com.snackoverflow.toolgether.domain.deposit.entity;
 
 public enum DepositStatus {
     PENDING, // 반환 대기 중

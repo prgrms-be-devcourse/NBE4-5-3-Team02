@@ -1,7 +1,7 @@
-package com.snackoverflow.toolgether.domain.Deposit.entity;
+package com.snackoverflow.toolgether.domain.deposit.entity;
 
 import com.snackoverflow.toolgether.domain.ReturnReason;
-import com.snackoverflow.toolgether.domain.User.entity.User;
+import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 
 import jakarta.persistence.*;
@@ -38,4 +38,12 @@ public class DepositHistory {
 
     @Enumerated(EnumType.STRING)
     private ReturnReason returnReason; // 보증금 반환 사유
+
+    public void changeStatus(DepositStatus status) {
+        this.status = status;
+    }
+
+    public void changeReturnReason(ReturnReason returnReason) {
+        this.returnReason = returnReason;
+    }
 }

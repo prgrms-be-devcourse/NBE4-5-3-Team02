@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.domain.User.entity;
+package com.snackoverflow.toolgether.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -60,4 +60,8 @@ public class User {
 
     @Builder.Default
     private int credit = 0; // 보증금 환불 필드
+
+    public void updateCredit(int credit) {
+        this.credit += credit;
+    }
 }
