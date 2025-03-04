@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationRequest;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationResponse;
-import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 import com.snackoverflow.toolgether.domain.reservation.service.ReservationService;
 
 import lombok.RequiredArgsConstructor;
@@ -34,5 +33,15 @@ public class ReservationController {
 	@PatchMapping("/{id}/reject")
 	public void rejectReservation(@PathVariable Long id, @RequestParam String reason) {
 		reservationService.rejectReservation(id, reason);
+	}
+
+	@PatchMapping("/{id}/start")
+	public void startRental(@PathVariable Long id) {
+		reservationService.startRental(id);
+	}
+
+	@PatchMapping("/{id}/complete")
+	public void completeRental(@PathVariable Long id) {
+		reservationService.completeRental(id);
 	}
 }
