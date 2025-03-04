@@ -1,5 +1,6 @@
 package com.snackoverflow.toolgether.domain.reservation.controller;
 
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,7 +16,7 @@ import com.snackoverflow.toolgether.domain.reservation.service.ReservationServic
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/reservations")
+@RequestMapping("/api/v1/reservations")
 @RequiredArgsConstructor
 public class ReservationController {
 	private final ReservationService reservationService;
@@ -30,7 +31,7 @@ public class ReservationController {
 		reservationService.approveReservation(id);
 	}
 
-	@PostMapping("/{id}/reject")
+	@PatchMapping("/{id}/reject")
 	public void rejectReservation(@PathVariable Long id, @RequestParam String reason) {
 		reservationService.rejectReservation(id, reason);
 	}

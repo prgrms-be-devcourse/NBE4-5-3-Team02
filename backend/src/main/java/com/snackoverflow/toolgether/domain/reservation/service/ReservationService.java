@@ -11,6 +11,7 @@ import com.snackoverflow.toolgether.domain.deposit.entity.DepositStatus;
 import com.snackoverflow.toolgether.domain.deposit.service.DepositHistoryService;
 import com.snackoverflow.toolgether.domain.post.entity.Post;
 import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
+import com.snackoverflow.toolgether.domain.post.service.PostService;
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationRequest;
@@ -26,20 +27,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReservationService {
 	private final ReservationRepository reservationRepository;
-	private final PostRepository postRepository;
-	private final UserRepository userRepository;
+	private final PostService postService;
 	private final UserService userService;
 	private final DepositHistoryService depositHistoryService;
 
 	// 예약 요청
 	@Transactional
 	public ReservationResponse requestReservation(ReservationRequest reservationRequest) {
-		Post post = postRepository.findById(reservationRequest.postId())
-			.orElseThrow(() -> new RuntimeException("Post not found"));
-		User renter = userRepository.findById(reservationRequest.renterId())
-			.orElseThrow(() -> new RuntimeException("Renter not found"));
-		User owner = userRepository.findById(reservationRequest.ownerId())
-			.orElseThrow(() -> new RuntimeException("Owner not found"));
+		Post post = postService.findPostById(reservationRequest.postId());
+		User renter = userService.findUserById(reservationRequest.renterId());
+		User owner = userService.findUserById(reservationRequest.ownerId());
 
 		Double totalAmount = reservationRequest.deposit() + reservationRequest.rentalFee();
 		Reservation reservation = Reservation.builder()
@@ -97,8 +94,7 @@ public class ReservationService {
 		Reservation reservation = reservationRepository.findById(reservationId)
 			.orElseThrow(() -> new RuntimeException("Reservation not found"));
 
-		User renter = userRepository.findById(reservation.getRenter().getId())
-			.orElseThrow(() -> new RuntimeException("Renter not found"));
+		User renter = userService.findUserById(reservation.getRenter().getId());
 
 		reservation.completeRental();
 

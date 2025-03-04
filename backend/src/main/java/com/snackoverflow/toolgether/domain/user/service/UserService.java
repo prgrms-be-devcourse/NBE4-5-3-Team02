@@ -14,6 +14,12 @@ public class UserService {
 
 	private final UserRepository userRepository;
 
+	@Transactional(readOnly = true)
+	public User findUserById(Long userId) {
+		return userRepository.findById(userId)
+			.orElseThrow(() -> new RuntimeException("User not found"));
+	}
+
 	@Transactional
 	public User updateUserCredit(Long userId, int credit) {
 		User user = userRepository.findById(userId)
