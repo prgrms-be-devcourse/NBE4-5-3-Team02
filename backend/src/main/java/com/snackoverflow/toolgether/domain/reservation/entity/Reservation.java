@@ -79,7 +79,7 @@ public class Reservation {
         this.status = ReservationStatus.DONE;
     }
 
-    // 거절
+    // 거절 -> 사유 포함
     public void reject(String reason) {
         if (this.status != ReservationStatus.REQUESTED) {
             throw new IllegalStateException("Only requested reservations can be rejected.");

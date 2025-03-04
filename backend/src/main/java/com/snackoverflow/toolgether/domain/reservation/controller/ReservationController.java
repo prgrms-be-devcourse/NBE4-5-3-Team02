@@ -1,8 +1,10 @@
 package com.snackoverflow.toolgether.domain.reservation.controller;
 
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationRequest;
@@ -21,5 +23,15 @@ public class ReservationController {
 	@PostMapping("/request")
 	public ReservationResponse createReservation(@RequestBody ReservationRequest reservationRequest) {
 		return reservationService.requestReservation(reservationRequest);
+	}
+
+	@PostMapping("/{id}/approve")
+	public void approveReservation(@PathVariable Long id) {
+		reservationService.approveReservation(id);
+	}
+
+	@PostMapping("/{id}/reject")
+	public void rejectReservation(@PathVariable Long id, @RequestParam String reason) {
+		reservationService.rejectReservation(id, reason);
 	}
 }
