@@ -5,7 +5,10 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.snackoverflow.toolgether.domain.Deposit.entity.DepositHistory;
+import com.snackoverflow.toolgether.domain.Deposit.entity.DepositStatus;
 import com.snackoverflow.toolgether.domain.Deposit.repository.DepositRepository;
+import com.snackoverflow.toolgether.domain.Deposit.service.DepositService;
 import com.snackoverflow.toolgether.domain.Post.entity.Post;
 import com.snackoverflow.toolgether.domain.Post.repository.PostRepository;
 import com.snackoverflow.toolgether.domain.User.entity.User;
@@ -24,7 +27,7 @@ public class ReservationService {
 	private final ReservationRepository reservationRepository;
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
-	private final DepositRepository depositRepository;
+	private final DepositService depositService;
 
 	@Transactional
 	public ReservationResponse requestReservation(ReservationRequest reservationRequest) {
@@ -56,6 +59,16 @@ public class ReservationService {
 		Reservation reservation = reservationRepository.findById(reservationId)
 			.orElseThrow(() -> new RuntimeException("Reservation not found"));
 		reservation.approve();
+
+		// 예약 승인 시 보증금 결제 -> DepositHistory 추가
+		DepositHistory depositHistory = DepositHistory.builder()
+			.reservation(reservation)
+			.user(reservation.getRenter()) // 보증금은 대여자(renter)가 지불
+			.amount(reservation.getAmount().intValue())
+			.status(DepositStatus.PENDING)
+			.build();
+
+		depositService.createDepositHistory(depositHistory);
 	}
 
 	@Transactional
