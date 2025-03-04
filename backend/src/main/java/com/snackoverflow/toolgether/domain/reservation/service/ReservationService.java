@@ -3,6 +3,7 @@ package com.snackoverflow.toolgether.domain.reservation.service;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.snackoverflow.toolgether.domain.Post.entity.Post;
 import com.snackoverflow.toolgether.domain.Post.repository.PostRepository;
@@ -23,6 +24,7 @@ public class ReservationService {
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
 
+	@Transactional
 	public ReservationResponse requestReservation(ReservationRequest reservationRequest) {
 		Post post = postRepository.findById(reservationRequest.postId())
 			.orElseThrow(() -> new RuntimeException("Post not found"));
@@ -46,4 +48,19 @@ public class ReservationService {
 		reservationRepository.save(reservation);
 		return new ReservationResponse(reservation.getId(), reservation.getStatus().name(), reservation.getAmount());
 	}
+
+	@Transactional
+	public void approveReservation(Long reservationId) {
+		Reservation reservation = reservationRepository.findById(reservationId)
+			.orElseThrow(() -> new RuntimeException("Reservation not found"));
+		reservation.approve();
+	}
+
+	@Transactional
+	public void rejectReservation(Long reservationId, String reason) {
+		Reservation reservation = reservationRepository.findById(reservationId)
+			.orElseThrow(() -> new RuntimeException("Reservation not found"));
+		reservation.reject(reason);
+	}
+
 }

@@ -54,4 +54,54 @@ public class Reservation {
 
     @Column(nullable = false)
     private Double amount; // 총 결제 금액
+
+    // 요청됨 상태 변경
+    public void approve() {
+        if (this.status != ReservationStatus.REQUESTED) {
+            throw new IllegalStateException("Only requested reservations can be approved.");
+        }
+        this.status = ReservationStatus.APPROVED;
+    }
+
+    // 진행 중
+    public void startRental() {
+        if (this.status != ReservationStatus.APPROVED) {
+            throw new IllegalStateException("Only approved reservations can start rental.");
+        }
+        this.status = ReservationStatus.IN_PROGRESS;
+    }
+
+    // 완료
+    public void completeRental() {
+        if (this.status != ReservationStatus.IN_PROGRESS) {
+            throw new IllegalStateException("Only in-progress reservations can be completed.");
+        }
+        this.status = ReservationStatus.DONE;
+    }
+
+    // 거절
+    public void reject(String reason) {
+        if (this.status != ReservationStatus.REQUESTED) {
+            throw new IllegalStateException("Only requested reservations can be rejected.");
+        }
+        this.status = ReservationStatus.REJECTED;
+        this.rejectionReason = reason;
+    }
+
+    // 소유자 문제로 실패함
+    public void failDueToOwnerIssue() {
+        if (this.status != ReservationStatus.IN_PROGRESS) {
+            throw new IllegalStateException("Only in-progress reservations can be marked as failed due to owner issue.");
+        }
+        this.status = ReservationStatus.FAILED_OWNER_ISSUE;
+    }
+
+    // 대여자 문제로 실패함
+    public void failDueToRenterIssue() {
+        if (this.status != ReservationStatus.IN_PROGRESS) {
+            throw new IllegalStateException("Only in-progress reservations can be marked as failed due to renter issue.");
+        }
+        this.status = ReservationStatus.FAILED_RENTER_ISSUE;
+    }
+
 }
