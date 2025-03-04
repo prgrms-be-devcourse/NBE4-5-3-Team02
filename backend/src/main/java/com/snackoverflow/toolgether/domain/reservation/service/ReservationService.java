@@ -29,6 +29,7 @@ public class ReservationService {
 	private final UserRepository userRepository;
 	private final DepositService depositService;
 
+	// 예약 요청
 	@Transactional
 	public ReservationResponse requestReservation(ReservationRequest reservationRequest) {
 		Post post = postRepository.findById(reservationRequest.postId())
@@ -54,6 +55,7 @@ public class ReservationService {
 		return new ReservationResponse(reservation.getId(), reservation.getStatus().name(), reservation.getAmount());
 	}
 
+	// 예약 승인
 	@Transactional
 	public void approveReservation(Long reservationId) {
 		Reservation reservation = reservationRepository.findById(reservationId)
@@ -71,6 +73,7 @@ public class ReservationService {
 		depositService.createDepositHistory(depositHistory);
 	}
 
+	// 예약 거절
 	@Transactional
 	public void rejectReservation(Long reservationId, String reason) {
 		Reservation reservation = reservationRepository.findById(reservationId)
@@ -78,4 +81,19 @@ public class ReservationService {
 		reservation.reject(reason);
 	}
 
+	// 대여 시작 (IN_PROGRESS 상태)
+	@Transactional
+	public void startRental(Long reservationId) {
+		Reservation reservation = reservationRepository.findById(reservationId)
+			.orElseThrow(() -> new RuntimeException("Reservation not found"));
+		reservation.startRental();
+	}
+
+	// 대여 완료 (DONE 상태)
+	@Transactional
+	public void completeRental(Long reservationId) {
+		Reservation reservation = reservationRepository.findById(reservationId)
+			.orElseThrow(() -> new RuntimeException("Reservation not found"));
+		reservation.completeRental();
+	}
 }
