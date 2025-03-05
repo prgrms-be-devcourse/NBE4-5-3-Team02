@@ -1,5 +1,7 @@
 package com.snackoverflow.toolgether.domain.user.controller;
 
+import com.snackoverflow.toolgether.domain.user.dto.SignupRequest;
+import com.snackoverflow.toolgether.domain.user.service.UserService;
 import com.snackoverflow.toolgether.domain.user.service.VerificationService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.constraints.Email;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
+    private final UserService userService;
     private final VerificationService verificationService;
 
     // 이메일 인증
@@ -34,6 +37,17 @@ public class UserController {
     public ResponseEntity<String> verifiedEmail(@RequestBody @Validated VerificationRequest request) {
         verificationService.verifyEmail(request.getEmail(), request.code);
         return ResponseEntity.status(201).body("이메일 인증에 성공하였습니다.");
+    }
+
+    // 회원 가입
+    @PostMapping("/signup")
+    public ResponseEntity<String> signup(@RequestBody @Validated SignupRequest request) {
+        // 이메일, 아이디, 닉네임 중복 확인
+        userService.checkDuplicates(request);
+
+        // 이상 없을 시에 회원 가입 진행
+        userService.registerVerifiedUser(request);
+        return ResponseEntity.status(201).body("회원 가입이 완료되었습니다.");
     }
 
     public record EmailRequest(
