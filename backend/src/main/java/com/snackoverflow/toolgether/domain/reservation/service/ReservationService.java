@@ -54,6 +54,16 @@ public class ReservationService {
 			.build();
 
 		reservationRepository.save(reservation);
+
+		// 예약 요청 시 보증금 결제 -> DepositHistory 추가
+		DepositHistory depositHistory = DepositHistory.builder()
+			.reservation(reservation)
+			.user(reservation.getRenter()) // 보증금은 대여자가 지불
+			.amount(reservationRequest.deposit().intValue())
+			.status(DepositStatus.PENDING)
+			.build();
+
+		depositHistoryService.createDepositHistory(depositHistory);
 		return new ReservationResponse(reservation.getId(), reservation.getStatus().name(), reservation.getAmount());
 	}
 
@@ -61,16 +71,7 @@ public class ReservationService {
 	@Transactional
 	public void approveReservation(Long reservationId) {
 		Reservation reservation = findReservationByIdOrThrow(reservationId);
-
-		// 예약 승인 시 보증금 결제 -> DepositHistory 추가
-		DepositHistory depositHistory = DepositHistory.builder()
-			.reservation(reservation)
-			.user(reservation.getRenter()) // 보증금은 대여자가 지불
-			.amount(reservation.getAmount().intValue())
-			.status(DepositStatus.PENDING)
-			.build();
-
-		depositHistoryService.createDepositHistory(depositHistory);
+		reservation.approve();
 	}
 
 	// 예약 거절
@@ -78,6 +79,13 @@ public class ReservationService {
 	public void rejectReservation(Long reservationId, String reason) {
 		Reservation reservation = findReservationByIdOrThrow(reservationId);
 		reservation.reject(reason);
+
+		// 보증금 상태 변경 및 반환 사유 업데이트
+		DepositHistory depositHistory = depositHistoryService.findDepositHistoryByReservationId(reservationId);
+		depositHistoryService.updateDepositHistory(depositHistory.getId(), DepositStatus.RETURNED, ReturnReason.REJECTED);
+
+		// 대여자 크레딧 업데이트
+		userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
 	}
 
 	// 대여 시작 (IN_PROGRESS 상태)
@@ -101,7 +109,7 @@ public class ReservationService {
 		userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
 	}
 
-	// ~에 의한 대여 실패 -> 차용인의 경우 대여자에게, 대여자일 경우 차용인에게 보증금 환급
+	// ~에 의한 대여 실패 -> 소유자의 경우 대여자에게, 대여자일 경우 소유자에게 보증금 환급
 	@Transactional
 	public void failDueTo(Long reservationId, String reason, FailDue failDue) {
 		Reservation reservation = findReservationByIdOrThrow(reservationId);
@@ -117,7 +125,7 @@ public class ReservationService {
 		}
 		else if(failDue.equals(FailDue.RENTER_ISSUE)){
 			reservation.failDueToRenterIssue();
-			// 차용인 크레딧 업데이트
+			// 소유자 크레딧 업데이트
 			userService.updateUserCredit(reservation.getOwner().getId(), depositHistory.getAmount());
 		}
 	}

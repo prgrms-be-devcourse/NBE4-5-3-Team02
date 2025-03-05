@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/reservations")
 @RequiredArgsConstructor
-public class ApiV1ReservationController {
+public class ReservationController {
 	private final ReservationService reservationService;
 
 	@PostMapping("/request")
@@ -28,6 +28,7 @@ public class ApiV1ReservationController {
 		return new RsData<>("201-1", "예약 요청 성공", response);
 	}
 
+	// 예약 상태를 승인으로 바꾼 후 DepositHistory 생성
 	@PostMapping("/{id}/approve")
 	public RsData<Void> approveReservation(@PathVariable Long id) {
 		reservationService.approveReservation(id);

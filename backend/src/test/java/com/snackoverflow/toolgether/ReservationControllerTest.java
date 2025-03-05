@@ -2,7 +2,7 @@ package com.snackoverflow.toolgether;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.snackoverflow.toolgether.domain.reservation.controller.ApiV1ReservationController;
+import com.snackoverflow.toolgether.domain.reservation.controller.ReservationController;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationRequest;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationResponse;
 import com.snackoverflow.toolgether.domain.reservation.entity.FailDue;
@@ -15,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -28,7 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class ApiV1ReservationControllerTest {
+public class ReservationControllerTest {
 
 	private MockMvc mockMvc;
 
@@ -36,14 +35,14 @@ public class ApiV1ReservationControllerTest {
 	private ReservationService reservationService;
 
 	@InjectMocks
-	private ApiV1ReservationController apiV1ReservationController;
+	private ReservationController reservationController;
 
 	private ObjectMapper objectMapper = new ObjectMapper();
 
 	@BeforeEach
 	public void setUp() {
 		MockitoAnnotations.openMocks(this);
-		mockMvc = MockMvcBuilders.standaloneSetup(apiV1ReservationController).build();
+		mockMvc = MockMvcBuilders.standaloneSetup(reservationController).build();
 		objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new JavaTimeModule());
 	}
