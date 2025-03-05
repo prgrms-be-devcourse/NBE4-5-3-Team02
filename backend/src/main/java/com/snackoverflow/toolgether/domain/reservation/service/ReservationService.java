@@ -7,15 +7,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.snackoverflow.toolgether.domain.ReturnReason;
+import com.snackoverflow.toolgether.domain.deposit.entity.ReturnReason;
 import com.snackoverflow.toolgether.domain.deposit.entity.DepositHistory;
 import com.snackoverflow.toolgether.domain.deposit.entity.DepositStatus;
 import com.snackoverflow.toolgether.domain.deposit.service.DepositHistoryService;
 import com.snackoverflow.toolgether.domain.post.entity.Post;
-import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
 import com.snackoverflow.toolgether.domain.post.service.PostService;
+import com.snackoverflow.toolgether.domain.reservation.entity.FailDue;
 import com.snackoverflow.toolgether.domain.user.entity.User;
-import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationRequest;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationResponse;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
@@ -23,7 +22,7 @@ import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
 import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository;
 import com.snackoverflow.toolgether.domain.user.service.UserService;
 import com.snackoverflow.toolgether.global.exception.ErrorResponse;
-import com.snackoverflow.toolgether.global.exception.ReservationException;
+import com.snackoverflow.toolgether.global.exception.CustomException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -92,21 +91,41 @@ public class ReservationService {
 	@Transactional
 	public void completeRental(Long reservationId) {
 		Reservation reservation = findReservationByIdOrThrow(reservationId);
-		User renter = userService.findUserById(reservation.getRenter().getId());
 		reservation.completeRental();
 
 		// 보증금 상태 변경 및 반환 사유 업데이트
 		DepositHistory depositHistory = depositHistoryService.findDepositHistoryByReservationId(reservationId);
 		depositHistoryService.updateDepositHistory(depositHistory.getId(), DepositStatus.RETURNED, ReturnReason.NORMAL_COMPLETION);
 
-		// 사용자 크레딧 업데이트
-		userService.updateUserCredit(renter.getId(), depositHistory.getAmount());
+		// 대여자 크레딧 업데이트
+		userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
+	}
+
+	// ~에 의한 대여 실패 -> 차용인의 경우 대여자에게, 대여자일 경우 차용인에게 보증금 환급
+	@Transactional
+	public void failDueTo(Long reservationId, String reason, FailDue failDue) {
+		Reservation reservation = findReservationByIdOrThrow(reservationId);
+
+		// 보증금 상태 변경 및 반환 사유 업데이트 -> 사유를 받아와서 작성
+		DepositHistory depositHistory = depositHistoryService.findDepositHistoryByReservationId(reservationId);
+		depositHistoryService.updateDepositHistory(depositHistory.getId(), DepositStatus.RETURNED, ReturnReason.valueOf(reason));
+
+		if(failDue.equals(FailDue.OWNER_ISSUE)){
+			reservation.failDueToOwnerIssue();
+			// 대여자 크레딧 업데이트
+			userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
+		}
+		else if(failDue.equals(FailDue.RENTER_ISSUE)){
+			reservation.failDueToRenterIssue();
+			// 차용인 크레딧 업데이트
+			userService.updateUserCredit(reservation.getOwner().getId(), depositHistory.getAmount());
+		}
 	}
 
 	// 예외 처리 포함 예약 조회 메서드
 	private Reservation findReservationByIdOrThrow(Long reservationId) {
 		return reservationRepository.findById(reservationId)
-			.orElseThrow(() -> new ReservationException(ErrorResponse.builder()
+			.orElseThrow(() -> new CustomException(ErrorResponse.builder()
 				.title("예약 조회 실패")
 				.status(404)
 				.detail("해당 ID의 예약을 찾을 수 없습니다.")

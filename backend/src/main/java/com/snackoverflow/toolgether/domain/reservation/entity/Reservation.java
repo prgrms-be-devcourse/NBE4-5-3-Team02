@@ -55,6 +55,7 @@ public class Reservation {
     @Column(nullable = false)
     private Double amount; // 총 결제 금액
 
+    /* status 변경 함수 */
     // 요청됨 상태 변경
     public void approve() {
         if (this.status != ReservationStatus.REQUESTED) {
@@ -103,5 +104,6 @@ public class Reservation {
         }
         this.status = ReservationStatus.FAILED_RENTER_ISSUE;
     }
+    /* status 변경 함수 */
 
 }

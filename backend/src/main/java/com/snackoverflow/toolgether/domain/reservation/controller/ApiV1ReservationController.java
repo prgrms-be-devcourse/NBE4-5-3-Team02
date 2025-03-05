@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationRequest;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationResponse;
+import com.snackoverflow.toolgether.domain.reservation.entity.FailDue;
 import com.snackoverflow.toolgether.domain.reservation.service.ReservationService;
 import com.snackoverflow.toolgether.global.dto.RsData;
 
@@ -24,13 +25,13 @@ public class ApiV1ReservationController {
 	@PostMapping("/request")
 	public RsData<ReservationResponse> createReservation(@RequestBody ReservationRequest reservationRequest) {
 		ReservationResponse response = reservationService.requestReservation(reservationRequest);
-		return new RsData<>("200-1", "예약 요청 성공", response);
+		return new RsData<>("201-1", "예약 요청 성공", response);
 	}
 
 	@PostMapping("/{id}/approve")
 	public RsData<Void> approveReservation(@PathVariable Long id) {
 		reservationService.approveReservation(id);
-		return new RsData<>("200-1",
+		return new RsData<>("201-1",
 			"%d번 예약 승인 성공".formatted(id));
 	}
 
@@ -51,7 +52,21 @@ public class ApiV1ReservationController {
 	@PatchMapping("/{id}/complete")
 	public RsData<Void> completeRental(@PathVariable Long id) {
 		reservationService.completeRental(id);
-		return new RsData<>("200-5",
+		return new RsData<>("200-1",
 			"%d번 예약 대여 종료 성공".formatted(id));
+	}
+
+	@PatchMapping("/{id}/ownerIssue")
+	public RsData<Void> ownerIssue(@PathVariable Long id, @RequestParam String reason) {
+		reservationService.failDueTo(id, reason, FailDue.OWNER_ISSUE);
+		return new RsData<>("200-1",
+			"%d번 예약 소유자에 의한 이슈로 환급 성공".formatted(id));
+	}
+
+	@PatchMapping("/{id}/renterIssue")
+	public RsData<Void> renterIssue(@PathVariable Long id, @RequestParam String reason) {
+		reservationService.failDueTo(id, reason, FailDue.RENTER_ISSUE);
+		return new RsData<>("200-1",
+			"%d번 예약 대여자에 의한 이슈로 환급 성공".formatted(id));
 	}
 }

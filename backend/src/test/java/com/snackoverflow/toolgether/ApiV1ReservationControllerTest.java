@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.snackoverflow.toolgether.domain.reservation.controller.ApiV1ReservationController;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationRequest;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationResponse;
+import com.snackoverflow.toolgether.domain.reservation.entity.FailDue;
 import com.snackoverflow.toolgether.domain.reservation.service.ReservationService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -113,5 +114,31 @@ public class ApiV1ReservationControllerTest {
 			.andExpect(status().isOk());
 
 		verify(reservationService, times(1)).completeRental(1L);
+	}
+
+	@Test
+	@DisplayName("소유자 이슈로 인한 환불 테스트")
+	public void testOwnerIssue() throws Exception {
+		ResultActions resultActions = mockMvc.perform(patch("/api/v1/reservations/1/ownerIssue")
+				.param("reason", "Owner issue reason"))
+			.andDo(print());
+
+		resultActions
+			.andExpect(status().isOk());
+
+		verify(reservationService, times(1)).failDueTo(1L, "Owner issue reason", FailDue.OWNER_ISSUE);
+	}
+
+	@Test
+	@DisplayName("대여자 이슈로 인한 환불 테스트")
+	public void testRenterIssue() throws Exception {
+		ResultActions resultActions = mockMvc.perform(patch("/api/v1/reservations/1/renterIssue")
+				.param("reason", "Renter issue reason"))
+			.andDo(print());
+
+		resultActions
+			.andExpect(status().isOk());
+
+		verify(reservationService, times(1)).failDueTo(1L, "Renter issue reason", FailDue.RENTER_ISSUE);
 	}
 }
