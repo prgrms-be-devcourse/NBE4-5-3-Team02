@@ -1,5 +1,6 @@
 package com.snackoverflow.toolgether.domain.user.controller;
 
+import com.snackoverflow.toolgether.domain.user.dto.request.EmailRequest;
 import com.snackoverflow.toolgether.domain.user.dto.request.LoginRequest;
 import com.snackoverflow.toolgether.domain.user.dto.request.SignupRequest;
 import com.snackoverflow.toolgether.domain.user.dto.request.VerificationRequest;
@@ -10,12 +11,11 @@ import com.snackoverflow.toolgether.global.dto.RsData;
 import com.snackoverflow.toolgether.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import com.snackoverflow.toolgether.domain.user.service;
 
 import static com.snackoverflow.toolgether.domain.user.service.UserService.*;
 
@@ -33,7 +33,7 @@ public class UserController {
     @PostMapping("/send-verification-code")
     public RsData<String> sendVerificationCode(@Validated @RequestBody EmailRequest request,
                                                        HttpSession session) {
-        verificationService.sendEmailWithCode(request.email, session);
+        verificationService.sendEmailWithCode(request.getEmail(), session);
 
         return new RsData<>(
                 "200-1",
@@ -85,11 +85,5 @@ public class UserController {
                 user.getNickname() + " 님 환영합니다!",
                 null
         );
-    }
-
-    public record EmailRequest(
-            @NotBlank(message = "이메일을 입력해 주세요")
-            @Email(message = "유효한 이메일 형식이 아닙니다")
-            String email) {
     }
 }

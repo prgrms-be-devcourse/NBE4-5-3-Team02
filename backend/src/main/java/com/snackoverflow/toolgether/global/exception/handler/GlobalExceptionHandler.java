@@ -1,5 +1,6 @@
 package com.snackoverflow.toolgether.global.exception.handler;
 
+import com.snackoverflow.toolgether.global.exception.CustomException;
 import com.snackoverflow.toolgether.global.exception.custom.duplicate.DuplicateFieldException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.CustomAuthException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.MailPreparationException;
@@ -10,7 +11,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.service.spi.ServiceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -94,5 +94,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(404).body(ErrorResponse.of(
                 "USER-NOT-FOUND", exception.getMessage()
         ));
+    }
+
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<com.snackoverflow.toolgether.global.exception.ErrorResponse> handleCustomException(CustomException ex) {
+        return ResponseEntity
+                .status(ex.getErrorResponse().getStatus())
+                .body(ex.getErrorResponse());
     }
 }

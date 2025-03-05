@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -63,4 +62,8 @@ public class User {
 
     @Builder.Default
     private int credit = 0; // 보증금 환불 필드
+
+    public void updateCredit(int credit) {
+        this.credit += credit;
+    }
 }

@@ -36,4 +36,12 @@ public class DepositHistory {
 
     @Enumerated(EnumType.STRING)
     private ReturnReason returnReason; // 보증금 반환 사유
+
+    public void changeStatus(DepositStatus status) {
+        this.status = status;
+    }
+
+    public void changeReturnReason(ReturnReason returnReason) {
+        this.returnReason = returnReason;
+    }
 }

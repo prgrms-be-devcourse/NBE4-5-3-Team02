@@ -27,5 +27,4 @@ public class RsData<T> {
         String statusCodeStr = code.split("-")[0];
         return Integer.parseInt(statusCodeStr);
     }
-
 }

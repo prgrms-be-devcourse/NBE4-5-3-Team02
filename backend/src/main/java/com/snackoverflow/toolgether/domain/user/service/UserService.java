@@ -7,12 +7,11 @@ import com.snackoverflow.toolgether.global.exception.custom.duplicate.DuplicateF
 import com.snackoverflow.toolgether.global.exception.custom.mail.VerificationException;
 import com.snackoverflow.toolgether.global.exception.custom.user.UserNotFoundException;
 import com.snackoverflow.toolgether.global.util.JwtUtil;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -93,4 +92,17 @@ public class UserService {
         return userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("가입되지 않은 유저입니다."));
     }
 
+    @Transactional(readOnly = true)
+    public User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    @Transactional
+    public User updateUserCredit(Long userId, int credit) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.updateCredit(credit); // updateCredit() 메서드 호출
+        return user;
+    }
 }
