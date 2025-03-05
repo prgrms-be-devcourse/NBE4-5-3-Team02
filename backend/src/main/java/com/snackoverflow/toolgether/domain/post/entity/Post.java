@@ -1,5 +1,6 @@
 package com.snackoverflow.toolgether.domain.post.entity;
 
+import com.snackoverflow.toolgether.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,11 +9,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.time.LocalDateTime;
-
-import com.snackoverflow.toolgether.domain.PriceType;
-import com.snackoverflow.toolgether.domain.user.entity.User;
 
 @Entity
 @Getter

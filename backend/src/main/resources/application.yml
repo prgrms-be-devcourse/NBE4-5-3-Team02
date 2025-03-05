@@ -1,5 +1,8 @@
 server:
   port: 8080
+  servlet:
+    session:
+      timeout: 15m
 
 spring:
   jackson:
@@ -30,8 +33,17 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
-        default_batch_fetch_size: 10
-    #open-in-view: false
+        default_batch_fetch_size: 100
+    open-in-view: false
+
+  mail:
+    username: skvhffpdyd@gmail.com
+    password: lldj123414
+    host: smtp.gmail.com
+    port: 587
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 logging:
   level:
@@ -39,4 +51,3 @@ logging:
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
-

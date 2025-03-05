@@ -1,8 +1,7 @@
 package com.snackoverflow.toolgether.domain.deposit.entity;
 
-import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
-
+import com.snackoverflow.toolgether.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -7,15 +7,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.snackoverflow.toolgether.domain.Address;
-import com.snackoverflow.toolgether.domain.PriceType;
 import com.snackoverflow.toolgether.domain.post.entity.Category;
 import com.snackoverflow.toolgether.domain.post.entity.Post;
+import com.snackoverflow.toolgether.domain.post.entity.PriceType;
 import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
-import com.snackoverflow.toolgether.domain.post.service.PostService;
+import com.snackoverflow.toolgether.domain.user.entity.Address;
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
-import com.snackoverflow.toolgether.domain.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 

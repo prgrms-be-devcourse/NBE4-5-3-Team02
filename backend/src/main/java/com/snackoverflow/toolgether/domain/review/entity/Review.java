@@ -1,5 +1,7 @@
-package com.snackoverflow.toolgether.domain;
+package com.snackoverflow.toolgether.domain.review.entity;
 
+import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
+import com.snackoverflow.toolgether.domain.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

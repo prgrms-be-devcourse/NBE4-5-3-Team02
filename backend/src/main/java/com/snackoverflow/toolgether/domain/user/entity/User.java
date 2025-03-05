@@ -7,10 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.time.LocalDateTime;
-
-import com.snackoverflow.toolgether.domain.Address;
 
 @Entity
 @Getter
@@ -18,6 +15,7 @@ import com.snackoverflow.toolgether.domain.Address;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
+@Table(name = "users") // 예약어 변경
 public class User {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +26,9 @@ public class User {
 
     @Column(nullable = true)
     private String password; // 암호화된 비밀번호 (일반 사용자)
+
+    @Column(nullable = true, unique = true)
+    private String email; // 사용자 email (인증 용도)
 
     @Column(nullable = true)
     private String providerId; // 소셜 로그인 사용자 ID
@@ -53,6 +54,7 @@ public class User {
     @Column(nullable = false)
     private Double longitude; // 경도
 
+    @Column(nullable = true)
     private String profileImage; // 사용자 프로필 이미지, uuid로 저장
 
     @Builder.Default
