@@ -1,8 +1,9 @@
-package com.snackoverflow.toolgether.domain;
+package com.snackoverflow.toolgether.domain.user.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Address {
 
     @Column(nullable = false)

@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.domain;
+package com.snackoverflow.toolgether.domain.deposit.entity;
 
 public enum ReturnReason {
     NORMAL_COMPLETION,  // 정상 완료

@@ -1,5 +1,6 @@
-package com.snackoverflow.toolgether.domain;
+package com.snackoverflow.toolgether.domain.postavailability.entity;
 
+import com.snackoverflow.toolgether.domain.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

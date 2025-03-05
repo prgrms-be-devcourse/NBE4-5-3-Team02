@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.domain;
+package com.snackoverflow.toolgether.domain.reservation.entity;
 
 public enum ReservationStatus {
     REQUESTED,           // 요청됨

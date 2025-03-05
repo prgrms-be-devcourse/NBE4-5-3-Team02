@@ -1,5 +1,6 @@
-package com.snackoverflow.toolgether.domain;
+package com.snackoverflow.toolgether.domain.post.entity;
 
+import com.snackoverflow.toolgether.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
