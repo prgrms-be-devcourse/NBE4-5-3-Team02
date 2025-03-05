@@ -1,5 +1,8 @@
 server:
   port: 8080
+  servlet:
+    session:
+      timeout: 15m
 
 spring:
   jackson:
@@ -30,8 +33,17 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
-        default_batch_fetch_size: 10
-    #open-in-view: false
+        default_batch_fetch_size: 100
+    open-in-view: false
+
+  mail:
+    username: [본인 이메일 작성]
+    password: [앱 비밀번호 변경]
+    host: smtp.gmail.com
+    port: 587
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 logging:
   level:
