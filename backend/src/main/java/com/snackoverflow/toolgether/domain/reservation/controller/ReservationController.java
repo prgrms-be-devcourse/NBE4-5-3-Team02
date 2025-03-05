@@ -29,7 +29,7 @@ public class ReservationController {
 	}
 
 	// 예약 상태를 승인으로 바꾼 후 DepositHistory 생성
-	@PostMapping("/{id}/approve")
+	@PatchMapping("/{id}/approve")
 	public RsData<Void> approveReservation(@PathVariable Long id) {
 		reservationService.approveReservation(id);
 		return new RsData<>("201-1",
