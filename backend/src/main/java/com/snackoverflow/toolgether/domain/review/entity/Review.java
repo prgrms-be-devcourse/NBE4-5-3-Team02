@@ -14,6 +14,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+import com.snackoverflow.toolgether.domain.user.entity.User;
+import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
+
 @Entity
 @Getter
 @Builder
