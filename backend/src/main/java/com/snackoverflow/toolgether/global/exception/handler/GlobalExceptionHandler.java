@@ -1,5 +1,6 @@
 package com.snackoverflow.toolgether.global.exception.handler;
 
+import com.snackoverflow.toolgether.global.exception.custom.duplicate.DuplicateFieldException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.MailPreparationException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.SmtpConnectionException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.VerificationException;
@@ -62,5 +63,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException exception) {
         return ResponseEntity.status(400).body(ErrorResponse.of("INVALID_ARGUMENT", exception.getMessage()));
+    }
+
+    @ExceptionHandler(DuplicateFieldException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateField(DuplicateFieldException exception) {
+        return ResponseEntity.status(409).body(ErrorResponse.of(
+                "FIELD-CONFLICT-409", exception.getMessage()));
     }
 }
