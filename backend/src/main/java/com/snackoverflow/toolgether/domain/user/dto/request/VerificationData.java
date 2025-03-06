@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.domain.user.dto;
+package com.snackoverflow.toolgether.domain.user.dto.request;
 
 import lombok.Data;
 

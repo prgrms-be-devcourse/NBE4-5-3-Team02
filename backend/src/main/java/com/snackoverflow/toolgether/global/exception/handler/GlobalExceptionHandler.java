@@ -1,13 +1,17 @@
 package com.snackoverflow.toolgether.global.exception.handler;
 
+import com.snackoverflow.toolgether.global.exception.CustomException;
 import com.snackoverflow.toolgether.global.exception.custom.duplicate.DuplicateFieldException;
+import com.snackoverflow.toolgether.global.exception.custom.mail.CustomAuthException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.MailPreparationException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.SmtpConnectionException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.VerificationException;
+import com.snackoverflow.toolgether.global.exception.custom.user.UserNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,6 +64,20 @@ public class GlobalExceptionHandler {
         };
     }
 
+    @ExceptionHandler(CustomAuthException.class)
+    public ResponseEntity<ErrorResponse> handleAuth(CustomAuthException exception) {
+        return switch (exception.getAuthErrorType()) {
+            case TOKEN_EXPIRED ->
+                    ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorResponse.of("TOKEN-AUTH-401", exception.getMessage()));
+            case UNSUPPORTED_TOKEN ->
+                    ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.of("TOKEN-AUTH-403", exception.getMessage()));
+            case MALFORMED_TOKEN ->
+                    ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.of("TOKEN-AUTH-400", exception.getMessage()));
+            case CREDENTIALS_MISMATCH ->
+                    ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorResponse.of("TOKEN-AUTH-401-2", exception.getMessage()));
+        };
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException exception) {
         return ResponseEntity.status(400).body(ErrorResponse.of("INVALID_ARGUMENT", exception.getMessage()));
@@ -69,5 +87,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDuplicateField(DuplicateFieldException exception) {
         return ResponseEntity.status(409).body(ErrorResponse.of(
                 "FIELD-CONFLICT-409", exception.getMessage()));
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleService(UserNotFoundException exception) {
+        return ResponseEntity.status(404).body(ErrorResponse.of(
+                "USER-NOT-FOUND", exception.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<com.snackoverflow.toolgether.global.exception.ErrorResponse> handleCustomException(CustomException ex) {
+        return ResponseEntity
+                .status(ex.getErrorResponse().getStatus())
+                .body(ex.getErrorResponse());
     }
 }

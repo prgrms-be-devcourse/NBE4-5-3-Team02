@@ -1,6 +1,6 @@
 package com.snackoverflow.toolgether.domain.user.service;
 
-import com.snackoverflow.toolgether.domain.user.dto.VerificationData;
+import com.snackoverflow.toolgether.domain.user.dto.request.VerificationData;
 import com.snackoverflow.toolgether.global.exception.custom.mail.MailPreparationException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.VerificationException;
 import jakarta.mail.MessagingException;
