@@ -11,15 +11,13 @@
 
 # 👥 Our Team
 
-<div align="center">
-
-| 이름       | 사진                                                                                           | 역할                                |
-|------------|------------------------------------------------------------------------------------------------|-------------------------------------|
-| **최지선** | <a href="https://github.com/wesawth3sun"><img src="https://github.com/wesawth3sun.png" width="150" style="border-radius: 50%; border: 4px solid #58A6FF;"></a> | Team Lead <br> Backend Developer <br> Frontend Developer |
-| **윤상민** | <a href="https://github.com/skvhffpdyd"><img src="https://github.com/skvhffpdyd.png" width="150" style="border-radius: 50%; border: 4px solid #58A6FF;"></a> | Backend Developer <br> Frontend Developer     |
-| **이태경** | <a href="https://github.com/dlfjsld1"><img src="https://github.com/dlfjsld1.png" width="150" style="border-radius: 50%; border: 4px solid #58A6FF;"></a> | Backend Developer <br> Frontend Developer     |
-
-</div>
+|                                        최지선                                        |                                        윤상민                                        |                                        이태경                                        |                                        최현민                                        |
+|:---------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------:|
+| <img src="https://github.com/wesawth3sun.png" alt="최지선" width="210"> | <img src="https://github.com/skvhffpdyd.png" alt="윤상민" width="210"> | <img src="https://github.com/dlfjsld1.png" alt="이태경" width="210"> | <img src="https://github.com/hmhmchm.png" alt="최현민" width="210"> |
+|                                       PM/TL                                       |                                        TM                                         |                                        TM                                         |                                        TM                                         |
+|           [GitHub](https://github.com/wesawth3sun)           |           [GitHub](https://github.com/skvhffpdyd)           |            [GitHub](https://github.com/dlfjsld1)            |            [GitHub](https://github.com/hmhmchm)  
+<br/>
+<br/>
 
 ---
 
@@ -33,7 +31,7 @@
   <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" />
   <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
   <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" />
-  <img src="https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white" />
+  <img src="https://img.shields.io/badge/Amazon_S3-569A31?style=for-the-badge&logo=amazon-s3&logoColor=white" alt="Amazon S3" />
 </div>
 
 ---
