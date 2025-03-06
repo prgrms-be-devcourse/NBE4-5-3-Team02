@@ -10,8 +10,8 @@ import com.snackoverflow.toolgether.domain.deposit.entity.ReturnReason;
 import com.snackoverflow.toolgether.domain.deposit.entity.DepositHistory;
 import com.snackoverflow.toolgether.domain.deposit.entity.DepositStatus;
 import com.snackoverflow.toolgether.domain.deposit.repository.DepositHistoryRepository;
-import com.snackoverflow.toolgether.global.exception.CustomException;
-import com.snackoverflow.toolgether.global.exception.ErrorResponse;
+import com.snackoverflow.toolgether.global.exception.custom.CustomException;
+import com.snackoverflow.toolgether.global.exception.custom.ErrorResponse;
 
 import lombok.RequiredArgsConstructor;
 

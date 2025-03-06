@@ -37,5 +37,6 @@ public class PostAvailability {
     private LocalDateTime endTime; // 거래 가능 시간 종료
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isRecurring = false; // 매주 반복 여부, 기본값 false
 }

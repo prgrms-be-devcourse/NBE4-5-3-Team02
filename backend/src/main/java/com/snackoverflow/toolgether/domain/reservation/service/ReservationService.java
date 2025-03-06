@@ -21,8 +21,8 @@ import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
 import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository;
 import com.snackoverflow.toolgether.domain.user.service.UserService;
-import com.snackoverflow.toolgether.global.exception.ErrorResponse;
-import com.snackoverflow.toolgether.global.exception.CustomException;
+import com.snackoverflow.toolgether.global.exception.custom.ErrorResponse;
+import com.snackoverflow.toolgether.global.exception.custom.CustomException;
 
 import lombok.RequiredArgsConstructor;
 

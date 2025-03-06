@@ -8,6 +8,8 @@ import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.service.UserService;
 import com.snackoverflow.toolgether.domain.user.service.VerificationService;
 import com.snackoverflow.toolgether.global.dto.RsData;
+import com.snackoverflow.toolgether.global.filter.CustomUserDetails;
+import com.snackoverflow.toolgether.global.filter.Login;
 import com.snackoverflow.toolgether.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -15,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import com.snackoverflow.toolgether.domain.user.service;
 
 import static com.snackoverflow.toolgether.domain.user.service.UserService.*;
 
@@ -32,7 +33,7 @@ public class UserController {
     // 이메일 인증
     @PostMapping("/send-verification-code")
     public RsData<String> sendVerificationCode(@Validated @RequestBody EmailRequest request,
-                                                       HttpSession session) {
+                                               HttpSession session) {
         verificationService.sendEmailWithCode(request.getEmail(), session);
 
         return new RsData<>(
@@ -72,7 +73,7 @@ public class UserController {
     // 일반 사용자 로그인
     @PostMapping("/login")
     public RsData<String> loginUser(@RequestBody @Validated LoginRequest request,
-                                            HttpServletResponse response) {
+                                    HttpServletResponse response) {
         LoginResult result = userService.loginUser(request.getUsername(), request.getPassword());
         User user = userService.getUserForUsername(request.getUsername());
 

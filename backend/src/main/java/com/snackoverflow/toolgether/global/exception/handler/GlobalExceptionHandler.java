@@ -1,6 +1,6 @@
 package com.snackoverflow.toolgether.global.exception.handler;
 
-import com.snackoverflow.toolgether.global.exception.CustomException;
+import com.snackoverflow.toolgether.global.exception.custom.CustomException;
 import com.snackoverflow.toolgether.global.exception.custom.duplicate.DuplicateFieldException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.CustomAuthException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.MailPreparationException;
@@ -13,6 +13,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -97,9 +99,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<com.snackoverflow.toolgether.global.exception.ErrorResponse> handleCustomException(CustomException ex) {
+    public ResponseEntity<com.snackoverflow.toolgether.global.exception.custom.ErrorResponse> handleCustomException(CustomException ex) {
         return ResponseEntity
                 .status(ex.getErrorResponse().getStatus())
                 .body(ex.getErrorResponse());
+    }
+
+    @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationCredentialsNotFoundException exception) {
+        return ResponseEntity.status(401).body(ErrorResponse.of("401", exception.getMessage()));
     }
 }
