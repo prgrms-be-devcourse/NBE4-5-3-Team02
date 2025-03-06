@@ -37,8 +37,8 @@ spring:
     open-in-view: false
 
   mail:
-    username: [본인 이메일 작성]
-    password: [앱 비밀번호 변경]
+    username: writeyourmail0123@gmail.com
+    password: writeAppPassword
     host: smtp.gmail.com
     port: 587
     properties:

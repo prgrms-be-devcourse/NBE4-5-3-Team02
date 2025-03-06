@@ -1,10 +1,13 @@
 package com.snackoverflow.toolgether.domain.user.service;
 
+import org.springframework.transaction.annotation.Transactional;
+import com.snackoverflow.toolgether.domain.user.dto.MeInfoResponse;
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.dto.request.SignupRequest;
 import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
 import com.snackoverflow.toolgether.global.exception.custom.duplicate.DuplicateFieldException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.VerificationException;
+import com.snackoverflow.toolgether.global.exception.ServiceException;
 import com.snackoverflow.toolgether.global.exception.custom.user.UserNotFoundException;
 import com.snackoverflow.toolgether.global.util.JwtUtil;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +69,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+
     // 기본 사용자 로그인
     public LoginResult loginUser(String username, String password) {
         User user = userRepository.findByUsername(username).orElseThrow(() ->
@@ -104,5 +108,19 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         user.updateCredit(credit); // updateCredit() 메서드 호출
         return user;
+    }
+
+    @Transactional(readOnly = true)
+    public MeInfoResponse getMeInfo(long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new ServiceException("404-1", "해당 유저를 찾을 수 없습니다")
+        );
+        return MeInfoResponse.from(user);
+    }
+
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(
+                () -> new ServiceException("404-1", "해당 유저를 찾을 수 없습니다")
+        );
     }
 }
