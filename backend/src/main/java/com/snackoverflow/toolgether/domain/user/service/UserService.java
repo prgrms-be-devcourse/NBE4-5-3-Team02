@@ -10,7 +10,6 @@ import com.snackoverflow.toolgether.global.exception.custom.mail.VerificationExc
 import com.snackoverflow.toolgether.global.exception.ServiceException;
 import com.snackoverflow.toolgether.global.exception.custom.user.UserNotFoundException;
 import com.snackoverflow.toolgether.global.util.JwtUtil;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -64,11 +63,11 @@ public class UserService {
                 .latitude(request.getLatitude())
                 .phoneNumber(request.getPhoneNumber())
                 .profileImage(null)
+                .additionalInfoRequired(false)
                 .build();
 
         userRepository.save(user);
     }
-
 
     // 기본 사용자 로그인
     public LoginResult loginUser(String username, String password) {
@@ -88,8 +87,6 @@ public class UserService {
     }
 
     public record LoginResult(String userName, String token) {}
-
-    // 소셜 로그인
 
     // username 으로 사용자 찾기
     public User getUserForUsername(String username) {

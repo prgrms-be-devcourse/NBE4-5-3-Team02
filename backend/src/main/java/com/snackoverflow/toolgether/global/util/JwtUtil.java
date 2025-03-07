@@ -81,6 +81,7 @@ public class JwtUtil {
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
+        log.info("token = {}", cookie.toString());
     }
 
     // 쿠키에서 JWT 추출

@@ -45,17 +45,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Claims claims = jwtUtil.getPayload(token.get());
                 log.info("JWT claims={}", claims);
 
-                // claims 안에 username이 있는지 확인
-                if (!claims.containsKey("username")) {
-                    throw new CustomAuthException(MALFORMED_TOKEN, "유효하지 않은 토큰입니다.");
-                }
-
                 // 사용자 정보 추출
                 String username = (String) claims.get("username"); // 사용자의 아이디
+                String email = (String) claims.get("email");
                 log.info("token -> username: {}", username);
+                log.info("token -> email: {}", email);
 
                 // 인증 객체 생성 및 저장
-                CustomUserDetails customUserDetails = new CustomUserDetails(username);
+                CustomUserDetails customUserDetails = new CustomUserDetails(username, email);
                 Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails,
                         null, Collections.emptyList());
                 log.info("authentication={}", authentication);

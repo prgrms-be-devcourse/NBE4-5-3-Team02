@@ -7,13 +7,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
     private String username;
+    private String email;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

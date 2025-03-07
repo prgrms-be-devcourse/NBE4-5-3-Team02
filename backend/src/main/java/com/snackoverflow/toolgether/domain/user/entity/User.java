@@ -1,6 +1,7 @@
 package com.snackoverflow.toolgether.domain.user.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -48,11 +49,14 @@ public class User {
     @CreatedDate
     private LocalDateTime createdAt; // 가입 일자
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Double latitude; // 위도
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Double longitude; // 경도
+
+    @Column(nullable = true)
+    private boolean additionalInfoRequired = true; // 추가 정보 필요 플래그
 
     @Column(nullable = true)
     private String profileImage; // 사용자 프로필 이미지, uuid로 저장
@@ -65,5 +69,30 @@ public class User {
 
     public void updateCredit(int credit) {
         this.credit += credit;
+    }
+
+    public void updatePhoneNumber(String phoneNumber) {
+        if (phoneNumber != null) {
+            this.phoneNumber = phoneNumber;
+        }
+    }
+
+    public void updateLocation(Double latitude, Double longitude) {
+        if (latitude != null && longitude != null) {
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+    }
+
+    public void updateAdditionalInfoRequired(boolean additionalInfoRequired) {
+            this.additionalInfoRequired = additionalInfoRequired;
+    }
+
+    public void updateAddress(String zipcode, String mainAddress, String detailAddress) {
+        this.address = Address.builder()
+                .zipcode(zipcode)
+                .mainAddress(mainAddress)
+                .detailAddress(detailAddress)
+                .build();
     }
 }

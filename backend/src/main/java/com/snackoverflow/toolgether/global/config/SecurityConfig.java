@@ -30,9 +30,10 @@ class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests((authorizeHttpRequests) ->
-                        // 일단 모든 경로 허용
-                        authorizeHttpRequests.anyRequest().permitAll()
+                .authorizeHttpRequests(authorize ->
+                        authorize
+                                .requestMatchers("/login/oauth2/code/google", "/api/v1/users/login", "/h2-console/**").permitAll() // 특정 경로만 허용
+                                .anyRequest().authenticated() // 나머지 요청은 인증 필요
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

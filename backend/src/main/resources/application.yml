@@ -3,6 +3,26 @@ server:
   servlet:
     session:
       timeout: 15m
+jwt:
+  secret: [change]
+  expiration: 86400000 # 24시간(초 단위)
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: [change]
+            client-secret: [change]
+            redirect-uri: http://localhost:3000/redirect
+            scope:
+              - openid
+              - https://www.googleapis.com/auth/userinfo.profile
+              - https://www.googleapis.com/auth/userinfo.email
+            client-authentication-method: client_secret_post
+        provider:
+          google:
+            issuer-uri: https://accounts.google.com
 
 spring:
   jackson:

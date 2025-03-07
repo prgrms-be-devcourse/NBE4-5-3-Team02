@@ -8,8 +8,6 @@ import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.service.UserService;
 import com.snackoverflow.toolgether.domain.user.service.VerificationService;
 import com.snackoverflow.toolgether.global.dto.RsData;
-import com.snackoverflow.toolgether.global.filter.CustomUserDetails;
-import com.snackoverflow.toolgether.global.filter.Login;
 import com.snackoverflow.toolgether.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -17,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 import static com.snackoverflow.toolgether.domain.user.service.UserService.*;
 
@@ -72,7 +72,7 @@ public class UserController {
 
     // 일반 사용자 로그인
     @PostMapping("/login")
-    public RsData<String> loginUser(@RequestBody @Validated LoginRequest request,
+    public RsData<?> loginUser(@RequestBody @Validated LoginRequest request,
                                     HttpServletResponse response) {
         LoginResult result = userService.loginUser(request.getUsername(), request.getPassword());
         User user = userService.getUserForUsername(request.getUsername());
@@ -84,7 +84,10 @@ public class UserController {
         return new RsData<>(
                 "200-2",
                 user.getNickname() + " 님 환영합니다!",
-                null
+                Map.of(
+                        "nickname", user.getNickname(),
+                        "token", result.token()
+                )
         );
     }
 }
