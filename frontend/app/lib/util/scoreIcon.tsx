@@ -1,9 +1,11 @@
 interface Props {
+  className: string;
   score: number;
   size?: number;
+  round?: boolean;
 }
 
-export default function ScoreIcon({ score, size }: Props) {
+export default function ScoreIcon({ className, score, size, round }: Props) {
   const getLevel = (score: number): string => {
     if (score < 20) {
       return "One";
@@ -25,5 +27,7 @@ export default function ScoreIcon({ score, size }: Props) {
   const level = getLevel(score);
   const imageUrl = getLevelIconUrl(level);
 
-  return <img src={imageUrl} width={size || 60} height={size || 60} alt={`Level ${level} Icon`} />;
+  return <span className={`${className} ${round ? "rounded-full overflow-hidden" : ""}`}>
+  <img src={imageUrl} width={size || 60} height={size || 60} alt={`Level ${level} Icon`} />
+  </span>;
 }

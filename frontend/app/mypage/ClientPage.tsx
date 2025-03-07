@@ -32,7 +32,7 @@ export default function ClientPage({
       id: number;
       title: string;
       image: string;
-      price: number;
+      amount: number;
       startTime: string;
       endTime: string;
       status: string;
@@ -42,7 +42,7 @@ export default function ClientPage({
       id: number;
       title: string;
       image: string;
-      price: number;
+      amount: number;
       startTime: string;
       endTime: string;
       status: string;
@@ -60,11 +60,41 @@ export default function ClientPage({
   };
 
   const getRandomColor = () => {
-    const colors = ["#5A67D8", "#48BB78", "#ED8936", "#F56565", "#4299E1"];
+    const colors = [
+      "#5A67D8",
+      "#48BB78",
+      "#ED8936",
+      "#F56565",
+      "#4299E1",
+      "#667EEA",
+      "#9AE6B4",
+      "#DD6B20",
+      "#E53E3E",
+      "#3182CE",
+      "#805AD5",
+      "#68D391",
+      "#C05621",
+      "#C53030",
+      "#2B6CB0",
+      "#A371F7",
+      "#48B088",
+      "#D69E2E",
+      "#D53F8C",
+      "#2A4365",
+    ];
     return colors[Math.floor(Math.random() * colors.length)];
   };
 
-  const rentalEvents = reservations.rentals.map((rental) => ({
+  const scheduleReservations = {
+    rentals: reservations.rentals.filter((rental) => {
+      rental.status === "APPROVED" || rental.status === "IN_PROGRESS";
+    }),
+    borrows: reservations.borrows.filter((borrow) => {
+      borrow.status === "APPROVED" || borrow.status === "IN_PROGRESS";
+    }),
+  };
+
+  const rentalEvents = scheduleReservations.rentals.map((rental) => ({
     id: rental.id,
     title: `빌리기: ${rental.title}`,
     start: moment(rental.startTime).toDate(),
@@ -72,7 +102,7 @@ export default function ClientPage({
     color: getRandomColor(),
   }));
 
-  const borrowEvents = reservations.borrows.map((borrow) => ({
+  const borrowEvents = scheduleReservations.borrows.map((borrow) => ({
     id: borrow.id,
     title: `빌려주기: ${borrow.title}`,
     start: new Date(borrow.startTime),
@@ -140,12 +170,12 @@ export default function ClientPage({
                 <span className="font-bold">전화번호: </span>
                 {me.phoneNumber}
               </p>
-              <p className="text-gray-800">
+              {me?.username ? <p className="text-gray-800">
                 <span className="font-bold">아이디: </span> {me.username}
-              </p>
+              </p> :
               <p className="text-gray-800">
                 <span className="font-bold">이메일: </span> {me.email}
-              </p>
+              </p>}
               <p className="text-gray-800">
                 <span className="font-bold">주소: </span>{" "}
                 {me.address.mainAddress} {me.address.detailAddress} (
@@ -159,7 +189,7 @@ export default function ClientPage({
                 <span className="flex flex-row">
                   <span className="font-bold">평점: </span>
                   {me.score}
-                  <ScoreIcon score={me.score} size={25} />
+                  <ScoreIcon className="ml-2" score={me.score} size={25} round />
                 </span>
               </p>
               <p className="text-gray-800">
@@ -177,8 +207,8 @@ export default function ClientPage({
                 className={`flex-1 py-2 text-center text-lg font-semibold border-1 cursor-pointer transition-all
                 ${
                   eventType === "rental"
-                    ? "bg-gray-200 text-gray-800 border-b-2 border-gray-800"
-                    : "bg-white text-gray-800 hover:bg-gray-200 active:bg-gray-200"
+                    ? "bg-white text-gray-800 border-b-2 border-gray-800"
+                    : "bg-gray-200 text-gray-800 hover:bg-white active:bg-white"
                 }`}
               >
                 빌리기
@@ -188,8 +218,8 @@ export default function ClientPage({
                 className={`flex-1 py-2 text-center text-lg font-semibold border-1 cursor-pointer transition-all
                 ${
                   eventType === "borrow"
-                    ? "bg-gray-200 text-gray-800 border-b-2 border-gray-800"
-                    : "bg-white text-gray-800 hover:bg-gray-200 active:bg-gray-200"
+                    ? "bg-white text-gray-800 border-b-2 border-gray-800"
+                    : "bg-gray-200 text-gray-800 hover:bg-white active:bg-white"
                 }`}
               >
                 빌려주기
@@ -232,17 +262,18 @@ export default function ClientPage({
                           {reservation.title}
                         </h3>
                         <p className="text-gray-600">
-                          {moment(reservation.startTime).format(
+                          대여: {moment(reservation.startTime).format(
                             "YYYY년MM월DD일 HH시mm분"
                           )}
-                          -
-                          {moment(reservation.endTime).format(
+                        </p>
+                        <p className="text-gray-600">
+                          반납: {moment(reservation.endTime).format(
                             "YYYY년MM월DD일 HH시mm분"
                           )}
                         </p>
                         <p className="text-gray-600"></p>
                         <p className="text-gray-600">
-                          가격: {reservation.price}원
+                          가격: {reservation.amount}원
                         </p>
                         <p className="text-gray-600">
                           상태: {reservationStatus[reservation.status] || ""}
