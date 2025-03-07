@@ -1,8 +1,8 @@
 package com.snackoverflow.toolgether.global.init;
 
-import com.snackoverflow.toolgether.domain.post.entity.Category;
 import com.snackoverflow.toolgether.domain.post.entity.Post;
-import com.snackoverflow.toolgether.domain.post.entity.PriceType;
+import com.snackoverflow.toolgether.domain.post.entity.enums.Category;
+import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType;
 import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
@@ -22,16 +22,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.snackoverflow.toolgether.domain.post.entity.Category;
-import com.snackoverflow.toolgether.domain.post.entity.Post;
-import com.snackoverflow.toolgether.domain.post.entity.PriceType;
-import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
-import com.snackoverflow.toolgether.domain.user.entity.Address;
-import com.snackoverflow.toolgether.domain.user.entity.User;
-import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
-
-import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 
 @Configuration

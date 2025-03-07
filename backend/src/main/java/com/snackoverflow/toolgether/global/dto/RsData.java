@@ -27,4 +27,9 @@ public class RsData<T> {
         String statusCodeStr = code.split("-")[0];
         return Integer.parseInt(statusCodeStr);
     }
+        // 성공 여부 확인하는 메서드
+        public boolean isSuccess () {
+            return code.startsWith("2"); // 2xx 응답이면 성공
+        }
+
 }

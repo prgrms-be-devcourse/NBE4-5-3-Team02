@@ -1,5 +1,7 @@
 package com.snackoverflow.toolgether.domain.post.entity;
 
+import com.snackoverflow.toolgether.domain.post.entity.enums.Category;
+import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType;
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -58,4 +60,15 @@ public class Post {
 
     @Builder.Default
     private int viewCount = 0; // 조회수 (기본 0)
+
+    public void updatePost(String title, String content, Category category, PriceType priceType, int price, Double latitude, Double longitude, int viewCount) {
+        this.title = title;
+        this.content = content;
+        this.category = category;
+        this.priceType = priceType;
+        this.price = price;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.viewCount = viewCount;
+    }
 }

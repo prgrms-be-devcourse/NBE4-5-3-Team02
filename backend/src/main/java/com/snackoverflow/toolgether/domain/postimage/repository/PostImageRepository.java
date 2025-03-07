@@ -8,6 +8,8 @@ import java.util.List;
 
 @Repository
 public interface PostImageRepository extends JpaRepository<PostImage, Long> {
+    List<PostImage> findAllByPostId(Long postId); // 특정 게시물의 이미지 리스트 조회
 
     List<PostImage> findByPostId(Long postId);
+    void deleteByPostId(Long postId);
 }
