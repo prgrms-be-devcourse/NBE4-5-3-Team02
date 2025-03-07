@@ -206,11 +206,14 @@ export default function ClientPage({
           }
         );
 
-        console.log("예약 신청 요청:", reservationData);
-
         if (response.ok) {
+          const reservation = await response.json();
+          console.log("예약 신청 성공:", reservation);
           alert("예약 신청이 완료되었습니다.");
-          router.push("/");
+
+          router.push(
+            `/reservation/complete?reservationId=${reservation.data.id}`
+          );
         } else {
           const errorData = await response.json();
           console.error("예약 신청 실패:", errorData);

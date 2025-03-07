@@ -34,12 +34,18 @@ public class DepositHistoryService {
 		return depositHistory;
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	public DepositHistory findDepositHistoryByReservationId(Long reservationId) {
 		return depositHistoryRepository.findByReservationId(reservationId)
-			.orElseThrow(() -> new RuntimeException("DepositHistory not found"));
+			.orElseThrow(() -> new CustomException(ErrorResponse.builder()
+				.title("예약 ID 기반 보증금 내역 조회 실패")
+				.status(404)
+				.detail("해당 예약 ID의 보증금 내역을 찾을 수 없습니다.")
+				.instance(URI.create(ServletUriComponentsBuilder.fromCurrentRequestUri().toUriString()))
+				.build()));
 	}
 
+	@Transactional(readOnly = true)
 	public DepositHistory findDepositHistoryById(Long depositHistoryId) {
 		return depositHistoryRepository.findById(depositHistoryId)
 			.orElseThrow(() -> new CustomException(ErrorResponse.builder()

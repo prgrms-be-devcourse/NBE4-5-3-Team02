@@ -1,5 +1,6 @@
 package com.snackoverflow.toolgether.domain.reservation.controller;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +33,7 @@ public class ReservationController {
 	@PatchMapping("/{id}/approve")
 	public RsData<Void> approveReservation(@PathVariable Long id) {
 		reservationService.approveReservation(id);
-		return new RsData<>("201-1",
+		return new RsData<>("200-1",
 			"%d번 예약 승인 성공".formatted(id));
 	}
 
@@ -69,5 +70,14 @@ public class ReservationController {
 		reservationService.failDueTo(id, reason, FailDue.RENTER_ISSUE);
 		return new RsData<>("200-1",
 			"%d번 예약 대여자에 의한 이슈로 환급 성공".formatted(id));
+	}
+
+	@GetMapping("/{id}")
+	public RsData<ReservationResponse> getReservationById(@PathVariable Long id) {
+		ReservationResponse response = reservationService.getReservationById(id);
+		return new RsData<>("200-1",
+			"%d번 예약 조회 성공".formatted(id),
+			response
+		);
 	}
 }
