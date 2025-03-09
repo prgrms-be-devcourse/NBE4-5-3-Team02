@@ -1,5 +1,7 @@
 package com.snackoverflow.toolgether.domain.user.service;
 
+import com.snackoverflow.toolgether.domain.postimage.entity.PostImage;
+import com.snackoverflow.toolgether.domain.user.dto.request.PatchMyInfoRequest;
 import org.springframework.transaction.annotation.Transactional;
 import com.snackoverflow.toolgether.domain.user.dto.MeInfoResponse;
 import com.snackoverflow.toolgether.domain.user.entity.User;
@@ -38,6 +40,18 @@ public class UserService {
         }
         if (userRepository.existsByNickname(request.getNickname())) {
             throw new DuplicateFieldException("사용자 닉네임 중복 오류 발생");
+        }
+    }
+
+    public void checkMyInfoDuplicates(PatchMyInfoRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateFieldException("사용자 EMAIL 중복 오류 발생");
+        }
+        if (userRepository.existsByNickname(request.getNickname())) {
+            throw new DuplicateFieldException("사용자 닉네임 중복 오류 발생");
+        }
+        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new DuplicateFieldException("사용자 전화번호 중복 오류 발생");
         }
     }
 
@@ -119,5 +133,35 @@ public class UserService {
         return userRepository.findByUsername(username).orElseThrow(
                 () -> new ServiceException("404-1", "해당 유저를 찾을 수 없습니다")
         );
+    }
+
+    @Transactional
+    public void postProfileImage(User user, String uuid) {
+        user.updateProfileImage(uuid);
+        userRepository.save(user);
+
+    }
+
+    @Transactional
+    public void deleteProfileImage(User user) {
+        user.deleteProfileImage();
+        userRepository.save(user);
+
+    }
+
+    @Transactional
+    public void updateMyInfo(User user, PatchMyInfoRequest request) {
+        user.updateEmail(request.getEmail());
+        user.updatePhoneNumber(request.getPhoneNumber());
+        user.updateNickname(request.getNickname());
+        user.updateAddress(request.getAddress().getMainAddress(), request.getAddress().getDetailAddress(), request.getAddress().getZipcode());
+        user.updateLocation(request.getLatitude(), request.getLongitude());
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteUser(User user) {
+        user.delete();
+        userRepository.save(user);
     }
 }

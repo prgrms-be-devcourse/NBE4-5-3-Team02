@@ -70,7 +70,7 @@ public class BaseInitData {
 			.address(new Address("서울", "강남구", "12345")) // Address 객체 생성 및 설정
 			.username("human123")
 			.nickname("사람이")
-			.password("1234")
+			.password("12345678")
 			.score(30)
 			.phoneNumber("01012345678")
 			.latitude(37.5665)
@@ -92,7 +92,7 @@ public class BaseInitData {
 			.address(new Address("부산", "해운대구", "67890"))
 			.username("seaman222")
 			.nickname("바다사람")
-			.password("5678")
+			.password("56781234")
 			.score(50)
 			.phoneNumber("01098765432")
 			.latitude(35.1587)

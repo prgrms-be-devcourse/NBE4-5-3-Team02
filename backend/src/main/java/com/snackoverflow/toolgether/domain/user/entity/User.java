@@ -1,14 +1,20 @@
 package com.snackoverflow.toolgether.domain.user.entity;
 
+import com.snackoverflow.toolgether.domain.user.dto.request.PatchMyInfoRequest;
+import com.snackoverflow.toolgether.global.util.Util;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
+import org.hibernate.annotations.SQLDelete;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -67,6 +73,9 @@ public class User {
     @Builder.Default
     private int credit = 0; // 보증금 환불 필드
 
+    @Column(nullable = true)
+    private LocalDateTime deletedAt; // 탈퇴 일자, 탈퇴하면 null이 아님
+
     public void updateCredit(int credit) {
         this.credit += credit;
     }
@@ -85,7 +94,7 @@ public class User {
     }
 
     public void updateAdditionalInfoRequired(boolean additionalInfoRequired) {
-            this.additionalInfoRequired = additionalInfoRequired;
+        this.additionalInfoRequired = additionalInfoRequired;
     }
 
     public void updateAddress(String zipcode, String mainAddress, String detailAddress) {
@@ -94,5 +103,50 @@ public class User {
                 .mainAddress(mainAddress)
                 .detailAddress(detailAddress)
                 .build();
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateProfileImage(String uuid) {
+        this.profileImage = uuid;
+    }
+
+    public void deleteProfileImage() {
+        this.profileImage = null;
+    }
+
+    //탈퇴시 호출, 삭제 시간을 기록하고 익명화 진행
+    @PreUpdate
+    public void preUpdate() {
+        if (this.deletedAt != null) {
+            anonymize();
+        }
+    }
+
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    // 개인 정보 익명화
+    public void anonymize() {
+        this.username = "deletedUser-" + Util.generateUUIDMasking();
+        this.password = Util.generateUUIDMasking();
+        this.email = Util.generateUUIDMasking() + "@deleted.com";
+        this.phoneNumber = Util.generateUUIDMasking();
+        this.nickname = "삭제된유저-" + Util.generateUUIDMasking();
+        this.address = new Address(
+                "삭제된 주소",
+                "삭제된 상세 주소",
+                "00000"
+        );
+        this.latitude = 0.0;
+        this.longitude = 0.0;
+        this.profileImage = null;
     }
 }
