@@ -51,7 +51,7 @@ public class ReservationControllerTest {
 	@DisplayName("예약 요청 테스트")
 	public void testRequestReservation() throws Exception {
 		ReservationRequest request = new ReservationRequest(1L, 2L, 3L, LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(2), 1000.0, 500.0);
-		ReservationResponse response = new ReservationResponse(1L, "REQUESTED",  1L, LocalDateTime.now(),  LocalDateTime.now(), 20000.0);
+		ReservationResponse response = new ReservationResponse(1L, "REQUESTED",  1L, LocalDateTime.now(),  LocalDateTime.now(), 20000.0, "", 3L, 2L);
 
 		when(reservationService.requestReservation(any(ReservationRequest.class))).thenReturn(response);
 
