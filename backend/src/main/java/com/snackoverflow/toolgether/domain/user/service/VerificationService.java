@@ -10,12 +10,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class VerificationService {
 
     private final HttpSession session;
@@ -64,6 +66,7 @@ public class VerificationService {
     }
 
     // 인증 코드 확인 후 세션 상태 변경 verified: false -> true
+    @Transactional
     public void verifyEmail(String inputEmail, String inputCode) {
         VerificationData data = (VerificationData) session.getAttribute(SESSION_KEY);
 
