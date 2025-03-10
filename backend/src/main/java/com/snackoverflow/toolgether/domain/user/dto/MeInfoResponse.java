@@ -14,6 +14,8 @@ public record MeInfoResponse(
         String email,
         @NonNull String phoneNumber,
         @NonNull AddressInfo address,
+        @NonNull Double latitude,
+        @NonNull Double longitude,
         @NonNull LocalDateTime createdAt,
         @NonNull Integer score,
         @NonNull Integer credit
@@ -27,6 +29,8 @@ public record MeInfoResponse(
                 user.getEmail(),
                 user.getPhoneNumber(),
                 AddressInfo.from(user.getAddress()),
+                user.getLatitude(),
+                user.getLongitude(),
                 user.getCreatedAt(),
                 user.getScore(),
                 user.getCredit()
