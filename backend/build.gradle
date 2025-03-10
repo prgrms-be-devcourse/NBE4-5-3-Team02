@@ -49,6 +49,8 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 	implementation 'org.springframework.session:spring-session-core'
 	annotationProcessor 'org.projectlombok:lombok'
+	//s3 bucket
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
 	// QueryDSL
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
@@ -62,6 +64,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.geolatte:geolatte-geom:1.9.0'
 	implementation 'io.netty:netty-resolver-dns-native-macos:4.1.91.Final:osx-aarch_64'
+}
+
+dependencyManagement { // Spring Cloud Version 명시 (Hoxton.SR6)
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:Hoxton.SR6"
+	}
 }
 
 tasks.named('test') {
