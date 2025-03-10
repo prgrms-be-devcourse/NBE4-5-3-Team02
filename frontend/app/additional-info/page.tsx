@@ -20,6 +20,7 @@ export default function AdditionalInfoPage() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [geoError, setGeoError] = useState('');
+    const [isGeoLoading, setIsGeoLoading] = useState(true);
 
     // 브라우저 위치 정보 조회
     useEffect(() => {
@@ -28,34 +29,24 @@ export default function AdditionalInfoPage() {
         if (!navigator.geolocation) {
             console.error('브라우저가 Geolocation을 지원하지 않음');
             setGeoError('Geolocation is not supported by your browser');
+            setIsGeoLoading(false); // 로드 완료
             return;
         }
 
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 console.log('위치 정보 수신 성공:', position);
-                console.log('위도:', position.coords.latitude);
-                console.log('경도:', position.coords.longitude);
-
                 setFormData(prev => ({
                     ...prev,
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude
                 }));
-
-                // 상태 업데이트 확인
-                setTimeout(() => {
-                    console.log('업데이트된 formData:', {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    });
-                }, 0);
+                setIsGeoLoading(false); // 로드 완료
             },
             (err) => {
                 console.error('위치 정보 오류 발생:', err);
-                console.log('에러 코드:', err.code);
-                console.log('에러 메시지:', err.message);
                 setGeoError('Unable to retrieve your location: ' + err.message);
+                setIsGeoLoading(false); // 로드 완료
             }
         );
     }, []);
@@ -106,6 +97,16 @@ export default function AdditionalInfoPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (isGeoLoading) {
+            setError('위치 정보를 가져오는 중입니다. 잠시 후 다시 시도해주세요.');
+            return;
+        }
+
+        if (!formData.latitude || !formData.longitude) {
+            setError('위치 정보를 가져올 수 없습니다.');
+            return;
+        }
+
         if (!formData.latitude || !formData.longitude) {
             setError('위치 정보를 가져오는 중입니다. 잠시 후 다시 시도해주세요.');
             return;
@@ -139,7 +140,10 @@ export default function AdditionalInfoPage() {
             });
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || '정보 저장 실패');
+
+            if (!response.ok || data.code === "400-1") {
+                throw new Error(data.message || '위치 정보가 허용 범위를 벗어났습니다.');
+            }
 
             sessionStorage.removeItem('requiresAdditionalInfo');
             router.push('/');

@@ -2,6 +2,9 @@ package com.snackoverflow.toolgether.global.exception.handler;
 
 import com.snackoverflow.toolgether.global.exception.custom.CustomException;
 import com.snackoverflow.toolgether.global.exception.custom.duplicate.DuplicateFieldException;
+import com.snackoverflow.toolgether.global.exception.custom.location.AddressConversionException;
+import com.snackoverflow.toolgether.global.exception.custom.location.DistanceCalculationException;
+import com.snackoverflow.toolgether.global.exception.custom.location.LocationException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.CustomAuthException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.MailPreparationException;
 import com.snackoverflow.toolgether.global.exception.custom.mail.SmtpConnectionException;
@@ -14,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -92,10 +94,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleService(UserNotFoundException exception) {
-        return ResponseEntity.status(404).body(ErrorResponse.of(
-                "USER-NOT-FOUND", exception.getMessage()
-        ));
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
+        log.error("사용자 찾기 실패: {}", ex.getMessage());
+        return ResponseEntity.status(404).body(
+                ErrorResponse.of("USER_NOT_FOUND", ex.getMessage()));
+    }
+
+    @ExceptionHandler(LocationException.class)
+    public ResponseEntity<ErrorResponse> handleLocationException(LocationException exception) {
+        String errorCode = exception instanceof AddressConversionException ? "ADDRESS_CONVERSION_ERROR"
+                : exception instanceof DistanceCalculationException ? "DISTANCE_CALCULATION_ERROR"
+                : "LOCATION_ERROR";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ErrorResponse.of(errorCode, exception.getMessage()));
     }
 
     @ExceptionHandler(CustomException.class)

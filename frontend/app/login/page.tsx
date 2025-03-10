@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {useAuth} from "@/app/lib/auth-context";
 import {motion} from 'framer-motion';
@@ -13,6 +13,7 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const {login} = useAuth();
+    const hasFetched = useRef(false);
 
 
     // 폼 제출 핸들러
@@ -56,7 +57,8 @@ export default function LoginPage() {
         const urlParams = new URLSearchParams(window.location.search);
         const authCode = urlParams.get('code');
 
-        if (authCode) {
+        if (authCode && !hasFetched.current) {
+            hasFetched.current = true;
             fetch('http://localhost:8080/login/oauth2/code/google', {
                 method: 'POST',
                 credentials: 'include',

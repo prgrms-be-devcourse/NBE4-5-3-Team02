@@ -1,6 +1,5 @@
 package com.snackoverflow.toolgether.global.filter;
 
-import com.snackoverflow.toolgether.global.exception.custom.mail.CustomAuthException;
 import com.snackoverflow.toolgether.global.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -10,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,8 +18,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
-
-import static com.snackoverflow.toolgether.global.exception.custom.mail.CustomAuthException.AuthErrorType.MALFORMED_TOKEN;
 
 @Slf4j
 @Component
@@ -64,5 +60,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 토큰이 없어도 게시물은 조회할 수 있도록
             filterChain.doFilter(request, response);
         }
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String requestURI = request.getRequestURI();
+        return requestURI.startsWith("/h2-console") || requestURI.matches(".*\\.(css|js|gif|png|jpg|ico)$");
     }
 }

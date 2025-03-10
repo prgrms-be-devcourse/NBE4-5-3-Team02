@@ -2,13 +2,22 @@ server:
   port: 8080
   servlet:
     session:
+      persistent: true
       timeout: 15m
 jwt:
   secret: [change]
   expiration: 86400000 # 24시간(초 단위)
 
+kakao:
+  rest:
+    api:
+      key: [change]
+
 spring:
-  
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
   security:
     oauth2:
       client:
@@ -25,10 +34,6 @@ spring:
         provider:
           google:
             issuer-uri: https://accounts.google.com
-
-  jackson:
-    serialization:
-      fail-on-empty-beans: false
 
   output:
     ansi:
@@ -54,8 +59,17 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
-        default_batch_fetch_size: 10
-    #open-in-view: false
+        default_batch_fetch_size: 100
+    open-in-view: false
+
+  mail:
+    username: writeyourmail0123@gmail.com
+    password: writeAppPassword
+    host: smtp.gmail.com
+    port: 587
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 logging:
   level:
@@ -63,3 +77,6 @@ logging:
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
+
+
+

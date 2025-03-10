@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -75,14 +76,23 @@ public class UserOauthController {
     }
 
     @PatchMapping("/oauth/users/additional-info")
-    public RsData<?> updateAdditionalInfo(@Validated @RequestBody AdditionalInfoRequest request,
-                                          @Login CustomUserDetails userDetails) {
-        oauthService.updateAdditionalInfo(userDetails.getEmail(), request);
-        return new RsData<>(
-                "201-2",
-                "추가 정보가 등록되었습니다.",
-                null
-        );
+    public Mono<RsData<Object>> updateAdditionalInfo(
+            @Validated @RequestBody AdditionalInfoRequest request,
+            @Login CustomUserDetails userDetails) {
+        return oauthService.updateAdditionalInfo(userDetails.getEmail(), request)
+                .map(isLocationValid -> {
+                    if (Boolean.FALSE.equals(isLocationValid)) {
+                        log.debug("isLocationValid: {}", isLocationValid);
+                        return new RsData<>(
+                                "400-1",
+                                "위치 정보가 허용 범위를 벗어났습니다.",
+                                null);
+                    }
+                    return new RsData<>(
+                            "201-2",
+                            "추가 정보가 등록되었습니다.",
+                            null);
+                });
     }
 
     private void setJwtToken(HttpServletResponse response, String email) {
