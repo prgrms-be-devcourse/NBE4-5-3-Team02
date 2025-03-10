@@ -56,18 +56,28 @@ public class UserController {
 
     // 회원 가입
     @PostMapping("/signup")
-    public RsData<User> signup(@RequestBody @Validated SignupRequest request) {
-        // 이메일, 아이디, 닉네임 중복 확인
-        userService.checkDuplicates(request);
+    public RsData<?> signup(@RequestBody @Validated SignupRequest request) {
+        try {
+            // 중복 확인 및 패스워드가 일치하는지 확인
+            userService.checkDuplicates(request);
+            userService.checkPassword(request);
 
-        // 이상 없을 시에 회원 가입 진행
-        userService.registerVerifiedUser(request);
+            // 회원 가입 처리
+            boolean isSuccess = userService.registerVerifiedUser(request);
 
-        return new RsData<>(
-                "201-2",
-                "회원 가입이 완료되었습니다.",
-                userService.getUserForUsername(request.username())
-        );
+            if (isSuccess) {
+                // 회원 정보 조회 및 성공 응답 반환
+                User user = userService.getUserForUsername(request.username());
+                return new RsData<>("201-2", "회원 가입 완료", user);
+            }
+
+            // 위치 검증 실패 응답 반환
+            return new RsData<>("400-1", "위치 검증 실패", null);
+
+        } catch (Exception e) {
+            // 기타 서버 오류 처리
+            return new RsData<>("500-1", "서버 오류", null);
+        }
     }
 
     // 일반 사용자 로그인
