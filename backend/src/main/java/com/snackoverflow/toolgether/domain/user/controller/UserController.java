@@ -90,4 +90,14 @@ public class UserController {
                 )
         );
     }
+
+    @GetMapping("/{id}")
+    public RsData<User> getUser(@PathVariable Long id) {
+        User user = userService.findUserById(id);
+        return new RsData<>(
+            "200-3",
+            "%d번 유저 검색".formatted(id),
+            user
+        );
+    }
 }

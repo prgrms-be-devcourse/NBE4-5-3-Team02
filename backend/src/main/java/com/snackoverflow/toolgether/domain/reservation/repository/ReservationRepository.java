@@ -13,4 +13,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     // ownerId를 기준으로 예약 정보를 조회하는 메서드
     List<Reservation> findByOwnerId(Long ownerId);
+
+    List<Reservation> findByPostId(Long postId);
 }

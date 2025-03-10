@@ -1,7 +1,7 @@
 "use client";
 
 import { Calendar, momentLocalizer } from "react-big-calendar";
-import moment from "moment";
+import moment, { duration } from "moment";
 import "moment/locale/ko";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./CustomCalendar.css";
@@ -59,10 +59,60 @@ export default function ClientPage({
   const [dateRange, setDateRange] = useState<Date[]>([]);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [usageDuration, setUsageDuration] = useState<string>("");
+  const [reservedDates, setReservedDates] = useState<Date[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
 
   useEffect(() => {
     calculateTotalPrice(dateRange);
   }, [startTime, endTime, dateRange]);
+
+  useEffect(() => {
+    const loadReservedEvents = async () => {
+      const events = await fetchReservedEvents(post.id);
+      setEvents(events);
+      console.log("Reserved events:", events);
+      processReservedEvents(events);
+    };
+    loadReservedEvents();
+  }, [me.id, post.id]);
+
+  // 예약된 날짜 가져오기
+  const fetchReservedEvents = async (postId: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v1/reservations/reservatedDates/${postId}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        return data.data.map((reservation: any) => ({
+          title: `예약중`,
+          start: moment(reservation.startTime).toDate(),
+          end: moment(reservation.endTime).toDate(),
+          allDay: false,
+        }));
+      } else {
+        console.error("Failed to fetch reserved events");
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching reserved events:", error);
+      return [];
+    }
+  };
+
+  const processReservedEvents = (events: any[]) => {
+    const dates: Date[] = [];
+    events.forEach((event) => {
+      let currentDate = moment(event.start).clone();
+      const endDate = moment(event.end).clone();
+
+      while (currentDate.isSameOrBefore(endDate, "day")) {
+        dates.push(currentDate.clone().toDate());
+        currentDate.add(1, "day");
+      }
+    });
+    setReservedDates(dates);
+  };
 
   const handleNavigate = (newDate: Date) => {
     setDate(newDate);
@@ -131,6 +181,7 @@ export default function ClientPage({
           .add(moment(endTime, "HH:mm").minutes(), "minutes");
         const diff = moment.duration(endDateTime.diff(startDateTime));
         const hours = Math.ceil(diff.asHours());
+
         setUsageDuration(`${hours}시간 이용`);
         setTotalPrice(price * hours);
       } else if (priceType === "DAY") {
@@ -143,12 +194,42 @@ export default function ClientPage({
     }
   };
 
-  // 캘린더 슬롯 선택
+  // 캘린더 슬롯 선택 - 이미 예약된 날짜는 선택 불가능
   const handleSelectSlot = ({ start, end }: SlotInfo) => {
     const correctedEnd = moment(end).subtract(1, "day").toDate();
+    const range: Date[] = [];
+    let current = moment(start).clone();
+
+    while (current.isSameOrBefore(moment(correctedEnd), "day")) {
+      if (
+        reservedDates.some((reservedDate) =>
+          current.isSame(moment(reservedDate), "day")
+        ) &&
+        !events.some(
+          (event) =>
+            current.isSame(moment(event.start), "day") ||
+            current.isSame(moment(event.end), "day")
+        )
+      ) {
+        alert("선택하신 날짜는 이미 예약되어 있거나 예약된 기간을 포함합니다.");
+        return;
+      }
+      range.push(current.clone().toDate());
+      current.add(1, "day");
+    }
+
     setSelectedDates([start, correctedEnd]);
     calculateDateRange([start, correctedEnd]);
     setShowTimeForm(true);
+  };
+
+  const isDateInEventRange = (date: Date, event: any) => {
+    const startDate = moment(event.start).startOf("day");
+    const endDate = moment(event.end).startOf("day");
+    const targetDate = moment(date).startOf("day");
+    return (
+      targetDate.isSameOrAfter(startDate) && targetDate.isSameOrBefore(endDate)
+    );
   };
 
   // 캘린더 선택 날짜 스타일
@@ -160,9 +241,31 @@ export default function ClientPage({
         },
       };
     }
+    if (events.some((event) => isDateInEventRange(date, event))) {
+      return {
+        style: {
+          pointerEvents: "none",
+        },
+      };
+    }
+    if (
+      reservedDates.some((reservedDate) =>
+        moment(reservedDate).isSame(date, "day")
+      ) &&
+      !events.some(
+        (event) =>
+          moment(event.start).isSame(date, "day") ||
+          moment(event.end).isSame(date, "day")
+      )
+    ) {
+      return {
+        style: {
+          pointerEvents: "none",
+        },
+      };
+    }
     return {};
   };
-
   // 시간 변경 핸들러
   const handleStartTimeChange = (time: string) => {
     setStartTime(time);
@@ -175,15 +278,50 @@ export default function ClientPage({
   // 보증금
   const deposit = 10000;
 
+  const isOverlapping = (
+    newStartTime: moment.Moment,
+    newEndTime: moment.Moment,
+    events: any[]
+  ) => {
+    for (const event of events) {
+      const existingStartTime = moment(event.start);
+      const existingEndTime = moment(event.end);
+
+      // 겹침 조건 확인 (여러 가지 방법 중 하나)
+      if (
+        newStartTime.isBefore(existingEndTime) &&
+        newEndTime.isAfter(existingStartTime)
+      ) {
+        return true; // 겹침 발견
+      }
+    }
+    return false; // 겹치는 예약 없음
+  };
+
   const handleReservation = async () => {
     try {
-      if (selectedDates.length === 2) {
+      if (usageDuration.startsWith("-")) {
+        alert("시간 선택이 잘못되었습니다.");
+        return;
+      }
+      if (selectedDates.length === 2 && selectedDates[0] && selectedDates[1]) {
+        //selectedDates가 null이 아닐경우
         const startDate = moment(selectedDates[0])
           .format("YYYY-MM-DD")
           .concat(`T${startTime}:00`);
         const endDate = moment(selectedDates[1])
           .format("YYYY-MM-DD")
           .concat(`T${endTime}:00`);
+
+        // Moment 객체로 변환
+        const newStartTime = moment(startDate);
+        const newEndTime = moment(endDate);
+
+        // 겹침 확인
+        if (isOverlapping(newStartTime, newEndTime, events)) {
+          alert("선택하신 시간에 이미 예약이 있습니다.");
+          return; // 예약 처리 중단
+        }
 
         const reservationData = {
           postId: post.id,
@@ -246,21 +384,28 @@ export default function ClientPage({
           onSelectSlot={handleSelectSlot}
           selectable
           dayPropGetter={dayPropGetter}
+          events={events} // 이벤트 데이터 전달
         />
       </div>
-      <div className="flex mt-10 space-x-4 justify-center">
+      <div className="flex flex-col mt-10 space-x-4 justify-center">
         {" "}
         {/* 시작일, 종료일 데이터 박스 */}
-        <DateBox
-          date={selectedDates[0]}
-          onTimeChange={handleStartTimeChange}
-          time={startTime}
-        />
-        <DateBox
-          date={selectedDates[1]}
-          onTimeChange={handleEndTimeChange}
-          time={endTime}
-        />
+        <div className="w-full mb-6">
+          <DateBox
+            date={selectedDates[0]}
+            onTimeChange={handleStartTimeChange}
+            time={startTime}
+            events={events}
+          />
+        </div>
+        <div className="w-full">
+          <DateBox
+            date={selectedDates[1]}
+            onTimeChange={handleEndTimeChange}
+            time={endTime}
+            events={events}
+          />
+        </div>
       </div>
       <div className="flex flex-col justify-center items-center mt-10 w-[50%] text-xl">
         <div className="flex flex-col mt-4 w-full">

@@ -5,7 +5,9 @@ import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
 import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import java.net.URI;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,18 +25,14 @@ import com.snackoverflow.toolgether.domain.reservation.entity.FailDue;
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationRequest;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationResponse;
-import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
-import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
-import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository;
 import com.snackoverflow.toolgether.domain.user.service.UserService;
+import com.snackoverflow.toolgether.global.exception.ServiceException;
 import com.snackoverflow.toolgether.global.exception.custom.ErrorResponse;
 import com.snackoverflow.toolgether.global.exception.custom.CustomException;
 
-import lombok.RequiredArgsConstructor;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -75,7 +73,16 @@ public class ReservationService {
 			.build();
 
 		depositHistoryService.createDepositHistory(depositHistory);
-		return new ReservationResponse(reservation.getId(), reservation.getStatus().name(), reservation.getPost().getId(), reservation.getStartTime(), reservation.getEndTime(), reservation.getAmount());
+		return new ReservationResponse(reservation.getId(),
+			reservation.getStatus().name(),
+			reservation.getPost().getId(),
+			reservation.getStartTime(),
+			reservation.getEndTime(),
+			reservation.getAmount(),
+			reservation.getRejectionReason(),
+			reservation.getOwner().getId(),
+			reservation.getRenter().getId()
+		);
 	}
 
 	// 예약 승인
@@ -150,7 +157,10 @@ public class ReservationService {
 			reservation.getPost().getId(),
 			reservation.getStartTime(),
 			reservation.getEndTime(),
-			reservation.getAmount()
+			reservation.getAmount(),
+			reservation.getRejectionReason(),
+			reservation.getOwner().getId(),
+			reservation.getRenter().getId()
 		);
 	}
 
@@ -163,6 +173,32 @@ public class ReservationService {
 				.detail("해당 ID의 예약을 찾을 수 없습니다.")
 				.instance(URI.create(ServletUriComponentsBuilder.fromCurrentRequestUri().toUriString()))
 				.build()));
+	}
+
+	@Transactional(readOnly = true)
+	public List<ReservationResponse> getReservationsByPostId(Long postId) {
+		List<Reservation> reservations = reservationRepository.findByPostId(postId);
+		List<ReservationResponse> responses = new ArrayList<>();
+		List<ReservationStatus> includedStatuses = List.of(
+			ReservationStatus.APPROVED,
+			ReservationStatus.IN_PROGRESS
+		);
+		reservations.stream()
+			.filter(reservation -> includedStatuses.contains(reservation.getStatus()))
+			.forEach(reservation -> {
+			responses.add(new ReservationResponse(
+				reservation.getId(),
+				reservation.getStatus().name(),
+				reservation.getPost().getId(),
+				reservation.getStartTime(),
+				reservation.getEndTime(),
+				reservation.getAmount(),
+				reservation.getRejectionReason(),
+				reservation.getOwner().getId(),
+				reservation.getRenter().getId()
+			));
+		});
+		return responses;
 	}
 
     // 렌탈 예약 정보 DB에서 조회

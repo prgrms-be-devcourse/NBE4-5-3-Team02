@@ -10,5 +10,8 @@ public record ReservationResponse(
 	Long postId,
 	LocalDateTime startTime,
 	LocalDateTime endTime,
-	Double amount
+	Double amount,
+	String rejectionReason,
+	Long ownerId,
+	Long renterId
 ) {}
