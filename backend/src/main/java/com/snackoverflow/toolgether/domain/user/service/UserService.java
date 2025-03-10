@@ -1,7 +1,7 @@
 package com.snackoverflow.toolgether.domain.user.service;
 
-import com.snackoverflow.toolgether.domain.postimage.entity.PostImage;
 import com.snackoverflow.toolgether.domain.user.dto.request.PatchMyInfoRequest;
+import com.snackoverflow.toolgether.domain.user.entity.Address;
 import org.springframework.transaction.annotation.Transactional;
 import com.snackoverflow.toolgether.domain.user.dto.MeInfoResponse;
 import com.snackoverflow.toolgether.domain.user.entity.User;
@@ -32,13 +32,13 @@ public class UserService {
 
     // 이메일, 아이디, 닉네임 중복 방지
     public void checkDuplicates(SignupRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (userRepository.existsByUsername(request.username())) {
             throw new DuplicateFieldException("사용자 ID 중복 오류 발생");
         }
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.email())) {
             throw new DuplicateFieldException("사용자 EMAIL 중복 오류 발생");
         }
-        if (userRepository.existsByNickname(request.getNickname())) {
+        if (userRepository.existsByNickname(request.nickname())) {
             throw new DuplicateFieldException("사용자 닉네임 중복 오류 발생");
         }
     }
@@ -59,23 +59,30 @@ public class UserService {
     @Transactional
     public void registerVerifiedUser(SignupRequest request) {
         // 이메일 인증 완료 시 회원 가입 허용
-        if (!verificationService.isEmailVerified(request.getEmail())) {
-            throw new VerificationException(VerificationException.ErrorType.NOT_VERIFIED, "인증되지 않은 이메일입니다. 이메일: "+ request.getEmail());
+        if (!verificationService.isEmailVerified(request.email())) {
+            throw new VerificationException(VerificationException.ErrorType.NOT_VERIFIED, "인증되지 않은 이메일입니다. 이메일: "+ request.email());
         }
 
         // 비밀번호 암호화
-        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        String encodedPassword = passwordEncoder.encode(request.password());
+
+        // 위치 인증 후 회원 가입 가능
+
 
         //User 엔티티 생성 후 DB 저장
         User user = User.builder()
-                .username(request.getUsername())
-                .password(request.getPassword())
-                .email(request.getEmail())
-                .nickname(request.getNickname())
-                .address(request.getAddress())
-                .longitude(request.getLongitude())
-                .latitude(request.getLatitude())
-                .phoneNumber(request.getPhoneNumber())
+                .username(request.username())
+                .password(request.password())
+                .email(request.email())
+                .nickname(request.nickname())
+                .address(Address.builder()
+                        .zipcode(request.postalCode())
+                        .mainAddress(request.baseAddress())
+                        .detailAddress(request.detailAddress())
+                        .build())
+                .longitude(request.longitude())
+                .latitude(request.latitude())
+                .phoneNumber(request.phoneNumber())
                 .profileImage(null)
                 .additionalInfoRequired(false)
                 .build();

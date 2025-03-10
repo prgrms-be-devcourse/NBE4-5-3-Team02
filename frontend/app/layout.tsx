@@ -4,6 +4,7 @@ import { AuthProvider } from '@/app/lib/auth-context';
 import Header from '@/components/Header';
 import Script from 'next/script';
 import {FacebookIcon, InstagramIcon, TwitterIcon} from "lucide-react";
+import AnimatedMain from '@/components/AnimatedMain';
 
 export const metadata: Metadata = {
   title: "Toolgether",
@@ -27,9 +28,9 @@ export default function RootLayout({
     </head>
       <body className="font-d2coding" suppressHydrationWarning={true}>
       <AuthProvider>
-      {/* Header */}
-        <Header /> {/* 헤더 추가 */}
-        {children}
+
+        <Header />
+          <AnimatedMain>{children}</AnimatedMain>
         <Script
             src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
             strategy="beforeInteractive"

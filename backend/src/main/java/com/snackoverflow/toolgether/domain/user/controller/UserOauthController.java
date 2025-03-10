@@ -78,7 +78,8 @@ public class UserOauthController {
     @PatchMapping("/oauth/users/additional-info")
     public Mono<RsData<Object>> updateAdditionalInfo(
             @Validated @RequestBody AdditionalInfoRequest request,
-            @Login CustomUserDetails userDetails) {
+            @Login CustomUserDetails userDetails,
+            HttpServletResponse response) {
         return oauthService.updateAdditionalInfo(userDetails.getEmail(), request)
                 .map(isLocationValid -> {
                     if (Boolean.FALSE.equals(isLocationValid)) {
@@ -88,6 +89,7 @@ public class UserOauthController {
                                 "위치 정보가 허용 범위를 벗어났습니다.",
                                 null);
                     }
+                    setJwtToken(response, userDetails.getEmail());
                     return new RsData<>(
                             "201-2",
                             "추가 정보가 등록되었습니다.",

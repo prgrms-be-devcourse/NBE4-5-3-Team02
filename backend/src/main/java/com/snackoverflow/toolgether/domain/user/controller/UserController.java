@@ -66,7 +66,7 @@ public class UserController {
         return new RsData<>(
                 "201-2",
                 "회원 가입이 완료되었습니다.",
-                userService.getUserForUsername(request.getUsername())
+                userService.getUserForUsername(request.username())
         );
     }
 
