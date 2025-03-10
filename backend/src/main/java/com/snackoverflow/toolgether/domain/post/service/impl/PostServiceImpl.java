@@ -1,7 +1,9 @@
 package com.snackoverflow.toolgether.domain.post.service.impl;
 
+import com.snackoverflow.toolgether.domain.post.dto.PostSearchRequest;
 import com.snackoverflow.toolgether.domain.post.dto.PostUpdateRequest;
 import com.snackoverflow.toolgether.domain.post.entity.enums.RecurrenceDays;
+import com.snackoverflow.toolgether.domain.post.repository.PostRepositoryCustom;
 import com.snackoverflow.toolgether.domain.postavailability.dto.PostAvailabilityRequest;
 import com.snackoverflow.toolgether.domain.postavailability.entity.PostAvailability;
 import com.snackoverflow.toolgether.domain.postavailability.repository.PostAvailabilityRepository;
@@ -16,6 +18,8 @@ import com.snackoverflow.toolgether.domain.post.entity.Post;
 import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
 import com.snackoverflow.toolgether.domain.post.service.PostService;
 import com.snackoverflow.toolgether.domain.user.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +31,7 @@ import java.util.List;
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
+    private final PostRepositoryCustom postQueryRepository;
     private final PostImageRepository postImageRepository;
     private final PostAvailabilityRepository postAvailabilityRepository;
     private final UserRepository userRepository;
@@ -165,6 +170,13 @@ public class PostServiceImpl implements PostService {
                         .build())
                 .toList();
         postAvailabilityRepository.saveAll(postAvailabilities);
+    }
+
+    @Transactional
+    @Override
+    public Page<PostResponse> searchPosts(PostSearchRequest request, Pageable pageable) {
+        Page<Post> posts = postQueryRepository.searchPosts(request, pageable);
+        return posts.map(PostResponse::new);
     }
 
     // 예약에 필요한 메서드

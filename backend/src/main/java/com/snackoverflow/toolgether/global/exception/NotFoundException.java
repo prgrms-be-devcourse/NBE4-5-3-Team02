@@ -10,4 +10,6 @@ public class NotFoundException extends RuntimeException {
         super(message);
         this.code = code;
     }
+
 }
+
