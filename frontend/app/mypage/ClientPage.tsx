@@ -7,6 +7,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useMemo, useState } from "react";
 import ScoreIcon from "../lib/util/scoreIcon";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ClientPage({
   me,
@@ -55,6 +56,13 @@ export default function ClientPage({
 
   const [eventType, setEventType] = useState("rental");
   const [date, setDate] = useState(new Date());
+  const [isModal, setIsModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalContent, setModalContent] = useState("");
+  const [onConfirmModal, setOnConfirmModal] = useState<(() => void) | null>(
+    () => {}
+  );
+  const [isCancelButton, setIsCancelButton] = useState(true);
 
   const handleNavigate = (newDate: Date) => {
     setDate(newDate);
@@ -153,6 +161,175 @@ export default function ClientPage({
     }
   }, [eventType, reservations]);
 
+  const handleModal = (
+    title: string,
+    content: string,
+    confirmAction: (() => void) | null = null,
+    isCancelButton: boolean = true
+  ) => {
+    setModalTitle(title);
+    setModalContent(content);
+    setIsModal(true);
+    setOnConfirmModal(() => confirmAction);
+    setIsCancelButton(isCancelButton);
+  };
+
+  const handleUploadProfile = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      alert("이미지를 선택해주세요.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("profileImage", file);
+
+    try {
+      const uploadProfile = await fetch(
+        "http://localhost:8080/api/v1/mypage/profile",
+        {
+          method: "POST",
+          credentials: "include",
+          body: formData,
+        }
+      );
+
+      if (uploadProfile.ok) {
+        const Data = await uploadProfile.json();
+        if (Data?.code.startsWith("200")) {
+          handleModal(
+            "성공",
+            "프로필이 수정되었습니다.",
+            () => {
+              window.location.reload();
+            },
+            false
+          );
+        } else {
+          handleModal("프로필 수정 실패", Data?.msg, null, false);
+        }
+      } else {
+        console.error("Error fetching data:", uploadProfile.status);
+        handleModal(
+          "프로필 수정 실패",
+          `오류가 발생했습니다. (HTTP 상태 코드: ${uploadProfile.status})`,
+          null,
+          false
+        );
+      }
+    } catch (error) {
+      console.error("프로필 수정 중 오류 발생:", error);
+      handleModal(
+        "프로필 수정 실패",
+        "프로필 수정 중 예상치 못한 오류가 발생했습니다.",
+        null,
+        false // 실패 모달 (취소 버튼 숨김)
+      );
+    }
+  };
+
+  const handleDeleteProfile = async () => {
+    try {
+      const deleteProfile = await fetch(
+        "http://localhost:8080/api/v1/mypage/profile",
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (deleteProfile.ok) {
+        const Data = await deleteProfile.json();
+        if (Data?.code.startsWith("200")) {
+          handleModal(
+            "성공",
+            "프로필이 삭제되었습니다.",
+            () => {
+              window.location.reload();
+            },
+            false
+          );
+        } else {
+          handleModal("프로필 삭제 실패", Data?.msg, null, false);
+        }
+      } else {
+        console.error("Error fetching data:", deleteProfile.status);
+        handleModal(
+          "프로필 삭제 실패",
+          `오류가 발생했습니다. (HTTP 상태 코드: ${deleteProfile.status})`,
+          null,
+          false
+        );
+      }
+    } catch (error) {
+      console.error("프로필 삭제 중 오류 발생:", error);
+      handleModal(
+        "프로필 삭제 실패",
+        "프로필 삭제 중 예상치 못한 오류가 발생했습니다.",
+        null,
+        false
+      );
+    }
+  };
+
+  const handleWithdrawMembership = async () => {
+    try {
+      const withdrawMembership = await fetch(
+        "http://localhost:8080/api/v1/mypage/me",
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (withdrawMembership.ok) {
+        const Data = await withdrawMembership.json();
+        if (Data?.code.startsWith("200")) {
+          handleModal(
+            "회원 탈퇴 완료",
+            "회원 탈퇴가 정상적으로 처리되었습니다.",
+            () => {
+              window.location.href = "/";
+            },
+            false
+          );
+        } else {
+          handleModal(
+            "회원 탈퇴 실패",
+            Data?.msg || "회원 탈퇴에 실패했습니다.",
+            null,
+            false
+          );
+        }
+      } else {
+        console.error("회원 탈퇴 API 요청 실패:", withdrawMembership.status);
+        handleModal(
+          "회원 탈퇴 실패",
+          `오류가 발생했습니다. (HTTP 상태 코드: ${withdrawMembership.status})`,
+          null,
+          false
+        );
+      }
+    } catch (error) {
+      console.error("회원 탈퇴 처리 중 오류 발생:", error);
+      handleModal(
+        "회원 탈퇴 실패",
+        "회원 탈퇴 처리 중 예상치 못한 오류가 발생했습니다.",
+        null,
+        false
+      );
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-gray-100">
       <div className="container mx-auto px-4 py-4">
@@ -165,51 +342,106 @@ export default function ClientPage({
           </Link>
         </div>
         <div className="grid grid-cols-1 gap-4 mt-4">
-          {/* 유저 정보 */}
-          <div className="bg-white shadow-md p-4">
-            <h2 className="text-lg font-bold text-gray-800">나의 정보</h2>
-            <div className="mt-4">
-              <p className="text-gray-800">
-                <span className="font-bold">닉네임: </span>
-                {me.nickname}
-              </p>
-              <p className="text-gray-800">
-                <span className="font-bold">전화번호: </span>
-                {me.phoneNumber}
-              </p>
-              {me?.username ? (
+          <div className="shadow-md p-4 bg-white grid grid-cols-2 gap-4">
+            {/* 유저 정보 */}
+            <div className="">
+              <h2 className="text-lg font-bold text-gray-800">나의 정보</h2>
+              <div className="mt-4">
                 <p className="text-gray-800">
-                  <span className="font-bold">아이디: </span> {me.username}
+                  <span className="font-bold">닉네임: </span>
+                  {me.nickname}
                 </p>
-              ) : (
                 <p className="text-gray-800">
-                  <span className="font-bold">이메일: </span> {me.email}
+                  <span className="font-bold">전화번호: </span>
+                  {me.phoneNumber}
                 </p>
-              )}
-              <p className="text-gray-800">
-                <span className="font-bold">주소: </span>{" "}
-                {me.address.mainAddress} {me.address.detailAddress} (
-                {me.address.zipcode})
-              </p>
-              <p className="text-gray-800">
-                <span className="font-bold">가입일:</span>{" "}
-                {localizer.format(me.createdAt, "YYYY년 MM월 DD일일", "ko")}
-              </p>
-              <p className="text-gray-800">
-                <span className="flex flex-row">
-                  <span className="font-bold">평점: </span>
-                  {me.score}
-                  <ScoreIcon
-                    className="ml-2"
-                    score={me.score}
-                    size={25}
-                    round
-                  />
-                </span>
-              </p>
-              <p className="text-gray-800">
-                <span className="font-bold">크레딧: </span> {me.credit}
-              </p>
+                {me?.username ? (
+                  <p className="text-gray-800">
+                    <span className="font-bold">아이디: </span> {me.username}
+                  </p>
+                ) : (
+                  <p className="text-gray-800">
+                    <span className="font-bold">이메일: </span> {me.email}
+                  </p>
+                )}
+                <p className="text-gray-800">
+                  <span className="font-bold">주소: </span>{" "}
+                  {me.address.mainAddress} {me.address.detailAddress} (
+                  {me.address.zipcode})
+                </p>
+                <p className="text-gray-800">
+                  <span className="font-bold">가입일:</span>{" "}
+                  {localizer.format(me.createdAt, "YYYY년 MM월 DD일", "ko")}
+                </p>
+                <p className="text-gray-800">
+                  <span className="flex flex-row">
+                    <span className="font-bold">평점: </span>
+                    {me.score}
+                    <ScoreIcon
+                      className="ml-2"
+                      score={me.score}
+                      size={25}
+                      round
+                    />
+                  </span>
+                </p>
+                <p className="text-gray-800">
+                  <span className="font-bold">크레딧: </span> {me.credit}
+                </p>
+              </div>
+            </div>
+            {/* 프로필 */}
+            <div className="flex flex-col items-center justify-center">
+              <div className="relative">
+                {!me?.profileImage ? (
+                  <div className="w-30 h-30 bg-gray-200 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center">
+                    {/* 프로필 추가 버튼 (프로필 이미지 없을 때) */}
+                    <button
+                      className="text-gray-600 hover:text-gray-800"
+                      onClick={() =>
+                        document.getElementById("profile-upload-input")?.click()
+                      }
+                    >
+                      프로필 추가
+                    </button>
+                  </div>
+                ) : (
+                  <div className="relative w-30 h-30 rounded-full overflow-hidden border-2 border-gray-300">
+                    <Image
+                      src={me.profileImage}
+                      alt="profile"
+                      fill
+                      sizes="100%"
+                      style={{ objectFit: "cover" }}
+                    />
+                    {/* 프로필 수정 및 삭제 버튼 (프로필 이미지 있을 때) */}
+                    <div className="absolute bottom-0 left-0 right-0 flex justify-around bg-gray-100 bg-opacity-75 p-1">
+                      <button
+                        className="text-blue-500 hover:text-blue-700"
+                        onClick={() =>
+                          document
+                            .getElementById("profile-upload-input")
+                            ?.click()
+                        }
+                      >
+                        수정
+                      </button>
+                      <button
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() =>
+                          handleModal(
+                            "프로필 삭제",
+                            "프로필을 삭제하시겠습니까?",
+                            handleDeleteProfile
+                          )
+                        }
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -220,22 +452,22 @@ export default function ClientPage({
               <button
                 onClick={() => setEventType("rental")}
                 className={`flex-1 py-2 text-center text-lg font-semibold border-1 cursor-pointer transition-all
-                ${
-                  eventType === "rental"
-                    ? "bg-white text-gray-800 border-b-2 border-gray-800"
-                    : "bg-gray-200 text-gray-800 hover:bg-white active:bg-white"
-                }`}
+                  ${
+                    eventType === "rental"
+                      ? "bg-white text-gray-800 border-b-2 border-gray-800"
+                      : "bg-gray-200 text-gray-800 hover:bg-white active:bg-white"
+                  }`}
               >
                 빌리기
               </button>
               <button
                 onClick={() => setEventType("borrow")}
                 className={`flex-1 py-2 text-center text-lg font-semibold border-1 cursor-pointer transition-all
-                ${
-                  eventType === "borrow"
-                    ? "bg-white text-gray-800 border-b-2 border-gray-800"
-                    : "bg-gray-200 text-gray-800 hover:bg-white active:bg-white"
-                }`}
+                  ${
+                    eventType === "borrow"
+                      ? "bg-white text-gray-800 border-b-2 border-gray-800"
+                      : "bg-gray-200 text-gray-800 hover:bg-white active:bg-white"
+                  }`}
               >
                 빌려주기
               </button>
@@ -267,10 +499,12 @@ export default function ClientPage({
                       key={reservation.id}
                       className="flex items-center border rounded p-2 mb-2"
                     >
-                      <img
+                      <Image
                         src={reservation.image}
                         alt={reservation.title}
                         className="w-20 h-20 object-cover rounded mr-4"
+                        width={80}
+                        height={80}
                       />
                       <div>
                         <h3 className="font-bold text-gray-800">
@@ -304,8 +538,97 @@ export default function ClientPage({
               </div>
             </div>
           </div>
+          {/* 회원 탈퇴 버튼 추가 */}
+          <div className="flex justify-end">
+            <button
+              className="py-2 px-4"
+              onClick={() =>
+                handleModal(
+                  "회원 탈퇴",
+                  "정말로 회원 탈퇴하시겠습니까?",
+                  handleWithdrawMembership,
+                  true
+                )
+              }
+            >
+              회원 탈퇴
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* 성공 모달 */}
+      {isModal && (
+        <div className="fixed z-10 inset-0 overflow-y-auto">
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div
+              className="fixed inset-0 transition-opacity"
+              aria-hidden="true"
+            >
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
+              &#8203;
+            </span>
+            <div
+              className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="modal-headline"
+            >
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3
+                      className="text-lg leading-6 font-medium text-gray-900"
+                      id="modal-headline"
+                    >
+                      {modalTitle}
+                    </h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">{modalContent}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  onClick={() => {
+                    if (onConfirmModal) {
+                      onConfirmModal();
+                    }
+                    setIsModal(false);
+                  }}
+                >
+                  확인
+                </button>
+                {isCancelButton && (
+                  <button
+                    type="button"
+                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    onClick={() => setIsModal(false)}
+                  >
+                    취소
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* 이미지 선택 input (숨김) */}
+      <input
+        type="file"
+        id="profile-upload-input"
+        accept="image/*" // 이미지 파일만 허용
+        className="hidden" // 숨김 처리
+        onChange={handleUploadProfile} // 이미지 선택 시 이벤트 핸들러 호출
+      />
     </div>
   );
 }
