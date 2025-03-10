@@ -6,6 +6,7 @@ import "moment/locale/ko";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useMemo, useState } from "react";
 import ScoreIcon from "../lib/util/scoreIcon";
+import Link from "next/link";
 
 export default function ClientPage({
   me,
@@ -84,16 +85,16 @@ export default function ClientPage({
     ];
     return colors[Math.floor(Math.random() * colors.length)];
   };
-
   const scheduleReservations = {
-    rentals: reservations.rentals.filter((rental) => {
-      rental.status === "APPROVED" || rental.status === "IN_PROGRESS";
-    }),
-    borrows: reservations.borrows.filter((borrow) => {
-      borrow.status === "APPROVED" || borrow.status === "IN_PROGRESS";
-    }),
+    rentals: reservations.rentals.filter(
+      (rental) =>
+        rental.status === "APPROVED" || rental.status === "IN_PROGRESS"
+    ),
+    borrows: reservations.borrows.filter(
+      (borrow) =>
+        borrow.status === "APPROVED" || borrow.status === "IN_PROGRESS"
+    ),
   };
-
   const rentalEvents = scheduleReservations.rentals.map((rental) => ({
     id: rental.id,
     title: `빌리기: ${rental.title}`,
@@ -101,7 +102,6 @@ export default function ClientPage({
     end: moment(rental.endTime).toDate(),
     color: getRandomColor(),
   }));
-
   const borrowEvents = scheduleReservations.borrows.map((borrow) => ({
     id: borrow.id,
     title: `빌려주기: ${borrow.title}`,
@@ -156,7 +156,14 @@ export default function ClientPage({
   return (
     <div className="relative min-h-screen bg-gray-100">
       <div className="container mx-auto px-4 py-4">
-        <h1 className="text-2xl font-bold text-gray-800">마이페이지</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-800">마이페이지</h1>
+          <Link href="/mypage/edit">
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              마이페이지 수정
+            </button>
+          </Link>
+        </div>
         <div className="grid grid-cols-1 gap-4 mt-4">
           {/* 유저 정보 */}
           <div className="bg-white shadow-md p-4">
@@ -170,12 +177,15 @@ export default function ClientPage({
                 <span className="font-bold">전화번호: </span>
                 {me.phoneNumber}
               </p>
-              {me?.username ? <p className="text-gray-800">
-                <span className="font-bold">아이디: </span> {me.username}
-              </p> :
-              <p className="text-gray-800">
-                <span className="font-bold">이메일: </span> {me.email}
-              </p>}
+              {me?.username ? (
+                <p className="text-gray-800">
+                  <span className="font-bold">아이디: </span> {me.username}
+                </p>
+              ) : (
+                <p className="text-gray-800">
+                  <span className="font-bold">이메일: </span> {me.email}
+                </p>
+              )}
               <p className="text-gray-800">
                 <span className="font-bold">주소: </span>{" "}
                 {me.address.mainAddress} {me.address.detailAddress} (
@@ -189,7 +199,12 @@ export default function ClientPage({
                 <span className="flex flex-row">
                   <span className="font-bold">평점: </span>
                   {me.score}
-                  <ScoreIcon className="ml-2" score={me.score} size={25} round />
+                  <ScoreIcon
+                    className="ml-2"
+                    score={me.score}
+                    size={25}
+                    round
+                  />
                 </span>
               </p>
               <p className="text-gray-800">
@@ -262,12 +277,14 @@ export default function ClientPage({
                           {reservation.title}
                         </h3>
                         <p className="text-gray-600">
-                          대여: {moment(reservation.startTime).format(
+                          대여:{" "}
+                          {moment(reservation.startTime).format(
                             "YYYY년MM월DD일 HH시mm분"
                           )}
                         </p>
                         <p className="text-gray-600">
-                          반납: {moment(reservation.endTime).format(
+                          반납:{" "}
+                          {moment(reservation.endTime).format(
                             "YYYY년MM월DD일 HH시mm분"
                           )}
                         </p>
