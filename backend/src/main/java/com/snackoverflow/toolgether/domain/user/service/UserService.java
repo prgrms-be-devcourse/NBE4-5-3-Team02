@@ -2,6 +2,7 @@ package com.snackoverflow.toolgether.domain.user.service;
 
 import com.snackoverflow.toolgether.domain.user.dto.request.PatchMyInfoRequest;
 import com.snackoverflow.toolgether.domain.user.entity.Address;
+import com.snackoverflow.toolgether.global.util.s3.S3Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.snackoverflow.toolgether.domain.user.dto.MeInfoResponse;
 import com.snackoverflow.toolgether.domain.user.entity.User;
@@ -16,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +32,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final VerificationService verificationService;
     private final JwtUtil jwtUtil;
+    private final S3Service s3Service;
 
     // 이메일, 아이디, 닉네임 중복 방지
     public void checkDuplicates(SignupRequest request) {
@@ -142,18 +146,27 @@ public class UserService {
         );
     }
 
+    //프로필 이미지 업로드
     @Transactional
-    public void postProfileImage(User user, String uuid) {
-        user.updateProfileImage(uuid);
+    public void postProfileImage(User user, MultipartFile profileImageFile) {
+        deleteProfileImage(user);
+        //S3Service 의 upload 메소드 호출, "profile" 폴더에 저장
+        String profileImageUrl = s3Service.upload(profileImageFile, "profile");
+        //S3 URL로 프로필 이미지 정보 업데이트
+        user.updateProfileImage(profileImageUrl);
         userRepository.save(user);
-
     }
 
+    //프로필 이미지 삭제
     @Transactional
     public void deleteProfileImage(User user) {
-        user.deleteProfileImage();
-        userRepository.save(user);
+        String profileImage = user.getProfileImage();
 
+        if (profileImage != null) {
+            s3Service.delete(profileImage);
+            user.deleteProfileImage();
+            userRepository.save(user);
+        }
     }
 
     @Transactional

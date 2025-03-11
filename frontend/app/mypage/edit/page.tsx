@@ -17,6 +17,9 @@ export default async function page() {
 
   // console.log("쿠키에서 가져온 닉네임: ", myParsedData.nickname);
 
+  let userData = null;
+  //마이페이지에서 유저 데이터 가져오기 - 이메일, 닉네임, 전화번호, 주소소
+
   const getMyInfo = await fetch("http://localhost:8080/api/v1/mypage/me", {
     method: "GET",
     credentials: "include",
@@ -25,19 +28,8 @@ export default async function page() {
     },
   });
 
-  const getMyReservations = await fetch(
-    "http://localhost:8080/api/v1/mypage/reservations",
-    {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
+ 
 
-  let userData = null;
-  let reservationData = null;
 
   if (getMyInfo.ok) {
     const Data = await getMyInfo.json();
@@ -47,16 +39,6 @@ export default async function page() {
     userData = Data.data;
   } else {
     console.error("Error fetching data:", getMyInfo.status);
-  }
-
-  if (getMyReservations.ok) {
-    const Data = await getMyReservations.json();
-    if (Data?.code !== "200-1") {
-      console.error(`에러가 발생했습니다. \n${Data?.msg}`);
-    }
-    reservationData = Data.data;
-  } else {
-    console.error("Error fetching data:", getMyReservations.status);
   }
 
   // const mockUpUser = {
@@ -81,51 +63,10 @@ export default async function page() {
   //   },
   // };
 
-  // const mockUpReservation = {
-  //   result: "200-1",
-  //   data: {
-  //     rentals: [
-  //       {
-  //         id: 1, //reservation id
-  //         title: "전동 드릴",
-  //         image: "image.png",
-  //         amount: 10000,
-  //         startTime: "2025-03-10T10:11:00",
-  //         endTime: "2025-03-12T18:12:00",
-  //         status: "APPROVED",
-  //         isReviewed: false,
-  //       },
-  //       {
-  //         id: 3, //reservation id
-  //         title: "망치",
-  //         image: "image.png",
-  //         amount: 5000,
-  //         startTime: "2025-03-11T11:11:00",
-  //         endTime: "2025-03-14T18:12:00",
-  //         status: "APPROVED",
-  //         isReviewed: false,
-  //       },
-  //     ],
-  //     borrows: [
-  //       {
-  //         id: 2,
-  //         title: "공구 세트",
-  //         image: "image.png",
-  //         amount: 20000,
-  //         startTime: "2025-03-05T09:10:00",
-  //         endTime: "2025-03-07T15:17:00",
-  //         status: "IN_PROGRESS",
-  //         isReviewed: false,
-  //       },
-  //     ],
-  //   },
-  // };
-
   // const me = mockUpUser.data;
   const me = userData;
-  const reservations = reservationData;
 
-  return <ClientPage me={me} reservations={reservations} />;
+  return <ClientPage me={me} />;
 }
 
 function parseAccessToken(accessToken: RequestCookie | undefined) {
