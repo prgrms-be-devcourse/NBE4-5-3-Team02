@@ -183,9 +183,9 @@ public class UserService {
             throw new UserNotFoundException("비밀번호가 올바르지 않습니다.");
         }
 
-        // username 기반으로 토큰 생성
+        // username 기반으로 토큰 생성 -> userId를 넣고 토큰을 생성 (보안)
         Map<String, Object> claims = new HashMap<>();
-        claims.put("username", user.getUsername());
+        claims.put("userId", user.getId());
         String token = jwtUtil.createToken(claims);
 
         return new LoginResult(username, token);
