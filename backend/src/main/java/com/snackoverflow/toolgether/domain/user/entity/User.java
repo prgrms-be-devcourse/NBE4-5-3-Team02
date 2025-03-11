@@ -64,7 +64,7 @@ public class User {
     private boolean additionalInfoRequired = true; // 추가 정보 필요 플래그
 
     @Column(nullable = true)
-    private String profileImage; // 사용자 프로필 이미지, uuid로 저장
+    private String profileImage; // 사용자 프로필 이미지 링크 저장
 
     @Builder.Default
     private int score = 30; // 유저 평가 정보: 기본값 30점

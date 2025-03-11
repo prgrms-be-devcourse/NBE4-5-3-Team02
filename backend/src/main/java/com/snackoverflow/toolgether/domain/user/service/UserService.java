@@ -6,6 +6,7 @@ import com.snackoverflow.toolgether.domain.user.entity.Address;
 import com.snackoverflow.toolgether.global.exception.custom.location.AddressConversionException;
 import com.snackoverflow.toolgether.global.exception.custom.location.DistanceCalculationException;
 import org.springframework.beans.factory.annotation.Value;
+import com.snackoverflow.toolgether.global.util.s3.S3Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.snackoverflow.toolgether.domain.user.dto.MeInfoResponse;
 import com.snackoverflow.toolgether.domain.user.entity.User;
@@ -22,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +40,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final WebClient webClient;
     private final OauthService oauthService;
+    private final S3Service s3Service;
 
     @Value("${kakao.rest.api.key}")
     private String kakaoApiKey;
@@ -223,18 +226,27 @@ public class UserService {
         );
     }
 
+    //프로필 이미지 업로드
     @Transactional
-    public void postProfileImage(User user, String uuid) {
-        user.updateProfileImage(uuid);
+    public void postProfileImage(User user, MultipartFile profileImageFile) {
+        deleteProfileImage(user);
+        //S3Service 의 upload 메소드 호출, "profile" 폴더에 저장
+        String profileImageUrl = s3Service.upload(profileImageFile, "profile");
+        //S3 URL로 프로필 이미지 정보 업데이트
+        user.updateProfileImage(profileImageUrl);
         userRepository.save(user);
-
     }
 
+    //프로필 이미지 삭제
     @Transactional
     public void deleteProfileImage(User user) {
-        user.deleteProfileImage();
-        userRepository.save(user);
+        String profileImage = user.getProfileImage();
 
+        if (profileImage != null) {
+            s3Service.delete(profileImage);
+            user.deleteProfileImage();
+            userRepository.save(user);
+        }
     }
 
     @Transactional

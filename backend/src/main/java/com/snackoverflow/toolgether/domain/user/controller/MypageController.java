@@ -14,11 +14,11 @@ import com.snackoverflow.toolgether.domain.user.service.UserService;
 import com.snackoverflow.toolgether.global.dto.RsData;
 import com.snackoverflow.toolgether.global.filter.CustomUserDetails;
 import com.snackoverflow.toolgether.global.filter.Login;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +38,7 @@ public class MypageController {
     //내 정보 조회
     @GetMapping("/me")
     public RsData<MeInfoResponse> getMyInfo(
-            @Login CustomUserDetails customUserDetails
+        @Login CustomUserDetails customUserDetails
     ) {
         String username = customUserDetails.getUsername();
         User user = userService.findByUsername(username);
@@ -56,7 +56,7 @@ public class MypageController {
     @Transactional(readOnly = true)
     @GetMapping("/reservations")
     public RsData<Map<String, List<MyReservationInfoResponse>>> getMyReservations(
-            @Login CustomUserDetails customUserDetails
+        @Login CustomUserDetails customUserDetails
     ) {
         String username = customUserDetails.getUsername();
         User user = userService.findByUsername(username);
@@ -105,11 +105,12 @@ public class MypageController {
     @PostMapping("/profile")
     public RsData<Void> postProfileimage(
             @Login CustomUserDetails customUserDetails,
-            @RequestBody @NotNull @Validated ProfileRequest profileRequest
+            @Validated ProfileRequest profileRequest,
+            @RequestParam("profileImage") MultipartFile profileImage
     ) {
         String username = customUserDetails.getUsername();
         User user = userService.findByUsername(username);
-        userService.postProfileImage(user, profileRequest.getUuid());
+        userService.postProfileImage(user, profileImage);
         return new RsData<>(
                 "200-1",
                 "프로필 이미지 업로드가 완료되었습니다"

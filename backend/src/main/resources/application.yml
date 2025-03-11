@@ -77,3 +77,15 @@ logging:
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
+
+#AWS S3
+cloud:
+  aws:
+    credentials:
+      access-key: [change]
+      secret-key: [change]
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: toolgetherbucket
+
