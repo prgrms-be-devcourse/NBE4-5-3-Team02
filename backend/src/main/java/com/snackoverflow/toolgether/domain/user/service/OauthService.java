@@ -63,7 +63,7 @@ public class OauthService {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {
                 })
-                .block();// 동기 처리 -> 비동기 처리도 가능한지 알아볼 것
+                .block();// 동기 처리
         log.info("Google Token Response: {}", response);
         if (response != null && response.containsKey("access_token")) {
             return response;
@@ -131,7 +131,7 @@ public class OauthService {
     }
 
     // 두 좌표 간의 거리 계산 공식 (Haversine)
-    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    public double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         final double R = 6371; // 지구 반지름 (km 단위)
 
         double latDistance = Math.toRadians(lat2 - lat1);
