@@ -69,7 +69,7 @@ public class ReservationControllerTest {
 	@Test
 	@DisplayName("예약 승인 테스트")
 	public void testApproveReservation() throws Exception {
-		ResultActions resultActions = mockMvc.perform(post("/api/v1/reservations/1/approve"))
+		ResultActions resultActions = mockMvc.perform(patch("/api/v1/reservations/1/approve"))
 			.andDo(print());
 
 		resultActions

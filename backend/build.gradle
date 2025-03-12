@@ -70,6 +70,9 @@ dependencies {
 	implementation 'com.google.http-client:google-http-client-gson:1.43.3'
 
 	implementation 'org.springframework.boot:spring-boot-starter-quartz'
+
+	implementation 'org.springframework.retry:spring-retry'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
 }
 
 dependencyManagement { // Spring Cloud Version 명시 (Hoxton.SR6)

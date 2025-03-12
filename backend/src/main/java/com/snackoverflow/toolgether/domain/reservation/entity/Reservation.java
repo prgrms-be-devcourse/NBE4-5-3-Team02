@@ -55,6 +55,9 @@ public class Reservation {
     @Column(nullable = false)
     private Double amount; // 총 결제 금액
 
+    @Version // 낙관적 락을 위한 버전 필드
+    private Long version;
+
     /* status 변경 함수 */
     // 요청됨 상태 변경
     public void approve() {

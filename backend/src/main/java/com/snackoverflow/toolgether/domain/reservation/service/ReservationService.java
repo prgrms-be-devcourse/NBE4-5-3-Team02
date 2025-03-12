@@ -23,6 +23,9 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -69,7 +72,7 @@ public class ReservationService {
 		}
 	}
 
-	// 예약 요청 (일정 충돌 방지 로직 필요)
+	// 예약 요청
 	@Transactional
 	public ReservationResponse requestReservation(ReservationRequest reservationRequest) {
 		Post post = postService.findPostById(reservationRequest.postId());
@@ -114,6 +117,7 @@ public class ReservationService {
 
 	// 예약 승인
 	@Transactional
+	@Retryable(retryFor = OptimisticLockingFailureException.class, maxAttempts = 3, backoff = @Backoff(delay = 100))
 	public void approveReservation(Long reservationId) {
 		try {
 			Reservation reservation = findReservationByIdOrThrow(reservationId);
@@ -154,20 +158,14 @@ public class ReservationService {
 				.withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
 				.build();
 
-			System.out.println("대여 시작 시간 : " + startTrigger.getStartTime());
-			System.out.println("대여 종료 시간 : " + completeTrigger.getStartTime());
-
-			log.info("Scheduling StartRentalJob. Job Key: {}, Trigger Key: {}", startJob.getKey(), startTrigger.getKey()); // Job/Trigger 정보
-			log.info("Scheduling CompleteRentalJob. Job Key: {}, Trigger Key: {}", completeJob.getKey(), completeTrigger.getKey()); // Job/Trigger 정보
-
 			scheduler.scheduleJob(startJob, Set.of(startTrigger), true);
 			scheduler.scheduleJob(completeJob, Set.of(completeTrigger), true);
 
-			log.info("Job scheduled.  StartJob exists: {}, CompleteJob exists: {}",
-				scheduler.checkExists(startJob.getKey()), scheduler.checkExists(completeJob.getKey()));
-			log.info("Trigger scheduled. StartTrigger exists: {}, CompleteTrigger exists: {}",
-				scheduler.checkExists(startTrigger.getKey()), scheduler.checkExists(completeTrigger.getKey()));
-		}  catch (SchedulerException e) {
+		} catch (OptimisticLockingFailureException e) {
+			log.warn("OptimisticLockingFailureException during approveReservation. Retrying...", e);
+			throw e; // @Retryable에 의해 다시 시도됨
+		}
+		catch (SchedulerException e) {
 			// SchedulerException을 RuntimeException으로 래핑하여 던짐
 			throw new RuntimeException("Failed to schedule start/complete rental job", e);
 		}
@@ -175,75 +173,109 @@ public class ReservationService {
 
 	// 예약 거절
 	@Transactional
+	@Retryable(retryFor = OptimisticLockingFailureException.class, maxAttempts = 3, backoff = @Backoff(delay = 100))
 	public void rejectReservation(Long reservationId, String reason) {
-		Reservation reservation = findReservationByIdOrThrow(reservationId);
-		reservation.reject(reason);
+		try {
+			Reservation reservation = findReservationByIdOrThrow(reservationId);
+			reservation.reject(reason);
 
-		// 보증금 상태 변경 및 반환 사유 업데이트
-		DepositHistory depositHistory = depositHistoryService.findDepositHistoryByReservationId(reservationId);
-		depositHistoryService.updateDepositHistory(depositHistory.getId(), DepositStatus.RETURNED, ReturnReason.REJECTED);
+			// 보증금 상태 변경 및 반환 사유 업데이트
+			DepositHistory depositHistory = depositHistoryService.findDepositHistoryByReservationId(reservationId);
+			depositHistoryService.updateDepositHistory(depositHistory.getId(), DepositStatus.RETURNED,
+				ReturnReason.REJECTED);
 
-		// 대여자 크레딧 업데이트
-		userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
+			// 대여자 크레딧 업데이트
+			userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
+		} catch (OptimisticLockingFailureException e) {
+			log.warn("OptimisticLockingFailureException during rejectReservation. Retrying...", e);
+			throw e;
+		}
 	}
 
 	// 대여 시작 (IN_PROGRESS 상태)
 	@Transactional
+	@Retryable(retryFor = OptimisticLockingFailureException.class, maxAttempts = 3, backoff = @Backoff(delay = 100))
 	public void startRental(Long reservationId) {
-		Reservation reservation = findReservationByIdOrThrow(reservationId);
-		reservation.startRental();
+		try {
+			Reservation reservation = findReservationByIdOrThrow(reservationId);
+			reservation.startRental();
+		} catch (OptimisticLockingFailureException e) {
+			log.warn("OptimisticLockingFailureException during startRental. Retrying...", e);
+			throw e;
+		}
 	}
 
 	// 대여 완료 (DONE 상태)
 	@Transactional
+	@Retryable(retryFor = OptimisticLockingFailureException.class, maxAttempts = 3, backoff = @Backoff(delay = 100))
 	public void completeRental(Long reservationId) {
-		Reservation reservation = findReservationByIdOrThrow(reservationId);
-		reservation.completeRental();
+		try {
+			Reservation reservation = findReservationByIdOrThrow(reservationId);
+			reservation.completeRental();
 
-		// 보증금 상태 변경 및 반환 사유 업데이트
-		DepositHistory depositHistory = depositHistoryService.findDepositHistoryByReservationId(reservationId);
-		depositHistoryService.updateDepositHistory(depositHistory.getId(), DepositStatus.RETURNED, ReturnReason.NORMAL_COMPLETION);
+			// 보증금 상태 변경 및 반환 사유 업데이트
+			DepositHistory depositHistory = depositHistoryService.findDepositHistoryByReservationId(reservationId);
+			depositHistoryService.updateDepositHistory(depositHistory.getId(), DepositStatus.RETURNED,
+				ReturnReason.NORMAL_COMPLETION);
 
-		// 대여자 크레딧 업데이트
-		userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
+			// 대여자 크레딧 업데이트
+			userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
+		} catch (OptimisticLockingFailureException e) {
+			log.warn("OptimisticLockingFailureException during startRental. Retrying...", e);
+			throw e;
+		}
 	}
 
 	// 대여자 예약 취소
 	@Transactional
+	@Retryable(retryFor = OptimisticLockingFailureException.class, maxAttempts = 3, backoff = @Backoff(delay = 100))
 	public void cancelReservation(Long reservationId) {
-		Reservation reservation = findReservationByIdOrThrow(reservationId);
-		reservation.canceled();
+		try {
+			Reservation reservation = findReservationByIdOrThrow(reservationId);
+			reservation.canceled();
 
-		// 보증금 상태 변경 및 반환 사유 업데이트
-		DepositHistory depositHistory = depositHistoryService.findDepositHistoryByReservationId(reservationId);
-		depositHistoryService.updateDepositHistory(depositHistory.getId(), DepositStatus.RETURNED, ReturnReason.REJECTED);
+			// 보증금 상태 변경 및 반환 사유 업데이트
+			DepositHistory depositHistory = depositHistoryService.findDepositHistoryByReservationId(reservationId);
+			depositHistoryService.updateDepositHistory(depositHistory.getId(), DepositStatus.RETURNED,
+				ReturnReason.REJECTED);
 
-		// 대여자 크레딧 업데이트
-		userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
+			// 대여자 크레딧 업데이트
+			userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
+		} catch (OptimisticLockingFailureException e) {
+			log.warn("OptimisticLockingFailureException during startRental. Retrying...", e);
+			throw e;
+		}
 	}
 
 	// ~에 의한 대여 실패 -> 소유자의 경우 대여자에게, 대여자일 경우 소유자에게 보증금 환급
 	@Transactional
+	@Retryable(retryFor = OptimisticLockingFailureException.class, maxAttempts = 3, backoff = @Backoff(delay = 100))
 	public void failDueTo(Long reservationId, String reason, FailDue failDue) {
-		Reservation reservation = findReservationByIdOrThrow(reservationId);
+		try {
+			Reservation reservation = findReservationByIdOrThrow(reservationId);
 
-		// 보증금 상태 변경 및 반환 사유 업데이트 -> 사유를 받아와서 작성
-		DepositHistory depositHistory = depositHistoryService.findDepositHistoryByReservationId(reservationId);
-		depositHistoryService.updateDepositHistory(depositHistory.getId(), DepositStatus.RETURNED, ReturnReason.valueOf(reason));
+			// 보증금 상태 변경 및 반환 사유 업데이트 -> 사유를 받아와서 작성
+			DepositHistory depositHistory = depositHistoryService.findDepositHistoryByReservationId(reservationId);
+			depositHistoryService.updateDepositHistory(depositHistory.getId(), DepositStatus.RETURNED,
+				ReturnReason.valueOf(reason));
 
-		if(failDue.equals(FailDue.OWNER_ISSUE)){
-			reservation.failDueToOwnerIssue();
-			// 대여자 크레딧 업데이트
-			userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
-		}
-		else if(failDue.equals(FailDue.RENTER_ISSUE)){
-			reservation.failDueToRenterIssue();
-			// 소유자 크레딧 업데이트
-			userService.updateUserCredit(reservation.getOwner().getId(), depositHistory.getAmount());
+			if (failDue.equals(FailDue.OWNER_ISSUE)) {
+				reservation.failDueToOwnerIssue();
+				// 대여자 크레딧 업데이트
+				userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
+			} else if (failDue.equals(FailDue.RENTER_ISSUE)) {
+				reservation.failDueToRenterIssue();
+				// 소유자 크레딧 업데이트
+				userService.updateUserCredit(reservation.getOwner().getId(), depositHistory.getAmount());
+			}
+		} catch (OptimisticLockingFailureException e) {
+			log.warn("OptimisticLockingFailureException during startRental. Retrying...", e);
+			throw e;
 		}
 	}
 
 	// 예약 ID로 예약 조회
+	@Transactional(readOnly = true)
 	public ReservationResponse getReservationById(Long reservationId) {
 		Reservation reservation = findReservationByIdOrThrow(reservationId);
 		return new ReservationResponse(
@@ -260,13 +292,13 @@ public class ReservationService {
 	}
 
 	// 예외 처리 포함 예약 조회 메서드
+	@Transactional(readOnly = true)
 	public Reservation findReservationByIdOrThrow(Long reservationId) {
 		return reservationRepository.findById(reservationId)
 			.orElseThrow(() -> new CustomException(ErrorResponse.builder()
 				.title("예약 조회 실패")
 				.status(404)
 				.detail("해당 ID의 예약을 찾을 수 없습니다.")
-				.instance(URI.create(ServletUriComponentsBuilder.fromCurrentRequestUri().toUriString()))
 				.build()));
 	}
 
