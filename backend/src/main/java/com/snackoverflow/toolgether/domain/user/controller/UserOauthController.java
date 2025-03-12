@@ -2,8 +2,10 @@ package com.snackoverflow.toolgether.domain.user.controller;
 
 import com.snackoverflow.toolgether.domain.user.dto.request.AdditionalInfoRequest;
 import com.snackoverflow.toolgether.domain.user.entity.User;
+import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
 import com.snackoverflow.toolgether.domain.user.service.OauthService;
 import com.snackoverflow.toolgether.global.dto.RsData;
+import com.snackoverflow.toolgether.global.exception.custom.user.UserNotFoundException;
 import com.snackoverflow.toolgether.global.filter.CustomUserDetails;
 import com.snackoverflow.toolgether.global.filter.Login;
 import com.snackoverflow.toolgether.global.util.JwtUtil;
@@ -26,6 +28,7 @@ import java.util.Map;
 public class UserOauthController {
 
     private final OauthService oauthService;
+    private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
     @PostMapping("/login/oauth2/code/google")
@@ -55,7 +58,8 @@ public class UserOauthController {
              * 존재하지 않는 회원이라면 추가 정보 기입으로 이동
              */
             if (oauthService.existsUser(email)) {
-                setJwtToken(response, email);
+                User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+                setJwtToken(response, user.getId());
                 return new RsData<>(
                         "200-1",
                         "기존 사용자 로그인 성공",
@@ -64,7 +68,7 @@ public class UserOauthController {
             }
 
             User socialUser = oauthService.createSocialUser(userInfo);
-            setJwtToken(response, email);
+            setJwtToken(response, socialUser.getId());
             return new RsData<>(
                     "201-1",
                     "신규 회원 가입 완료 - 추가 정보 입력 필요",
@@ -89,7 +93,7 @@ public class UserOauthController {
                                 "위치 정보가 허용 범위를 벗어났습니다.",
                                 null);
                     }
-                    setJwtToken(response, userDetails.getEmail());
+                    setJwtToken(response, userDetails.getUserId());
                     return new RsData<>(
                             "201-2",
                             "추가 정보가 등록되었습니다.",
@@ -97,9 +101,10 @@ public class UserOauthController {
                 });
     }
 
-    private void setJwtToken(HttpServletResponse response, String email) {
+    // 토큰 이메일 기반 -> userId 기반으로 변경
+    private void setJwtToken(HttpServletResponse response, Long userId) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("email", email);
+        claims.put("userId", userId);
         String token = jwtUtil.createToken(claims);
         jwtUtil.setJwtInCookie(token, response);
     }

@@ -14,6 +14,7 @@ public class CustomUserDetails implements UserDetails {
 
     private String username;
     private String email;
+    private Long userId;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
