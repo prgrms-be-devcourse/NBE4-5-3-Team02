@@ -71,6 +71,11 @@ spring:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
 
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always # DB 초기화. create-drop, always, embedded, never 중 하나. create/always는 개발환경에서만.
+
 logging:
   level:
     org.hibernate.SQL: DEBUG

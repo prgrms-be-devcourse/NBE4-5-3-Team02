@@ -104,6 +104,13 @@ public class Reservation {
         }
         this.status = ReservationStatus.FAILED_RENTER_ISSUE;
     }
+
+    public void canceled(){
+        if(this.status != ReservationStatus.REQUESTED){
+            throw new IllegalStateException("요청 대기 상태에서만 취소 처리가 가능합니다.");
+        }
+        this.status = ReservationStatus.CANCELED;
+    }
     /* status 변경 함수 */
 
 }

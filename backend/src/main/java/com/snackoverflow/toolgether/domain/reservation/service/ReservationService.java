@@ -3,14 +3,26 @@ package com.snackoverflow.toolgether.domain.reservation.service;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
 import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository;
-import lombok.RequiredArgsConstructor;
-import java.net.URI;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import java.net.URI;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -26,14 +38,10 @@ import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationRequest;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationResponse;
 import com.snackoverflow.toolgether.domain.user.service.UserService;
-import com.snackoverflow.toolgether.global.exception.ServiceException;
 import com.snackoverflow.toolgether.global.exception.custom.ErrorResponse;
 import com.snackoverflow.toolgether.global.exception.custom.CustomException;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Stream;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -41,6 +49,25 @@ public class ReservationService {
 	private final PostService postService;
 	private final UserService userService;
 	private final DepositHistoryService depositHistoryService;
+
+	// Quartz
+	private final Scheduler scheduler; // Quartz 스케줄러
+	private final JobDetail startRentalJobDetail; // Quartz JobDetail (시작)
+	private final JobDetail completeRentalJobDetail; // Quartz JobDetail (종료)
+
+	@PostConstruct
+	public void init() {
+		try {
+			if (!scheduler.isStarted()) { // 이미 시작되었는지 확인.  불필요한 재시작 방지.
+				scheduler.start();
+				log.info("Quartz Scheduler started.");
+			}
+		} catch (SchedulerException e) {
+			log.error("Failed to start Quartz Scheduler", e);
+			// throw new RuntimeException("Failed to start Quartz Scheduler", e); // 또는 다른 예외 처리
+			// 시작 실패 시, 애플리케이션을 중단시키는 것이 좋을 수도 있음.
+		}
+	}
 
 	// 예약 요청 (일정 충돌 방지 로직 필요)
 	@Transactional
@@ -88,8 +115,62 @@ public class ReservationService {
 	// 예약 승인
 	@Transactional
 	public void approveReservation(Long reservationId) {
-		Reservation reservation = findReservationByIdOrThrow(reservationId);
-		reservation.approve();
+		try {
+			Reservation reservation = findReservationByIdOrThrow(reservationId);
+			reservation.approve();
+
+			// Quartz Job 등록 (Start Rental)
+			JobDataMap startJobDataMap = new JobDataMap();
+			startJobDataMap.put("reservationId", reservationId); // 확인: reservationId가 null이 아닌지
+
+			// JobDetail에 JobDataMap 설정 (여기 수정)
+			JobDetail startJob = startRentalJobDetail.getJobBuilder()
+				.usingJobData(startJobDataMap) // usingJobData 사용
+				.withIdentity("startRentalJob-" + reservationId, "startRentalGroup")
+				.build();
+
+			Trigger startTrigger = TriggerBuilder.newTrigger()
+				.forJob(startJob) // 수정: startJob 사용
+				.withIdentity("startRentalTrigger-" + reservationId, "startRentalGroup") // 그룹 지정
+				.startAt(
+					Date.from(reservation.getStartTime().atZone(ZoneId.systemDefault()).toInstant())) // startTime에 실행
+				.withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
+				.build();
+
+			// Quartz Job 등록 (Complete Rental)
+			JobDataMap completeJobDataMap = new JobDataMap();
+			completeJobDataMap.put("reservationId", reservationId); //확인
+
+			// JobDetail에 JobDataMap 설정
+			JobDetail completeJob = completeRentalJobDetail.getJobBuilder()
+				.usingJobData(completeJobDataMap) // usingJobData 사용
+				.withIdentity("completeRentalJob-" + reservationId, "completeRentalGroup") // 더 구체적인 이름, 그룹
+				.build();
+
+			Trigger completeTrigger = TriggerBuilder.newTrigger()
+				.forJob(completeJob) // 수정: completeJob 사용
+				.withIdentity("completeRentalTrigger-" + reservationId, "completeRentalGroup") // 그룹 지정
+				.startAt(Date.from(reservation.getEndTime().atZone(ZoneId.systemDefault()).toInstant()))// endTime에 실행
+				.withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
+				.build();
+
+			System.out.println("대여 시작 시간 : " + startTrigger.getStartTime());
+			System.out.println("대여 종료 시간 : " + completeTrigger.getStartTime());
+
+			log.info("Scheduling StartRentalJob. Job Key: {}, Trigger Key: {}", startJob.getKey(), startTrigger.getKey()); // Job/Trigger 정보
+			log.info("Scheduling CompleteRentalJob. Job Key: {}, Trigger Key: {}", completeJob.getKey(), completeTrigger.getKey()); // Job/Trigger 정보
+
+			scheduler.scheduleJob(startJob, Set.of(startTrigger), true);
+			scheduler.scheduleJob(completeJob, Set.of(completeTrigger), true);
+
+			log.info("Job scheduled.  StartJob exists: {}, CompleteJob exists: {}",
+				scheduler.checkExists(startJob.getKey()), scheduler.checkExists(completeJob.getKey()));
+			log.info("Trigger scheduled. StartTrigger exists: {}, CompleteTrigger exists: {}",
+				scheduler.checkExists(startTrigger.getKey()), scheduler.checkExists(completeTrigger.getKey()));
+		}  catch (SchedulerException e) {
+			// SchedulerException을 RuntimeException으로 래핑하여 던짐
+			throw new RuntimeException("Failed to schedule start/complete rental job", e);
+		}
 	}
 
 	// 예약 거절
@@ -122,6 +203,20 @@ public class ReservationService {
 		// 보증금 상태 변경 및 반환 사유 업데이트
 		DepositHistory depositHistory = depositHistoryService.findDepositHistoryByReservationId(reservationId);
 		depositHistoryService.updateDepositHistory(depositHistory.getId(), DepositStatus.RETURNED, ReturnReason.NORMAL_COMPLETION);
+
+		// 대여자 크레딧 업데이트
+		userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
+	}
+
+	// 대여자 예약 취소
+	@Transactional
+	public void cancelReservation(Long reservationId) {
+		Reservation reservation = findReservationByIdOrThrow(reservationId);
+		reservation.canceled();
+
+		// 보증금 상태 변경 및 반환 사유 업데이트
+		DepositHistory depositHistory = depositHistoryService.findDepositHistoryByReservationId(reservationId);
+		depositHistoryService.updateDepositHistory(depositHistory.getId(), DepositStatus.RETURNED, ReturnReason.REJECTED);
 
 		// 대여자 크레딧 업데이트
 		userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
@@ -165,7 +260,7 @@ public class ReservationService {
 	}
 
 	// 예외 처리 포함 예약 조회 메서드
-	private Reservation findReservationByIdOrThrow(Long reservationId) {
+	public Reservation findReservationByIdOrThrow(Long reservationId) {
 		return reservationRepository.findById(reservationId)
 			.orElseThrow(() -> new CustomException(ErrorResponse.builder()
 				.title("예약 조회 실패")

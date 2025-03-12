@@ -99,7 +99,7 @@ export default async function Page({
     <ClientPage
       reservation={reservationData}
       deposit={depositData}
-      me={mockUpOwner.data}
+      me={mockUpRenter.data}
     />
   );
 }

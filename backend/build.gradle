@@ -64,6 +64,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.geolatte:geolatte-geom:1.9.0'
 	implementation 'io.netty:netty-resolver-dns-native-macos:4.1.91.Final:osx-aarch_64'
+
+	implementation 'org.springframework.boot:spring-boot-starter-quartz'
 }
 
 dependencyManagement { // Spring Cloud Version 명시 (Hoxton.SR6)

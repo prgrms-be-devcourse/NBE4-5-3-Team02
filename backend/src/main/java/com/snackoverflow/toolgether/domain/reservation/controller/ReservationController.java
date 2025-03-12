@@ -1,8 +1,6 @@
 package com.snackoverflow.toolgether.domain.reservation.controller;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationRequest;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationResponse;
 import com.snackoverflow.toolgether.domain.reservation.entity.FailDue;
-import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 import com.snackoverflow.toolgether.domain.reservation.service.ReservationService;
 import com.snackoverflow.toolgether.global.dto.RsData;
 
@@ -47,6 +44,13 @@ public class ReservationController {
 		reservationService.rejectReservation(id, reason);
 		return new RsData<>("200-1",
 			"%d번 예약 거절 성공".formatted(id));
+	}
+
+	@PatchMapping("/{id}/cancel")
+	public RsData<Void> cancelReservation(@PathVariable Long id) {
+		reservationService.cancelReservation(id);
+		return new RsData<>("200-1",
+			"%d번 예약 취소 성공".formatted(id));
 	}
 
 	@PatchMapping("/{id}/start")
