@@ -1,5 +1,6 @@
 package com.snackoverflow.toolgether.global.config;
 
+import com.snackoverflow.toolgether.global.filter.GoogleAccessTokenFilter;
 import com.snackoverflow.toolgether.global.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,7 @@ import java.util.List;
 class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final GoogleAccessTokenFilter googleAccessTokenFilter;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -32,10 +34,16 @@ class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize ->
                         authorize
-                                .requestMatchers("/login/oauth2/code/google", "/api/v1/users/login", "/h2-console/**", "/oauth/users/additional-info", "/api/v1/users/**").permitAll() // 특정 경로만 허용
+                                .requestMatchers("/login/oauth2/code/google",
+                                        "/api/v1/users/login",
+                                        "/h2-console/**",
+                                        "/oauth/users/additional-info",
+                                        "/oauth/token/refresh",
+                                        "/api/v1/users/**").permitAll() // 특정 경로만 허용
                                 .anyRequest().authenticated() // 나머지 요청은 인증 필요
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(googleAccessTokenFilter, JwtAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers((headers) -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(
