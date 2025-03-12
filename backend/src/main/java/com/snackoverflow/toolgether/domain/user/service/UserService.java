@@ -65,16 +65,17 @@ public class UserService {
         }
     }
 
-    public void checkMyInfoDuplicates(PatchMyInfoRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new DuplicateFieldException("사용자 EMAIL 중복 오류 발생");
+    public String checkMyInfoDuplicates(User user, PatchMyInfoRequest request) {
+        User existingUserByNickname = userRepository.findByNickname(request.getNickname());
+        if (existingUserByNickname != null && !existingUserByNickname.getId().equals(user.getId())) {
+            return "닉네임";
         }
-        if (userRepository.existsByNickname(request.getNickname())) {
-            throw new DuplicateFieldException("사용자 닉네임 중복 오류 발생");
+
+        User existingUserByPhoneNumber = userRepository.findByPhoneNumber(request.getPhoneNumber());
+        if (existingUserByPhoneNumber != null && !existingUserByPhoneNumber.getId().equals(user.getId())) {
+            return "전화번호";
         }
-        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
-            throw new DuplicateFieldException("사용자 전화번호 중복 오류 발생");
-        }
+        return "";
     }
 
     // 주소 -> 좌표 변환 메서드 (동기식)
@@ -251,10 +252,9 @@ public class UserService {
 
     @Transactional
     public void updateMyInfo(User user, PatchMyInfoRequest request) {
-        user.updateEmail(request.getEmail());
         user.updatePhoneNumber(request.getPhoneNumber());
         user.updateNickname(request.getNickname());
-        user.updateAddress(request.getAddress().getMainAddress(), request.getAddress().getDetailAddress(), request.getAddress().getZipcode());
+        user.updateAddress(request.getAddress().getZipcode(), request.getAddress().getMainAddress(), request.getAddress().getDetailAddress());
         user.updateLocation(request.getLatitude(), request.getLongitude());
         userRepository.save(user);
     }
@@ -263,5 +263,39 @@ public class UserService {
     public void deleteUser(User user) {
         user.delete();
         userRepository.save(user);
+    }
+
+    public boolean checkGeoInfo(PatchMyInfoRequest request) {
+        try {
+            // 주소 -> 좌표 변환
+            KakaoGeoResponse.Document converted = convertAddressToCoordinate(request.getAddress().getMainAddress());
+            if (converted == null) {
+                throw new AddressConversionException("주소를 좌표로 반환할 수 없습니다.");
+            }
+
+            double addressLat = Double.parseDouble(converted.getLatitude());
+            double addressLon = Double.parseDouble(converted.getLongitude());
+
+            // 사용자 제공 위치와 주소 변환 위치 비교
+            double distance = oauthService.calculateDistance(
+                    request.getLatitude(),
+                    request.getLongitude(),
+                    addressLat,
+                    addressLon
+            );
+
+            // 5km 초과 시 거부
+            if (distance > 5) {
+                log.warn("위치 허용 범위 초과: {} km (요청 위치: {}/{})",
+                        distance, request.getLatitude(), request.getLongitude());
+                return false;
+            }
+            return true;
+        } catch (AddressConversionException e) {
+            log.error("주소 변환 실패: {}", e.getMessage());
+            return false;
+        } catch (NumberFormatException e) {
+            throw new DistanceCalculationException("좌표 파싱 실패: " + e.getMessage());
+        }
     }
 }

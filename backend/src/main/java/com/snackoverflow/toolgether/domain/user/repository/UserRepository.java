@@ -2,6 +2,7 @@ package com.snackoverflow.toolgether.domain.user.repository;
 
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,7 +20,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByNickname(String nickname);
 
-    boolean existsByPhoneNumber(String phoneNumber);
-
     Optional<User> findById(long id);
+
+    User findByNickname(String nickname);
+
+    User findByPhoneNumber(String phoneNumber);
 }

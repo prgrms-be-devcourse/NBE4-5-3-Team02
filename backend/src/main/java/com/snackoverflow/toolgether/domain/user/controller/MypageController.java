@@ -139,7 +139,20 @@ public class MypageController {
     ) {
         String username = customUserDetails.getUsername();
         User user = userService.findByUsername(username);
-        userService.checkMyInfoDuplicates(request);
+        boolean isGeoInfoValid = userService.checkGeoInfo(request);
+        if (!isGeoInfoValid) {
+            return new RsData<>(
+                    "400-1",
+                    "위치 검증 실패"
+            );
+        }
+        String duplicateCheck = userService.checkMyInfoDuplicates(user, request);
+        if (duplicateCheck.equals("닉네임") || duplicateCheck.equals("전화번호")) {
+            return new RsData<>(
+                    "409-1",
+                    "%s 중복".formatted(duplicateCheck)
+            );
+        }
         userService.updateMyInfo(user, request);
 
         return new RsData<>(

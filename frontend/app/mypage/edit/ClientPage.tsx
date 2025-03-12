@@ -3,47 +3,20 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation"; // useRouter 훅 import
 
-export default function ClientPage({
-  me,
-}: {
-  me: {
-    id: number;
-    nickname: string;
-    username: string;
-    profileImage: string;
-    email: string;
-    phoneNumber: string;
-    address: {
-      mainAddress: string;
-      detailAddress: string;
-      zipcode: string;
-    };
-    latitude: number;
-    longitude: number;
-    createdAt: string;
-    score: number;
-    credit: number;
-  } | null;
-}) {
-  const [nickname, setNickname] = useState(me?.nickname || "");
-  const [email, setEmail] = useState(me?.email || "");
-  const [phoneNumber, setPhoneNumber] = useState(me?.phoneNumber || "");
-  const [mainAddress, setMainAddress] = useState(
-    me?.address?.mainAddress || ""
-  );
-  const [detailAddress, setDetailAddress] = useState(
-    me?.address?.detailAddress || ""
-  );
-  const [zipcode, setZipcode] = useState(me?.address?.zipcode || "");
-  const [latitude, setLatitude] = useState(me?.latitude || "");
-  const [longitude, setLongitude] = useState(me?.longitude || "");
+export default function ClientPage() {
+  const [nickname, setNickname] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [mainAddress, setMainAddress] = useState("");
+  const [detailAddress, setDetailAddress] = useState("");
+  const [zipcode, setZipcode] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
   const [validationErrors, setValidationErrors] = useState<{
     nickname?: string;
-    email?: string;
     phoneNumber?: string;
     mainAddress?: string;
     detailAddress?: string;
@@ -51,8 +24,83 @@ export default function ClientPage({
     latitude?: string;
     longitude?: string;
   }>({});
+  const [, setGeoError] = useState("");
 
   const router = useRouter();
+
+  // TODO: 쿠키 확인 및 리다이렉트 - 작동 안 함. 수정 필요
+  // useEffect(() => {
+  //   const authToken = document.cookie.includes('token');
+  //   if (!authToken) {
+  //     router.push("/");
+  //   }
+  // }, [router]);
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  // 위치 정보 조회
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setGeoError("브라우저가 위치 서비스를 지원하지 않습니다");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(position.coords.latitude.toString());
+        setLongitude(position.coords.longitude.toString());
+      },
+      (err) => {
+        setGeoError(`위치 정보 오류: ${err.message}`);
+        console.error("useEffect: 위치 정보 조회 오류", err);
+      }
+    );
+  }, []);
+
+  // 카카오 주소 검색
+  const handleAddressSearch = () => {
+    if (!window.daum) {
+      console.error("카카오 API 로드 실패");
+      return;
+    }
+
+    new window.daum.Postcode({
+      oncomplete: (data) => {
+        setZipcode(data.zonecode);
+        setMainAddress(`${data.address} ${data.buildingName || ""}`.trim());
+      },
+    // @ts-ignore
+    }).open();
+  };
+
+  //유저정보 조회
+  const getData = async () => {
+    const getMyInfo = await fetch("http://localhost:8080/api/v1/mypage/me", {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (getMyInfo.ok) {
+      const Data = await getMyInfo.json();
+      if (Data?.code !== "200-1") {
+        console.error(`에러가 발생했습니다. \n${Data?.msg}`);
+      }
+      setNickname(Data?.data?.nickname);
+      setPhoneNumber(Data?.data?.phoneNumber);
+      setMainAddress(Data?.data?.address.mainAddress);
+      setDetailAddress(Data?.data.address.detailAddress);
+      setZipcode(Data?.data?.address.zipcode);
+      setLatitude(Data?.data?.latitude);
+      setLongitude(Data?.data?.longitude);
+    } else {
+      console.error("Error fetching data:", getMyInfo.status);
+    }
+  };
 
   // 유효성 검사
   const validateNickname = (value: string) => {
@@ -61,16 +109,6 @@ export default function ClientPage({
     }
     if (!/^[가-힣]{4,10}$/.test(value)) {
       return "닉네임은 한글 4~10자로 입력해주세요.";
-    }
-    return "";
-  };
-
-  const validateEmail = (value: string) => {
-    if (!value) {
-      return "이메일을 입력해주세요.";
-    }
-    if (!/\S+@\S+\.\S+/.test(value)) {
-      return "유효한 이메일 주소를 입력해주세요.";
     }
     return "";
   };
@@ -126,21 +164,13 @@ export default function ClientPage({
     return "";
   };
 
+  // 입력값 변경 이벤트 핸들러
   const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setNickname(value);
     setValidationErrors((prevErrors) => ({
       ...prevErrors,
       nickname: validateNickname(value),
-    }));
-  };
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setEmail(value);
-    setValidationErrors((prevErrors) => ({
-      ...prevErrors,
-      email: validateEmail(value),
     }));
   };
 
@@ -181,31 +211,13 @@ export default function ClientPage({
     }));
   };
 
-  const handleLatitudeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLatitude(value);
-    setValidationErrors((prevErrors) => ({
-      ...prevErrors,
-      latitude: validateLatitude(value),
-    }));
-  };
-
-  const handleLongitudeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLongitude(value);
-    setValidationErrors((prevErrors) => ({
-      ...prevErrors,
-      longitude: validateLongitude(value),
-    }));
-  };
-
+  //폼폼 제출 이벤트 핸들러
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 폼 제출 전 전체 유효성 검사
+    //폼 제출 전 전체 유효성 검사
     const newValidationErrors: any = {
       nickname: validateNickname(nickname),
-      email: validateEmail(email),
       phoneNumber: validatePhoneNumber(phoneNumber),
       mainAddress: validateMainAddress(mainAddress),
       zipcode: validateZipcode(zipcode),
@@ -215,7 +227,7 @@ export default function ClientPage({
     setValidationErrors(newValidationErrors);
 
     if (Object.values(newValidationErrors).some((error) => error)) {
-      setSubmitError("입력값을 다시 확인해주세요.");
+      setSubmitError(Object.values(newValidationErrors).join("\n"));
       setIsSubmitting(false);
       setSubmitSuccess(false);
       return;
@@ -227,7 +239,6 @@ export default function ClientPage({
 
     const body = JSON.stringify({
       nickname,
-      email,
       phoneNumber,
       address: {
         mainAddress,
@@ -237,7 +248,6 @@ export default function ClientPage({
       latitude,
       longitude,
     });
-    console.log("body: ", body); // body 확인용 로그
     try {
       const response = await fetch("http://localhost:8080/api/v1/mypage/me", {
         method: "PATCH",
@@ -251,15 +261,12 @@ export default function ClientPage({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(
-          errorData?.msg ||
-            `마이페이지 수정 실패 (HTTP status: ${response.status})`
-        );
+        throw new Error(errorData?.msg || response.status);
       }
 
       const Data = await response.json();
       if (Data?.code !== "200-1") {
-        throw new Error(`마이페이지 수정 실패: ${Data?.msg}`);
+        throw new Error(Data?.msg);
       }
 
       setSubmitSuccess(true);
@@ -273,6 +280,7 @@ export default function ClientPage({
     }
   };
 
+  //모달 닫고 마이페이지로 이동
   const closeModalAndRedirect = () => {
     setSubmitSuccess(false);
     router.push("/mypage");
@@ -324,29 +332,6 @@ export default function ClientPage({
               </div>
               <div className="mb-4">
                 <label
-                  htmlFor="email"
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                >
-                  이메일
-                </label>
-                <input
-                  type="text"
-                  id="email"
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                    validationErrors.email ? "border-red-500" : ""
-                  }`}
-                  placeholder="이메일"
-                  value={email}
-                  onChange={handleEmailChange}
-                />
-                {validationErrors.email && (
-                  <p className="text-red-500 text-xs italic mt-1">
-                    {validationErrors.email}
-                  </p>
-                )}
-              </div>
-              <div className="mb-4">
-                <label
                   htmlFor="phoneNumber"
                   className="block text-gray-700 text-sm font-bold mb-2"
                 >
@@ -368,6 +353,15 @@ export default function ClientPage({
                   </p>
                 )}
               </div>
+              <div className="flex items-end justify-end mb-4">
+                <button
+                  type="button"
+                  className="bg-green-500 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2"
+                  onClick={handleAddressSearch}
+                >
+                  주소 검색
+                </button>
+              </div>
               <div className="mb-4">
                 <label
                   htmlFor="mainAddress"
@@ -378,7 +372,8 @@ export default function ClientPage({
                 <input
                   type="text"
                   id="mainAddress"
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                  disabled
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline disabled:bg-gray-200 disabled:text-gray-500 ${
                     validationErrors.mainAddress ? "border-red-500" : ""
                   }`}
                   placeholder="주소"
@@ -422,7 +417,8 @@ export default function ClientPage({
                 <input
                   type="text"
                   id="zipcode"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  disabled
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline disabled:bg-gray-200 disabled:text-gray-500`}
                   placeholder="우편번호"
                   value={zipcode}
                   onChange={handleZipcodeChange}
@@ -433,53 +429,6 @@ export default function ClientPage({
                   </p>
                 )}
               </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="latitude"
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                >
-                  위도(임시)
-                </label>
-                <input
-                  type="text"
-                  id="latitude"
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                    validationErrors.latitude ? "border-red-500" : ""
-                  }`}
-                  placeholder="위도"
-                  value={latitude}
-                  onChange={handleLatitudeChange}
-                />
-                {validationErrors.latitude && (
-                  <p className="text-red-500 text-xs italic mt-1">
-                    {validationErrors.latitude}
-                  </p>
-                )}
-              </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="longitude"
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                >
-                  경도(임시)
-                </label>
-                <input
-                  type="text"
-                  id="longitude"
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                    validationErrors.longitude ? "border-red-500" : ""
-                  }`}
-                  placeholder="경도"
-                  value={longitude}
-                  onChange={handleLongitudeChange}
-                />
-                {validationErrors.longitude && (
-                  <p className="text-red-500 text-xs italic mt-1">
-                    {validationErrors.longitude}
-                  </p>
-                )}
-              </div>
-
               <div className="flex items-center justify-between">
                 <button
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"

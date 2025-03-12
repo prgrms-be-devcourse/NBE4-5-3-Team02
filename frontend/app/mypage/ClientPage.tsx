@@ -4,56 +4,102 @@ import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "moment/locale/ko";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import ScoreIcon from "../lib/util/scoreIcon";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function ClientPage({
-  me,
-  reservations,
-}: {
-  me: {
-    id: number;
-    nickname: string;
-    username: string;
-    profileImage: string;
-    email: string;
-    phoneNumber: string;
-    address: {
-      mainAddress: string;
-      detailAddress: string;
-      zipcode: string;
-    };
-    createdAt: string;
-    score: number;
-    credit: number;
+interface Me {
+  id: number;
+  nickname: string;
+  username: string;
+  profileImage: string;
+  email: string;
+  phoneNumber: string;
+  address: {
+    mainAddress: string;
+    detailAddress: string;
+    zipcode: string;
   };
-  reservations: {
-    rentals: Array<{
-      id: number;
-      title: string;
-      image: string;
-      amount: number;
-      startTime: string;
-      endTime: string;
-      status: string;
-      isReviewed: boolean;
-    }>;
-    borrows: Array<{
-      id: number;
-      title: string;
-      image: string;
-      amount: number;
-      startTime: string;
-      endTime: string;
-      status: string;
-      isReviewed: boolean;
-    }>;
-  };
-}) {
-  const localizer = momentLocalizer(moment);
+  latitude: number;
+  longitude: number;
+  createdAt: string;
+  score: number;
+  credit: number;
+}
 
+interface Rental {
+  id: number;
+  title: string;
+  image: string;
+  amount: number;
+  startTime: string;
+  endTime: string;
+  status: string;
+  isReviewed: boolean;
+}
+
+interface Borrow {
+  id: number;
+  title: string;
+  image: string;
+  amount: number;
+  startTime: string;
+  endTime: string;
+  status: string;
+  isReviewed: boolean;
+}
+
+interface Reservations {
+  rentals: Rental[];
+  borrows: Borrow[];
+}
+
+export default function ClientPage() {
+  const [me, setMe] = useState<Me>({
+    id: 0,
+    nickname: "",
+    username: "",
+    profileImage: "",
+    email: "",
+    phoneNumber: "",
+    address: {
+      mainAddress: "",
+      detailAddress: "",
+      zipcode: "",
+    },
+    latitude: 0,
+    longitude: 0,
+    createdAt: "",
+    score: 0,
+    credit: 0,
+  })
+  const [reservations, setReservations] = useState<Reservations>({
+    rentals: [
+      {
+        id: 0,
+        title: "",
+        image: "",
+        amount: 0,
+        startTime: "",
+        endTime: "",
+        status: "",
+        isReviewed: false,
+      },
+    ],
+    borrows: [
+      {
+        id: 0,
+        title: "",
+        image: "",
+        amount: 0,
+        startTime: "",
+        endTime: "",
+        status: "",
+        isReviewed: false,
+      },
+    ],
+  });
   const [eventType, setEventType] = useState("rental");
   const [date, setDate] = useState(new Date());
   const [isModal, setIsModal] = useState(false);
@@ -63,6 +109,13 @@ export default function ClientPage({
     () => {}
   );
   const [isCancelButton, setIsCancelButton] = useState(true);
+
+  const localizer = momentLocalizer(moment);
+
+  useEffect(() => {
+    getMe();
+    getReservations();
+  }, []);
 
   const handleNavigate = (newDate: Date) => {
     setDate(newDate);
@@ -94,11 +147,11 @@ export default function ClientPage({
     return colors[Math.floor(Math.random() * colors.length)];
   };
   const scheduleReservations = {
-    rentals: reservations.rentals.filter(
+    rentals: reservations?.rentals.filter(
       (rental) =>
         rental.status === "APPROVED" || rental.status === "IN_PROGRESS"
     ),
-    borrows: reservations.borrows.filter(
+    borrows: reservations?.borrows.filter(
       (borrow) =>
         borrow.status === "APPROVED" || borrow.status === "IN_PROGRESS"
     ),
@@ -155,9 +208,9 @@ export default function ClientPage({
 
   const filteredReservations = useMemo(() => {
     if (eventType === "rental") {
-      return reservations.rentals;
+      return reservations?.rentals;
     } else {
-      return reservations.borrows;
+      return reservations?.borrows;
     }
   }, [eventType, reservations]);
 
@@ -174,6 +227,52 @@ export default function ClientPage({
     setIsCancelButton(isCancelButton);
   };
 
+  //유저정보 조회
+  const getMe = async () => {
+    const getMyInfo = await fetch("http://localhost:8080/api/v1/mypage/me", {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (getMyInfo.ok) {
+      const Data = await getMyInfo.json();
+      if (Data?.code !== "200-1") {
+        console.error(`에러가 발생했습니다. \n${Data?.msg}`);
+      }
+      setMe(Data?.data);
+    } else {
+      console.error("Error fetching data:", getMyInfo.status);
+    }
+  };
+
+  //예약정보 조회
+  const getReservations = async () => {
+    const getMyReservations = await fetch(
+      "http://localhost:8080/api/v1/mypage/reservations",
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (getMyReservations.ok) {
+      const Data = await getMyReservations.json();
+      if (Data?.code !== "200-1") {
+        console.error(`에러가 발생했습니다. \n${Data?.msg}`);
+      }
+      setReservations(Data?.data);
+    } else {
+      console.error("Error fetching data:", getMyReservations.status);
+    }
+  }
+
+  //폼 데이터를 서버로 전송하는 함수
   const handleUploadProfile = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -349,44 +448,44 @@ export default function ClientPage({
               <div className="mt-4">
                 <p className="text-gray-800">
                   <span className="font-bold">닉네임: </span>
-                  {me.nickname}
+                  {me?.nickname}
                 </p>
                 <p className="text-gray-800">
                   <span className="font-bold">전화번호: </span>
-                  {me.phoneNumber}
+                  {me?.phoneNumber}
                 </p>
                 {me?.username ? (
                   <p className="text-gray-800">
-                    <span className="font-bold">아이디: </span> {me.username}
+                    <span className="font-bold">아이디: </span> {me?.username}
                   </p>
                 ) : (
                   <p className="text-gray-800">
-                    <span className="font-bold">이메일: </span> {me.email}
+                    <span className="font-bold">이메일: </span> {me?.email}
                   </p>
                 )}
                 <p className="text-gray-800">
                   <span className="font-bold">주소: </span>{" "}
-                  {me.address.mainAddress} {me.address.detailAddress} (
-                  {me.address.zipcode})
+                  {me?.address.mainAddress} {me?.address.detailAddress} (
+                  {me?.address.zipcode})
                 </p>
                 <p className="text-gray-800">
                   <span className="font-bold">가입일:</span>{" "}
-                  {localizer.format(me.createdAt, "YYYY년 MM월 DD일", "ko")}
+                  {localizer.format(me?.createdAt, "YYYY년 MM월 DD일", "ko")}
                 </p>
                 <p className="text-gray-800">
                   <span className="flex flex-row">
                     <span className="font-bold">평점: </span>
-                    {me.score}
+                    {me?.score}
                     <ScoreIcon
                       className="ml-2"
-                      score={me.score}
+                      score={me?.score}
                       size={25}
                       round
                     />
                   </span>
                 </p>
                 <p className="text-gray-800">
-                  <span className="font-bold">크레딧: </span> {me.credit}
+                  <span className="font-bold">크레딧: </span> {me?.credit}
                 </p>
               </div>
             </div>
@@ -408,7 +507,7 @@ export default function ClientPage({
                 ) : (
                   <div className="relative w-30 h-30 rounded-full overflow-hidden border-2 border-gray-300">
                     <Image
-                      src={me.profileImage}
+                      src={me?.profileImage}
                       alt="profile"
                       fill
                       sizes="100%"
