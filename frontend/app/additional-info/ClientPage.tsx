@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PhoneIcon, MapPinIcon, DocumentMagnifyingGlassIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
 import { AddressData } from "@/types/d";
 import {CheckCircleIcon} from "lucide-react";
+import { fetchWithAuth } from '../lib/util/fetchWithAuth';
 
 export default function ClientPage() {
     const router = useRouter();
@@ -22,6 +23,7 @@ export default function ClientPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [geoError, setGeoError] = useState('');
     const [isGeoLoading, setIsGeoLoading] = useState(true);
+    const BASE_URL = 'http://localhost:8080';
 
     // 브라우저 위치 정보 조회
     useEffect(() => {
@@ -124,9 +126,8 @@ export default function ClientPage() {
         });
 
         try {
-            const response = await fetch('http://localhost:8080/oauth/users/additional-info', {
+            const response = await fetchWithAuth(`${BASE_URL}/oauth/users/additional-info`, {
                 method: 'PATCH',
-                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },

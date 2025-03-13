@@ -58,7 +58,6 @@ public class ReviewController {
             );
         }
         reviewService.create(reviewRequest, actualReservation, user);
-        System.out.println("review 생성됨");
         return new RsData<>(
                 "200-1",
                 "리뷰가 완료되었습니다"
