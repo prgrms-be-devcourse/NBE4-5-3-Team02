@@ -18,13 +18,18 @@ import com.snackoverflow.toolgether.domain.post.entity.Post;
 import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
 import com.snackoverflow.toolgether.domain.post.service.PostService;
 import com.snackoverflow.toolgether.domain.user.entity.User;
+import com.snackoverflow.toolgether.global.util.s3.S3Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,13 +40,14 @@ public class PostServiceImpl implements PostService {
     private final PostImageRepository postImageRepository;
     private final PostAvailabilityRepository postAvailabilityRepository;
     private final UserRepository userRepository;
+    private final S3Service s3Service;
 
     @Transactional
     @Override
-    public PostResponse createPost(PostCreateRequest request) {
+    public PostResponse createPost(User user,PostCreateRequest request, List<MultipartFile> images) {
         // 임시로 user_id=1 사용 (실제 로직에서는 인증된 사용자 정보 가져오기)
-        User user = userRepository.findById(1L)
-                .orElseThrow(() -> new NotFoundException("404-1", "사용자를 찾을 수 없습니다."));
+//        User user = userRepository.findById(1L)
+//                .orElseThrow(() -> new NotFoundException("404-1", "사용자를 찾을 수 없습니다."));
 
         if (request.getTitle() == null || request.getTitle().isBlank()) {
             throw new BadRequestException("400-1", "제목은 필수 입력값입니다.");
@@ -61,15 +67,15 @@ public class PostServiceImpl implements PostService {
 
         postRepository.save(post);
 
-        // 이미지 저장
-        List<PostImage> images = request.getImages().stream()
-                .map(image -> PostImage.builder()
+        // S3 이미지 업로드 후 저장
+        List<PostImage> postImages = images.stream()
+                .map(file -> PostImage.builder()
                         .post(post)
-                        .postImage(image)
+                        .imageUrl(s3Service.upload(file, "post-images"))
                         .build())
-                .toList();
+                .collect(Collectors.toList());
 
-        postImageRepository.saveAll(images);
+        postImageRepository.saveAll(postImages);
 
         // 거래 가능 일정 저장
         savePostAvailabilities(post, request.getAvailabilities());
@@ -81,18 +87,20 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostResponse getPostById(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException("404-1", "해당 게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("404-1", "게시물을 찾을 수 없습니다."));
 
-        // 해당 게시물의 이미지 리스트 조회
-        List<String> imageUrls = postImageRepository.findAllByPostId(postId)
-                .stream()
-                .map(PostImage::getPostImage) // PostImage 엔티티에서 이미지 경로 추출
-                .toList();
+        // 조회수 증가
+        post.incrementViewCount();
 
-        // 해당 게시물의 거래 가능 일정 조회
-        List<PostAvailability> availabilities = postAvailabilityRepository.findAllByPostId(postId);
+        // Set<String> 이미지 경로로 변환
+        Set<String> imageUrls = post.getPostImages().stream()
+                .map(PostImage::getImageUrl)
+                .collect(Collectors.toSet());
 
-        return new PostResponse(post,imageUrls,availabilities);
+        // PostAvailability Set으로 변환
+        Set<PostAvailability> availabilities = new HashSet<>(post.getPostAvailabilities());
+
+        return new PostResponse(post, imageUrls, availabilities);
     }
 
     @Transactional
@@ -135,7 +143,7 @@ public class PostServiceImpl implements PostService {
             List<PostImage> images = request.getImages().stream()
                     .map(image -> PostImage.builder()
                             .post(post)
-                            .postImage(image)
+                            .imageUrl(image)
                             .build())
                     .toList();
             postImageRepository.saveAll(images);
@@ -150,12 +158,13 @@ public class PostServiceImpl implements PostService {
         // 수정된 게시물 반환
         List<String> imageUrls = postImageRepository.findAllByPostId(postId)
                 .stream()
-                .map(PostImage::getPostImage)
+                .map(PostImage::getImageUrl)
                 .toList();
 
         List<PostAvailability> availabilities = postAvailabilityRepository.findAllByPostId(postId);
 
-        return new PostResponse(post, imageUrls, availabilities);
+//        return new PostResponse(post, imageUrls, availabilities);
+        return null;
     }
 
     private void savePostAvailabilities(Post post, List<PostAvailabilityRequest> availabilities) {
@@ -175,8 +184,8 @@ public class PostServiceImpl implements PostService {
     @Transactional
     @Override
     public Page<PostResponse> searchPosts(PostSearchRequest request, Pageable pageable) {
-        Page<Post> posts = postQueryRepository.searchPosts(request, pageable);
-        return posts.map(PostResponse::new);
+//        Page<Post> posts = postQueryRepository.searchPosts(request, pageable);
+        return postQueryRepository.searchPosts(request, pageable);
     }
 
     // 예약에 필요한 메서드

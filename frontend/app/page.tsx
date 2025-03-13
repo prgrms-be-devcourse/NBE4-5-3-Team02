@@ -1,5 +1,6 @@
 "use client";
 import {useState} from 'react';
+import { useRouter } from 'next/navigation';
 import {motion, AnimatePresence} from "framer-motion";
 import Link from 'next/link';
 import {
@@ -17,12 +18,19 @@ export default function MainPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDistrict, setSelectedDistrict] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const router = useRouter();
 
     const districts = ['강남구', '서초구', '송파구', '강동구', '마포구']; // 예시 지역구 목록
+
+    // 검색 실행 시 게시물 목록 페이지로 이동
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        // 검색 로직 구현
-        console.log('검색어:', searchQuery, '선택된 지역구:', selectedDistrict);
+        const queryString = new URLSearchParams({
+          keyword: searchQuery,
+          district: selectedDistrict
+        }).toString();
+    
+        router.push(`/posts?${queryString}`); // 검색 결과를 posts 페이지로 전달
     };
 
     return (

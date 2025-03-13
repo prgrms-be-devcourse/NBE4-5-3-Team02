@@ -2,16 +2,26 @@ package com.snackoverflow.toolgether.domain.post.controller;
 
 import com.snackoverflow.toolgether.domain.post.dto.PostSearchRequest;
 import com.snackoverflow.toolgether.domain.post.dto.PostUpdateRequest;
+import com.snackoverflow.toolgether.domain.user.entity.User;
+import com.snackoverflow.toolgether.domain.user.service.UserService;
 import com.snackoverflow.toolgether.global.dto.RsData;
 import com.snackoverflow.toolgether.domain.post.dto.PostCreateRequest;
 import com.snackoverflow.toolgether.domain.post.dto.PostResponse;
 import com.snackoverflow.toolgether.domain.post.service.PostService;
+import com.snackoverflow.toolgether.global.exception.NotFoundException;
+import com.snackoverflow.toolgether.global.filter.CustomUserDetails;
+import com.snackoverflow.toolgether.global.filter.Login;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -20,17 +30,24 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
+    private final UserService userService;
 
     /**
      * 게시물 작성
      */
     //    @Operation(summary = "게시물 등록")
-    @PostMapping
-    public RsData<PostResponse> createPost(@RequestBody @Valid PostCreateRequest request) {
+    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE,MediaType.MULTIPART_FORM_DATA_VALUE})
+    public RsData<PostResponse> createPost(@Login CustomUserDetails customUserDetails,
+                                            @RequestPart("request") @Valid PostCreateRequest request,
+                                           @RequestPart("images") List<MultipartFile> images) {
+        Long userId = customUserDetails.getUserId();
+        User user = userService.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("404-1", "사용자를 찾을 수 없습니다."));
+
         return new RsData<>(
                 "201-1",
                 "게시물이 성공적으로 등록되었습니다.",
-                postService.createPost(request)
+                postService.createPost(user,request,images)
         );
     }
 

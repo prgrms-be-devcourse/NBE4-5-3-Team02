@@ -14,12 +14,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -57,17 +59,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // 인증 객체 생성 및 저장
                 CustomUserDetails customUserDetails = new CustomUserDetails(username, email, userId);
-                Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails,
+                /*Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails,
                         null, Collections.emptyList());
-                log.info("authentication={}", authentication);
+                log.info("authentication={}", authentication);*/
+
+                //test
+                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+                Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, authorities);
+
+                log.info("Authentication 생성됨: {}", authentication);
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
             filterChain.doFilter(request, response);
-        } catch (UserNotFoundException | JwtException e) {
-            log.error("오류 발생: {}", e.getMessage());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized 반환
-            response.getWriter().write("Unauthorized: " + e.getMessage());
+        } catch (JwtException e) {
+            // 토큰이 없어도 게시물은 조회할 수 있도록
             filterChain.doFilter(request, response);
         }
     }
@@ -75,8 +81,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String requestURI = request.getRequestURI();
-        return requestURI.startsWith("/h2-console") ||
-                requestURI.startsWith("/login/oauth2/code/google") ||
-                requestURI.matches(".*\\.(css|js|gif|png|jpg|ico)$");
+        return requestURI.startsWith("/h2-console") || requestURI.matches(".*\\.(css|js|gif|png|jpg|ico)$");
     }
 }

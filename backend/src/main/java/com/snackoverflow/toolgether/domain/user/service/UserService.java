@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -190,6 +191,10 @@ public class UserService {
         String token = jwtUtil.createToken(claims);
 
         return new LoginResult(username, token);
+    }
+
+    public Optional<User> findByUserId(Long userId) {
+        return userRepository.findById(userId);
     }
 
     public record LoginResult(String userName, String token) {}

@@ -1,9 +1,5 @@
 package com.snackoverflow.toolgether.domain.user.service;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest;
 import com.snackoverflow.toolgether.domain.user.dto.KakaoGeoResponse;
 import com.snackoverflow.toolgether.domain.user.dto.request.AdditionalInfoRequest;
 import com.snackoverflow.toolgether.domain.user.entity.Address;
@@ -24,7 +20,6 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.util.Map;
 
 @Slf4j
@@ -199,21 +194,5 @@ public class OauthService {
                                 return Mono.just(false); // 실패 시 false 반환
                             });
                 });
-    }
-
-    // 리프레시 토큰으로 액세스 토큰 재발급
-    public String refreshAccessToken(String refreshToken) throws IOException {
-        log.info("토큰 재발행 로직 시작");
-        GoogleTokenResponse tokenResponse = new GoogleRefreshTokenRequest(
-                new NetHttpTransport(),
-                GsonFactory.getDefaultInstance(),
-                refreshToken,
-                clientId,
-                clientSecret
-        ).execute();
-
-        // 새로 발급된 액세스 토큰
-        log.info("새로 발급된 액세스 토큰 = {}", tokenResponse.getAccessToken());
-        return tokenResponse.getAccessToken();
     }
 }

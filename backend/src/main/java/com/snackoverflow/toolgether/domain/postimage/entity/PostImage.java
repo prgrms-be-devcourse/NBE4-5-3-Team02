@@ -23,6 +23,6 @@ public class PostImage {
     private Post post;
 
     @JoinColumn(nullable = false) // 한 장 이상 필수
-    private String postImage; // 이미지 파일 이름, uuid로 저장
+    private String imageUrl; // 이미지 파일 이름, uuid로 저장 (기존 postImage -> imageUrl 변경)
 
 }

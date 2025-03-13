@@ -1,16 +1,19 @@
 package com.snackoverflow.toolgether.domain.post.dto;
 
-import com.snackoverflow.toolgether.domain.post.entity.enums.Category;
-import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType;
 import com.snackoverflow.toolgether.domain.post.entity.Post;
 import com.snackoverflow.toolgether.domain.postavailability.dto.PostAvailabilityResponse;
 import com.snackoverflow.toolgether.domain.postavailability.entity.PostAvailability;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
+@Slf4j
 public class PostResponse {
     private Long id;
     private String title;
@@ -20,12 +23,14 @@ public class PostResponse {
     private int price;
     private Double latitude;
     private Double longitude;
-    private LocalDateTime createdAt;
+    private String createdAt;  // 날짜 포맷 적용
     private int viewCount;
-    private List<String> images;
-    private List<PostAvailabilityResponse> availabilities;
+    private Set<String> images;
+    private Set<PostAvailabilityResponse> availabilities;
 
-    public PostResponse(Post post, List<String> images, List<PostAvailability> availabilities) {
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+    public PostResponse(Post post, Set<String> images, Set<PostAvailability> availabilities) {
         this.id = post.getId();
         this.title = post.getTitle();
         this.content = post.getContent();
@@ -35,14 +40,17 @@ public class PostResponse {
         this.latitude = post.getLatitude();
         this.longitude = post.getLongitude();
         this.viewCount = post.getViewCount();
+        this.createdAt = post.getCreatedAt() != null ? post.getCreatedAt().format(FORMATTER) : null;
+
+        //images와 availabilities를 Set으로 유지
         this.images = images;
         this.availabilities = availabilities.stream()
-                .map(PostAvailabilityResponse::new)
-                .toList(); // PostAvailability → PostAvailabilityResponse 변환
+                .map(avail -> new PostAvailabilityResponse(avail, FORMATTER))
+                .collect(Collectors.toSet());
     }
 
+    //빈 Set을 기본값으로 사용하여 다른 생성자 호출
     public PostResponse(Post post) {
-        this(post, List.of(), List.of());
+        this(post, Set.of(), Set.of());
     }
-
 }

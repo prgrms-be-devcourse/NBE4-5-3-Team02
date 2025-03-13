@@ -69,7 +69,7 @@ public class MypageController {
                     String imageUrl = null;
                     List<PostImage> images = postImageService.getPostImagesByPostId(reservation.getPost().getId());  //PostImageService 호출
                     if (images != null && !images.isEmpty()) {
-                        imageUrl = images.get(0).getPostImage();
+                        imageUrl = images.get(0).getImageUrl();
                     }
                     boolean isReviewed = reviewService.findByUserIdAndReservationId(userId, reservation.getId()).isPresent();
 
@@ -82,7 +82,7 @@ public class MypageController {
                     String imageUrl = null;
                     List<PostImage> images = postImageService.getPostImagesByPostId(reservation.getPost().getId());  //PostImageService 호출
                     if (images != null && !images.isEmpty()) {
-                        imageUrl = images.get(0).getPostImage();
+                        imageUrl = images.get(0).getImageUrl();
                     }
                     boolean isReviewed = reviewService.findByUserIdAndReservationId(userId, reservation.getId()).isPresent();
                     return MyReservationInfoResponse.from(reservation, imageUrl, isReviewed);

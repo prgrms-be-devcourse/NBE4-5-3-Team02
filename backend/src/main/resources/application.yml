@@ -2,29 +2,20 @@ server:
   port: 8080
   servlet:
     session:
-      persistent: true
       timeout: 15m
 jwt:
   secret: [change]
   expiration: 86400000 # 24시간(초 단위)
 
-kakao:
-  rest:
-    api:
-      key: [change]
-
 spring:
-  jackson:
-    serialization:
-      fail-on-empty-beans: false
-
+  
   security:
     oauth2:
       client:
         registration:
           google:
-            client-id: [ change ]
-            client-secret: [ change ]
+            client-id: [change]
+            client-secret: [change]
             redirect-uri: http://localhost:3000/redirect
             scope:
               - openid
@@ -34,6 +25,10 @@ spring:
         provider:
           google:
             issuer-uri: https://accounts.google.com
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
 
   output:
     ansi:
@@ -59,22 +54,8 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
-        default_batch_fetch_size: 100
-    open-in-view: false
-
-  mail:
-    username: writeyourmail0123@gmail.com
-    password: writeAppPassword
-    host: smtp.gmail.com
-    port: 587
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
-
-  quartz:
-    job-store-type: jdbc
-    jdbc:
-      initialize-schema: always # DB 초기화. create-drop, always, embedded, never 중 하나. create/always는 개발환경에서만.
+        default_batch_fetch_size: 10
+    #open-in-view: false
 
 logging:
   level:
@@ -82,15 +63,3 @@ logging:
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
-
-#AWS S3
-cloud:
-  aws:
-    credentials:
-      access-key: [change]
-      secret-key: [change]
-    region:
-      static: ap-northeast-2
-    s3:
-      bucket: toolgetherbucket
-

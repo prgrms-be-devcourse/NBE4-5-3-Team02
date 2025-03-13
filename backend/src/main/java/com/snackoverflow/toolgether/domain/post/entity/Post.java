@@ -2,16 +2,23 @@ package com.snackoverflow.toolgether.domain.post.entity;
 
 import com.snackoverflow.toolgether.domain.post.entity.enums.Category;
 import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType;
+import com.snackoverflow.toolgether.domain.postavailability.entity.PostAvailability;
+import com.snackoverflow.toolgether.domain.postimage.entity.PostImage;
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -61,6 +68,14 @@ public class Post {
     @Builder.Default
     private int viewCount = 0; // 조회수 (기본 0)
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
+    private Set<PostImage> postImages = new HashSet<>(); // 이미지
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
+    private Set<PostAvailability> postAvailabilities = new HashSet<>(); // 스케줄
+
     public void updatePost(String title, String content, Category category, PriceType priceType, int price, Double latitude, Double longitude, int viewCount) {
         this.title = title;
         this.content = content;
@@ -70,5 +85,9 @@ public class Post {
         this.latitude = latitude;
         this.longitude = longitude;
         this.viewCount = viewCount;
+    }
+
+    public void incrementViewCount() {
+        this.viewCount += 1;
     }
 }
