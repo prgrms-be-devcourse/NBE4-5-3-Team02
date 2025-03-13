@@ -5,11 +5,14 @@ import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
 import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,6 +46,8 @@ import com.snackoverflow.toolgether.domain.reservation.dto.ReservationResponse;
 import com.snackoverflow.toolgether.domain.user.service.UserService;
 import com.snackoverflow.toolgether.global.exception.custom.ErrorResponse;
 import com.snackoverflow.toolgether.global.exception.custom.CustomException;
+
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -339,4 +344,9 @@ public class ReservationService {
     public List<Reservation> getBorrowReservations(Long userId) {
         return reservationRepository.findByRenterId(userId);
     }
+
+	@Transactional(readOnly = true)
+	public Optional<Reservation> getReservationByIdForReview(Long reservationId) {
+		return reservationRepository.findById(reservationId);
+	}
 }

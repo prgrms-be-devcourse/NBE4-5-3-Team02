@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation"; // useRouter 훅 import
+import { fetchWithAuth } from "@/app/lib/util/fetchWithAuth";
 
 export default function ClientPage() {
   const [nickname, setNickname] = useState("");
@@ -25,6 +26,8 @@ export default function ClientPage() {
     longitude?: string;
   }>({});
   const [, setGeoError] = useState("");
+  
+  const BASE_URL = 'http://localhost:8080';
 
   const router = useRouter();
 
@@ -77,7 +80,7 @@ export default function ClientPage() {
 
   //유저정보 조회
   const getData = async () => {
-    const getMyInfo = await fetch("http://localhost:8080/api/v1/mypage/me", {
+    const getMyInfo = await fetchWithAuth(`${BASE_URL}/api/v1/mypage/me`, {
       method: "GET",
       credentials: "include",
       headers: {
@@ -249,7 +252,7 @@ export default function ClientPage() {
       longitude,
     });
     try {
-      const response = await fetch("http://localhost:8080/api/v1/mypage/me", {
+      const response = await fetchWithAuth(`${BASE_URL}/api/v1/mypage/me`, {
         method: "PATCH",
         credentials: "include",
         headers: {
@@ -440,10 +443,7 @@ export default function ClientPage() {
                 <button
                   type="button"
                   className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                  onClick={() => {
-                    // TODO: 취소 버튼 클릭 시 동작 (예: 이전 페이지로 이동)
-                    alert("취소 버튼 클릭!");
-                  }}
+                  onClick={()=> router.push("/mypage")}
                 >
                   취소
                 </button>

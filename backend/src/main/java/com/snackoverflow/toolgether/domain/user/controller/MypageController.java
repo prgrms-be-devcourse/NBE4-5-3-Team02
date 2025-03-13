@@ -8,7 +8,6 @@ import com.snackoverflow.toolgether.domain.review.service.ReviewService;
 import com.snackoverflow.toolgether.domain.user.dto.MeInfoResponse;
 import com.snackoverflow.toolgether.domain.user.dto.MyReservationInfoResponse;
 import com.snackoverflow.toolgether.domain.user.dto.request.PatchMyInfoRequest;
-import com.snackoverflow.toolgether.domain.user.dto.request.ProfileRequest;
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.service.UserService;
 import com.snackoverflow.toolgether.global.dto.RsData;
@@ -105,7 +104,6 @@ public class MypageController {
     @PostMapping("/profile")
     public RsData<Void> postProfileimage(
             @Login CustomUserDetails customUserDetails,
-            @Validated ProfileRequest profileRequest,
             @RequestParam("profileImage") MultipartFile profileImage
     ) {
         String username = customUserDetails.getUsername();

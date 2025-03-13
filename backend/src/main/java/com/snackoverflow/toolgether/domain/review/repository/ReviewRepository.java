@@ -9,5 +9,8 @@ import java.util.Optional;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     // userId와 reservationId를 사용하여 Review를 작성했는지 조회
-    Optional<Review> findByReviewer_IdAndReservation_Id(Long userId, Long reservationId);
+    Optional<Review> findByReviewerIdAndReservationId(Long userId, Long reservationId);
+
+    // userId와 reservationId를 사용하여 Review가 존재하는지 확인
+    boolean existsByReviewerIdAndReservationId(Long userId, Long reservationId);
 }

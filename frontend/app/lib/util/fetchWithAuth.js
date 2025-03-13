@@ -29,10 +29,13 @@ const fetchWithAuth = async (url, options = {}, retry = true) => {
 
         // Authorization 헤더 추가
         const headers = {
-            ...options.headers,
             'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
+            ...options.headers,
         };
+
+        if (!(options.body instanceof FormData)) {
+            headers['Content-Type'] = 'application/json';
+        }
 
         const response = await fetch(url, {
             ...options,

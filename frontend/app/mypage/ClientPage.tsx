@@ -8,6 +8,7 @@ import { useMemo, useState, useEffect } from "react";
 import ScoreIcon from "../lib/util/scoreIcon";
 import Link from "next/link";
 import Image from "next/image";
+import { fetchWithAuth } from "../lib/util/fetchWithAuth";
 
 interface Me {
   id: number;
@@ -109,6 +110,8 @@ export default function ClientPage() {
     () => {}
   );
   const [isCancelButton, setIsCancelButton] = useState(true);
+
+  const BASE_URL = 'http://localhost:8080';
 
   const localizer = momentLocalizer(moment);
 
@@ -229,7 +232,7 @@ export default function ClientPage() {
 
   //유저정보 조회
   const getMe = async () => {
-    const getMyInfo = await fetch("http://localhost:8080/api/v1/mypage/me", {
+    const getMyInfo = await fetchWithAuth(`${BASE_URL}/api/v1/mypage/me`, {
       method: "GET",
       credentials: "include",
       headers: {
@@ -250,8 +253,8 @@ export default function ClientPage() {
 
   //예약정보 조회
   const getReservations = async () => {
-    const getMyReservations = await fetch(
-      "http://localhost:8080/api/v1/mypage/reservations",
+    const getMyReservations = await fetchWithAuth(
+      `${BASE_URL}/api/v1/mypage/reservations`,
       {
         method: "GET",
         credentials: "include",
@@ -287,8 +290,8 @@ export default function ClientPage() {
     formData.append("profileImage", file);
 
     try {
-      const uploadProfile = await fetch(
-        "http://localhost:8080/api/v1/mypage/profile",
+      const uploadProfile = await fetchWithAuth(
+        `${BASE_URL}/api/v1/mypage/profile`,
         {
           method: "POST",
           credentials: "include",
@@ -332,8 +335,8 @@ export default function ClientPage() {
 
   const handleDeleteProfile = async () => {
     try {
-      const deleteProfile = await fetch(
-        "http://localhost:8080/api/v1/mypage/profile",
+      const deleteProfile = await fetchWithAuth(
+        `${BASE_URL}/api/v1/mypage/profile`,
         {
           method: "DELETE",
           credentials: "include",
@@ -379,8 +382,8 @@ export default function ClientPage() {
 
   const handleWithdrawMembership = async () => {
     try {
-      const withdrawMembership = await fetch(
-        "http://localhost:8080/api/v1/mypage/me",
+      const withdrawMembership = await fetchWithAuth(
+        `${BASE_URL}/api/v1/mypage/me`,
         {
           method: "DELETE",
           credentials: "include",
@@ -435,7 +438,7 @@ export default function ClientPage() {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">마이페이지</h1>
           <Link href="/mypage/edit">
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
               마이페이지 수정
             </button>
           </Link>
