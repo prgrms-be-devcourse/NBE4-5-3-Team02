@@ -426,7 +426,11 @@ function InProgressStatus({
   } | null>(null); // 선택된 이슈
 
   // 선택 가능한 사유 목록 (issueType 추가)
-  const issueOptions = [
+  const issueOptions: {
+    value: string;
+    label: string;
+    issueType: "renter" | "owner";
+  }[] = [
     { value: "DAMAGE_REPORTED", label: "물건 훼손", issueType: "renter" },
     { value: "ITEM_LOSS", label: "물건 분실", issueType: "renter" },
     {
@@ -962,7 +966,7 @@ export default function ClientPage({
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen">
-      {reservation.status === "REQUESTED" && (
+      {reservation.status === "REQUESTED" && renter && BASE_URL && (
         <RequestedStatus
           reservation={reservation}
           deposit={deposit}
@@ -972,7 +976,7 @@ export default function ClientPage({
           BASE_URL={BASE_URL}
         />
       )}
-      {reservation.status === "APPROVED" && (
+      {reservation.status === "APPROVED" && owner && BASE_URL && (
         <ApprovedStatus
           reservation={reservation}
           deposit={deposit}
@@ -982,7 +986,7 @@ export default function ClientPage({
           BASE_URL={BASE_URL}
         />
       )}
-      {reservation.status === "IN_PROGRESS" && (
+      {reservation.status === "IN_PROGRESS" && BASE_URL && (
         <InProgressStatus
           reservation={reservation}
           deposit={deposit}
@@ -990,7 +994,7 @@ export default function ClientPage({
           BASE_URL={BASE_URL}
         />
       )}
-      {reservation.status === "REJECTED" && (
+      {reservation.status === "REJECTED" && renter && (
         <RejectedStatus
           reservation={reservation}
           deposit={deposit}
