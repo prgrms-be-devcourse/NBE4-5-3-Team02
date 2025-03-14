@@ -65,6 +65,7 @@ export default function ClientPage() {
         new window.daum.Postcode({
             oncomplete: (data: AddressData) => {
                 console.log('선택된 주소 데이터:', data);
+                // @ts-ignore
                 setFormData(prev => ({
                     ...prev,
                     postalCode: data.zonecode,
@@ -81,8 +82,10 @@ export default function ClientPage() {
     };
 
     // 입력 핸들러 타입 명시화
+    // @ts-ignore
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
+        // @ts-ignore
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -159,16 +162,31 @@ export default function ClientPage() {
             alert('가입을 환영합니다! 추가 정보가 성공적으로 저장되었습니다.');
             router.push('/');
         } catch (err) {
-            if (err.type === 'LOCATION_ERROR') {
-                setError(`🗺️ 지역 제한 서비스 안내
+            if (isCustomError(err)) {
+                if (err.type === 'LOCATION_ERROR') {
+                    console.log(err);
+                    setError(`🗺️ 지역 제한 서비스 안내
 • 현재 위치에서 5km 이내 지역만 서비스 제공`);
-            } else {
+                } else {
+                    setError(`⚠️ ${err.message}`);
+                }
+            } else if (err instanceof Error) {
+                // 일반적인 Error 객체 처리
                 setError(`⚠️ ${err.message}`);
+            } else {
+                // 알 수 없는 에러 처리
+                setError('⚠️ 알 수 없는 오류가 발생했습니다.');
+                console.error(err);
             }
         } finally {
             setIsLoading(false);
         }
     };
+
+    // 커스텀 에러 타입 가드 함수
+    function isCustomError(error: unknown): error is { type: string; message: string; details?: any } {
+        return typeof error === 'object' && error !== null && 'type' in error && 'message' in error;
+    }
 
     return (
         <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
