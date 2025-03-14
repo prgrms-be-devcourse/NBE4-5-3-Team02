@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
@@ -178,7 +178,8 @@ export default function PostsPage() {
       });
 
       setTotalPages(data.data.totalPages);
-    } catch (err) {
+
+    } catch (_error) {
       // setError(err instanceof Error ? err.message : "알 수 없는 오류 발생");
     } finally {
       setLoading(false);

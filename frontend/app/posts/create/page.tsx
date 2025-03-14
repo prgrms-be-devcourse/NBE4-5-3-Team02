@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import Script from 'next/script';
 
 // interface Window {
 //   daum: any;
@@ -218,7 +219,11 @@ export default function CreatePostPage() {
       animate={{ opacity: 1 }}
       transition={{ duration: 1.5 }}
       className="min-h-screen bg-gray-100 flex flex-col items-center py-10 px-4"
-    >
+      >
+     <Script
+        src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
+        strategy="lazyOnload" // ✅ 사용자가 페이지를 방문한 후 로드
+      />
       <h1 className="text-3xl font-bold text-gray-800 mb-6">📝 게시물 작성</h1>
 
       <form
@@ -527,9 +532,9 @@ export default function CreatePostPage() {
             required
           />
         </div>
-        <body>
+        {/* <body>
           <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-        </body>
+        </body> */}
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"

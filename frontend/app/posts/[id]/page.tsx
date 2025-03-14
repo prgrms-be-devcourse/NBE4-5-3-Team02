@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+// import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 interface Availability {
   date: string | null;
