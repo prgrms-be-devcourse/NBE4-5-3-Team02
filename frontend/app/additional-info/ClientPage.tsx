@@ -65,7 +65,6 @@ export default function ClientPage() {
         new window.daum.Postcode({
             oncomplete: (data: AddressData) => {
                 console.log('선택된 주소 데이터:', data);
-                //@ts-expect-error: prev 에러 가능성 있음
                 setFormData(prev => ({
                     ...prev,
                     postalCode: data.zonecode,
@@ -82,10 +81,8 @@ export default function ClientPage() {
     };
 
     // 입력 핸들러 타입 명시화
-    //@ts-expect-error: prev 에러 가능성 있음
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        //@ts-expect-error: prev 에러 가능성 있음
         setFormData(prev => ({
             ...prev,
             [name]: value
