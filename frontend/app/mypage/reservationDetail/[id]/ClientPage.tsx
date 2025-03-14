@@ -73,12 +73,14 @@ function RequestedStatus({
   me,
   renter,
   post,
+  BASE_URL,
 }: {
   reservation: Reservation;
   deposit: Deposit;
   me: me;
   renter: me;
   post: post;
+  BASE_URL: string;
 }) {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false); // 추가: 승인/거절 확인 모달
@@ -115,7 +117,7 @@ function RequestedStatus({
     if (actionType === "approve") {
       try {
         const response = await fetchWithAuth(
-          `http://localhost:8080/api/v1/reservations/${reservation.id}/approve`,
+          `${BASE_URL}/api/v1/reservations/${reservation.id}/approve`,
           {
             method: "PATCH",
             credentials: "include",
@@ -140,7 +142,7 @@ function RequestedStatus({
 
       try {
         const response = await fetchWithAuth(
-          `http://localhost:8080/api/v1/reservations/${
+          `${BASE_URL}/api/v1/reservations/${
             reservation.id
           }/reject?reason=${encodeURIComponent(rejectionReason)}`,
           {
@@ -163,7 +165,7 @@ function RequestedStatus({
       // 취소 로직
       try {
         const response = await fetchWithAuth(
-          `http://localhost:8080/api/v1/reservations/${reservation.id}/cancel`,
+          `${BASE_URL}/api/v1/reservations/${reservation.id}/cancel`,
           {
             method: "PATCH",
             credentials: "include",
@@ -302,12 +304,14 @@ function ApprovedStatus({
   me,
   owner,
   post,
+  BASE_URL,
 }: {
   reservation: Reservation;
   deposit: Deposit;
   me: me;
   owner: me;
   post: post;
+  BASE_URL: string;
 }) {
   const [showModal, setShowModal] = useState<boolean>(false);
 
@@ -321,7 +325,7 @@ function ApprovedStatus({
   const startRental = async () => {
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/v1/reservations/${reservation.id}/start`,
+        `${BASE_URL}/api/v1/reservations/${reservation.id}/start`,
         {
           method: "PATCH",
           credentials: "include",
@@ -405,10 +409,12 @@ function InProgressStatus({
   reservation,
   deposit,
   post,
+  BASE_URL,
 }: {
   reservation: Reservation;
   deposit: Deposit;
   post: post;
+  BASE_URL: string;
 }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
@@ -443,11 +449,11 @@ function InProgressStatus({
     }
     let apiUrl = "";
     if (selectedIssue.issueType === "owner") {
-      apiUrl = `http://localhost:8080/api/v1/reservations/${
+      apiUrl = `${BASE_URL}/api/v1/reservations/${
         reservation.id
       }/ownerIssue?reason=${encodeURIComponent(selectedIssue.value)}`;
     } else if (selectedIssue.issueType === "renter") {
-      apiUrl = `http://localhost:8080/api/v1/reservations/${
+      apiUrl = `${BASE_URL}/api/v1/reservations/${
         reservation.id
       }/renterIssue?reason=${encodeURIComponent(selectedIssue.value)}`;
     }
@@ -473,7 +479,7 @@ function InProgressStatus({
   const completeRental = async () => {
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/v1/reservations/${reservation.id}/complete`,
+        `${BASE_URL}/api/v1/reservations/${reservation.id}/complete`,
         {
           method: "PATCH",
           credentials: "include",
@@ -786,18 +792,17 @@ export default function ClientPage({ rid }: { rid: number }) {
     price: 0,
   });
 
+  const BASE_URL = "http://localhost:8080";
+
   //유저정보 조회
   const getMe = async () => {
-    const getMyInfo = await fetchWithAuth(
-      "http://localhost:8080/api/v1/mypage/me",
-      {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const getMyInfo = await fetchWithAuth(`${BASE_URL}/api/v1/mypage/me`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     if (getMyInfo.ok) {
       const Data = await getMyInfo.json();
@@ -814,7 +819,7 @@ export default function ClientPage({ rid }: { rid: number }) {
   // 예약 정보 조회
   const getReservation = async () => {
     const getReservationInfo = await fetchWithAuth(
-      `http://localhost:8080/api/v1/reservations/${rid}`,
+      `${BASE_URL}/api/v1/reservations/${rid}`,
       {
         method: "GET",
         credentials: "include",
@@ -838,7 +843,7 @@ export default function ClientPage({ rid }: { rid: number }) {
   // 보증금 정보 조회
   const getDeposit = async () => {
     const getDepositInfo = await fetchWithAuth(
-      `http://localhost:8080/api/v1/deposits/rid/${rid}`,
+      `${BASE_URL}/api/v1/deposits/rid/${rid}`,
       {
         method: "GET",
         credentials: "include",
@@ -883,7 +888,7 @@ export default function ClientPage({ rid }: { rid: number }) {
   const fetchRenterInfo = async (renterId: number) => {
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/v1/users/${renterId}`,
+        `${BASE_URL}/api/v1/users/${renterId}`,
         {
           method: "GET",
           credentials: "include",
@@ -907,7 +912,7 @@ export default function ClientPage({ rid }: { rid: number }) {
   const fetchOwnerInfo = async (ownerId: number) => {
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/v1/users/${ownerId}`,
+        `${BASE_URL}/api/v1/users/${ownerId}`,
         {
           method: "GET",
           credentials: "include",
@@ -930,7 +935,7 @@ export default function ClientPage({ rid }: { rid: number }) {
 
   const getPost = async (postid: number) => {
     const getPostInfo = await fetchWithAuth(
-      `http://localhost:8080/api/v1/reservations/post/${postid}`,
+      `${BASE_URL}/api/v1/reservations/post/${postid}`,
       {
         method: "GET",
         credentials: "include",
@@ -967,6 +972,7 @@ export default function ClientPage({ rid }: { rid: number }) {
           me={me}
           renter={renter}
           post={post}
+          BASE_URL={BASE_URL}
         />
       )}
       {reservation.status === "APPROVED" && (
@@ -976,6 +982,7 @@ export default function ClientPage({ rid }: { rid: number }) {
           me={me}
           owner={owner}
           post={post}
+          BASE_URL={BASE_URL}
         />
       )}
       {reservation.status === "IN_PROGRESS" && (
@@ -983,6 +990,7 @@ export default function ClientPage({ rid }: { rid: number }) {
           reservation={reservation}
           deposit={deposit}
           post={post}
+          BASE_URL={BASE_URL}
         />
       )}
       {reservation.status === "REJECTED" && (

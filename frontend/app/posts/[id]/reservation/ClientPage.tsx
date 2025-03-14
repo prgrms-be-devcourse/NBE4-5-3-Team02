@@ -82,18 +82,17 @@ export default function ClientPage({ postid }: { postid: number }) {
     price: 0,
   });
 
+  const BASE_URL = "http://localhost:8080";
+
   //유저정보 조회
   const getMe = async () => {
-    const getMyInfo = await fetchWithAuth(
-      "http://localhost:8080/api/v1/mypage/me",
-      {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const getMyInfo = await fetchWithAuth(`${BASE_URL}/api/v1/mypage/me`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     if (getMyInfo.ok) {
       const Data = await getMyInfo.json();
@@ -109,7 +108,7 @@ export default function ClientPage({ postid }: { postid: number }) {
 
   const getPost = async () => {
     const getMyInfo = await fetchWithAuth(
-      `http://localhost:8080/api/v1/reservations/post/${postid}`,
+      `${BASE_URL}/api/v1/reservations/post/${postid}`,
       {
         method: "GET",
         credentials: "include",
@@ -151,7 +150,7 @@ export default function ClientPage({ postid }: { postid: number }) {
   const fetchReservedEvents = async (postId: number) => {
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/v1/reservations/reservatedDates/${postId}`,
+        `${BASE_URL}/api/v1/reservations/reservatedDates/${postId}`,
         {
           method: "GET",
           credentials: "include",
@@ -416,7 +415,7 @@ export default function ClientPage({ postid }: { postid: number }) {
         console.log("request Data : ", reservationData);
 
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/v1/reservations/request",
+          `${BASE_URL}/api/v1/reservations/request`,
           {
             method: "POST",
             headers: {

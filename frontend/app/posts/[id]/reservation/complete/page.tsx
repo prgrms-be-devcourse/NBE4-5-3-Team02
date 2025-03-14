@@ -59,9 +59,11 @@ export default function Page() {
     price: 0,
   });
 
+  const BASE_URL = "http://localhost:8080";
+
   const getReservation = async (reservationId: string) => {
     const getReservationInfo = await fetchWithAuth(
-      `http://localhost:8080/api/v1/reservations/${reservationId}`,
+      `${BASE_URL}/api/v1/reservations/${reservationId}`,
       {
         method: "GET",
         credentials: "include",
@@ -85,7 +87,7 @@ export default function Page() {
 
   const getDeposit = async (reservationId: string) => {
     const getDepositInfo = await fetchWithAuth(
-      `http://localhost:8080/api/v1/deposits/rid/${reservationId}`,
+      `${BASE_URL}/api/v1/deposits/rid/${reservationId}`,
       {
         method: "GET",
         credentials: "include",
@@ -109,7 +111,7 @@ export default function Page() {
 
   const getPost = async (postid: number) => {
     const getPostInfo = await fetchWithAuth(
-      `http://localhost:8080/api/v1/reservations/post/${postid}`,
+      `${BASE_URL}/api/v1/reservations/post/${postid}`,
       {
         method: "GET",
         credentials: "include",
