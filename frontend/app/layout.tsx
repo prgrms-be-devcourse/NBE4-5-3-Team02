@@ -25,6 +25,17 @@ export default function RootLayout({
             rel="stylesheet"
             type="text/css"
         />
+        {/* 카카오 주소 검색 API 추가 */}
+        <Script
+          src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
+          strategy="beforeInteractive"
+        />
+
+        {/* 카카오 지도 API 추가 (위도·경도 변환) */}
+        <Script
+          src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_API_KEY&libraries=services`}
+          strategy="beforeInteractive"
+        />
     </head>
       <body className="font-d2coding" suppressHydrationWarning={true}>
       <AuthProvider>

@@ -80,9 +80,6 @@ export default function LoginPage() {
                     console.log('백엔드 응답:', data);
                     console.log('추가정보필요 플래그:', data.data?.additionalInfoRequired);
 
-                    // 세션 스토리지에 액세스 토큰 저장
-                    sessionStorage.setItem('access_token', data.data.access_token);
-
                     // 🔥 추가 정보 필요 여부 체크
                     if (data.data?.additionalInfoRequired) {
                         sessionStorage.setItem('requiresAdditionalInfo', 'true');
