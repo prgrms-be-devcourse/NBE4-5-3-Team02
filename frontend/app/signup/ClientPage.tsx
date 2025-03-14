@@ -39,6 +39,7 @@ export default function SignupPage() {
     const [countdown, setCountdown] = useState<number>(0);
     const [, setIsLoading] = useState(false);
     const [isEmailVerified, setIsEmailVerified] = useState(false);
+    //@ts-expect-error: useRef in signup ClientPage
     const intervalRef = useRef<NodeJS.Timeout>();
     const [error, setError] = useState('');
     const [formData, setFormData] = useState<FormData>({
@@ -166,7 +167,6 @@ export default function SignupPage() {
     };
 
     // 회원 가입 제출
-    //@ts-expect-error: React 에러 가능성 있음
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
