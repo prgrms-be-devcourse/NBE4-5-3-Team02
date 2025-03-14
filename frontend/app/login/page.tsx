@@ -15,6 +15,7 @@ export default function LoginPage() {
     const {login} = useAuth();
     const hasFetched = useRef(false);
 
+    const BASE_URL = "http://localhost:8080";
 
     // 폼 제출 핸들러
     const handleFormLogin = async (e: React.FormEvent) => {
@@ -23,7 +24,7 @@ export default function LoginPage() {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:8080/api/v1/users/login', {
+            const response = await fetch(`${BASE_URL}/api/v1/users/login`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -59,7 +60,7 @@ export default function LoginPage() {
 
         if (authCode && !hasFetched.current) {
             hasFetched.current = true;
-            fetch('http://localhost:8080/login/oauth2/code/google', {
+            fetch(`${BASE_URL}/login/oauth2/code/google`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -80,12 +81,17 @@ export default function LoginPage() {
                     console.log('백엔드 응답:', data);
                     console.log('추가정보필요 플래그:', data.data?.additionalInfoRequired);
 
+                    // 세션 스토리지에 액세스 토큰과 provider_id 저장
+                    sessionStorage.setItem('access_token', data.data.access_token);
+                    sessionStorage.setItem('user_id', data.data.user_id);
+
                     // 🔥 추가 정보 필요 여부 체크
                     if (data.data?.additionalInfoRequired) {
                         sessionStorage.setItem('requiresAdditionalInfo', 'true');
                         console.log('라우팅 시작: 추가 정보 페이지로 이동');
                         router.push('/additional-info');  // 추가 정보 입력 페이지로 이동하기
                     } else {
+                        login(); // AuthContext의 login 호출
                         sessionStorage.removeItem('requiresAdditionalInfo');
                         router.push('/');  // 메인 페이지로
                     }

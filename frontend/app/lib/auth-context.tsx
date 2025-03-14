@@ -1,62 +1,52 @@
-'use client'
+'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-type AuthContextType = {
-    isLoggedIn: boolean
-    login: () => void
-    logout: () => Promise<void>
+interface AuthContextType {
+    isLoggedIn: boolean;
+    login: () => void;
+    logout: () => void;
 }
 
-export const AuthContext = createContext<AuthContextType>(null!)
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [isLoggedIn, setIsLoggedIn] = useState(false)
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const router = useRouter();
 
-    // 세션 스토리지 기반 인증 체크
-    useEffect(() => {
-        const checkAuth = async () => {
-            const response = await fetch('/api/auth/check')
-            const data = await response.json()
-            if (data.isAuthenticated && sessionStorage.getItem('sessionActive')) {
-                setIsLoggedIn(true)
-            } else {
-                sessionStorage.removeItem('sessionActive')
-                setIsLoggedIn(false)
-            }
-        }
-        checkAuth()
-    }, [])
-
-    // 창 종료 시 로그아웃 처리
-    useEffect(() => {
-        const handleUnload = () => {
-            if (sessionStorage.getItem('sessionActive')) {
-                navigator.sendBeacon('/api/auth/logout')
-                sessionStorage.removeItem('sessionActive')
-            }
-        }
-
-        window.addEventListener('beforeunload', handleUnload)
-        return () => window.removeEventListener('beforeunload', handleUnload)
-    }, [])
-
+    // 로그인 함수
     const login = () => {
-        sessionStorage.setItem('sessionActive', 'true')
-        setIsLoggedIn(true)
-    }
+        setIsLoggedIn(true);
+        sessionStorage.getItem('access_token');
+    };
 
-    const logout = async () => {
-        await fetch('/api/auth/logout', { method: 'POST' })
-        sessionStorage.removeItem('sessionActive')
-        setIsLoggedIn(false)
-    }
+    // 로그아웃 함수
+    const logout = () => {
+        setIsLoggedIn(false);
+        sessionStorage.removeItem('access_token');
+        router.push('/login'); // 로그아웃 후 로그인 페이지로 이동
+    };
+
+    // 세션 스토리지에서 로그인 상태 확인
+    useEffect(() => {
+        const token = sessionStorage.getItem('access_token');
+        if (token) {
+            setIsLoggedIn(true);
+        }
+    }, []);
 
     return (
         <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
             {children}
         </AuthContext.Provider>
-    )
-}
+    );
+};
 
-export const useAuth = () => useContext(AuthContext)
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+};

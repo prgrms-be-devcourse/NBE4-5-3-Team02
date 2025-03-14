@@ -58,6 +58,7 @@ export default function SignupPage() {
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [, setGeoError] = useState('');
+    const BASE_URL = "http://localhost:8080";
 
     // 카운트다운 로직
     useEffect(() => {
@@ -121,7 +122,7 @@ export default function SignupPage() {
     // 이메일 인증 요청
     const handleSendVerificationCode = async () => {
         try {
-            const response = await fetch('http://localhost:8080/api/v1/users/send-verification-code', {
+            const response = await fetch(`${BASE_URL}/api/v1/users/send-verification-code`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {'Content-Type': 'application/json'},

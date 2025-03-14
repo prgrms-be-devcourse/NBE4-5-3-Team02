@@ -23,6 +23,8 @@ export default function ClientPage() {
     const [geoError, setGeoError] = useState('');
     const [isGeoLoading, setIsGeoLoading] = useState(true);
 
+    const BASE_URL = "http://localhost:8080";
+
     // 브라우저 위치 정보 조회
     useEffect(() => {
         console.log('위치 정보 조회 시작');
@@ -124,7 +126,7 @@ export default function ClientPage() {
         });
 
         try {
-            const response = await fetch('http://localhost:8080/oauth/users/additional-info', {
+            const response = await fetch(`${BASE_URL}/oauth/users/additional-info`, {
                 method: 'PATCH',
                 credentials: 'include',
                 headers: {

@@ -11,17 +11,12 @@ import {motion} from 'framer-motion'
 export default function Header() {
     const {isLoggedIn} = useAuth()
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-    const [isChatDropdownOpen, setIsChatDropdownOpen] = useState(false)
     const [notifications, setNotifications] = useState([
         {id: 1, message: '새 리뷰가 등록되었어요!', read: false},
         {id: 2, message: '새로운 예약 요청이 있습니다!', read: false}
     ])
-    const [messages] = useState([
-        {id: 1, content: '💬 예약 상품에 대한 문의가 있습니다.', time: '14:20'},
-    ])
 
     const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen)
-    const toggleChatDropdown = () => setIsChatDropdownOpen(!isChatDropdownOpen)
 
     const markAllAsRead = () => {
         setNotifications([])
@@ -30,12 +25,29 @@ export default function Header() {
 
     return (
         <header className="flex justify-between items-center p-4 bg-white shadow-md">
+            <div className="flex items-center gap-6">
             <Link
                 href="/"
-                className="text-2xl font-bold text-green-600 hover:text-green-700 transition-colors"
+                className="flex items-center gap-2 text-2xl font-bold text-green-600 hover:text-green-700 transition-colors"
             >
                 Toolgether
             </Link>
+
+            <div className="ml-6 flex gap-4">
+                <Link
+                    href="/posts"
+                    className="text-gray-600 hover:text-green-600 font-semibold transition-colors"
+                >
+                    게시판
+                </Link>
+                <Link
+                    href="#"
+                    className="text-gray-600 hover:text-green-600 font-semibold transition-colors"
+                >
+                    지역 커뮤니티
+                </Link>
+            </div>
+            </div>
 
             <nav className="flex items-center gap-6">
                 <EcoBadge/>
@@ -96,47 +108,12 @@ export default function Header() {
 
                 {/* 채팅 섹션 */}
                 {isLoggedIn && (
-                    <div className="relative">
-                        <button
-                            onClick={toggleChatDropdown}
-                            className="relative flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full shadow-md hover:bg-gray-200 transition-colors"
-                        >
-                            <ChatBubbleOvalLeftIcon className="w-6 h-6 text-green-600"/>
-                            {messages.length > 0 && (
-                                <span
-                                    className="absolute top-0 right-0 w-4 h-4 text-xs text-white bg-blue-500 rounded-full flex items-center justify-center">
-                                {messages.length}
-                            </span>
-                            )}
-                        </button>
-
-                        {isChatDropdownOpen && (
-                            <motion.div
-                                initial={{opacity: 0, y: -10}}
-                                animate={{opacity: 1, y: 0}}
-                                className="absolute right-0 w-72 mt-2 bg-white rounded-lg shadow-xl border"
-                            >
-                                <div className="p-4">
-                                    <h2 className="text-sm font-semibold mb-3">💌 새 메시지</h2>
-                                    <div className="space-y-3">
-                                        {messages.map((message) => (
-                                            <div
-                                                key={message.id}
-                                                className="flex items-start p-2 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
-                                            >
-                                                <div className="ml-2">
-                                                    <p className="text-sm text-gray-700">{message.content}</p>
-                                                    <time className="text-xs text-gray-500 mt-1 block">
-                                                        {message.time}
-                                                    </time>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </div>
+                    <Link
+                        href="/chat"
+                        className="p-2 text-gray-600 hover:text-green-600 relative"
+                    >
+                        <ChatBubbleOvalLeftIcon className="h-6 w-6" />
+                    </Link>
                 )}
 
                 {/* 프로필 이미지 */}
