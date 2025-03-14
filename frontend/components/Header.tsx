@@ -118,14 +118,14 @@ export default function Header() {
 
                 {/* 프로필 이미지 */}
                 {isLoggedIn && (
-                    <div
+                    <Link href="/mypage"
                         className="relative w-10 h-10 rounded-full bg-gray-200 overflow-hidden border-2 border-green-500">
                         <img
                             src="/user-profile.jpg"
                             alt="프로필"
                             className="w-full h-full object-cover hover:scale-105 transition-transform"
                         />
-                    </div>
+                    </Link>
                 )}
 
                 <AuthButton/>

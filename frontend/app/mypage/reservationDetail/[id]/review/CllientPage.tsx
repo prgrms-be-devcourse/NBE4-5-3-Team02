@@ -28,7 +28,16 @@ const ReviewPage: React.FC<{
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const BASE_URL = "http://localhost:8080";
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
+  const fetchHelper = async (url: string, options?: RequestInit) => {
+    const accessToken = sessionStorage.getItem("access_token");
+    if (accessToken) {
+      return fetchWithAuth(url, options);
+    } else {
+      return fetch(url, options);
+    }
+  };
 
   const handleScoreChange = useCallback(
     (step: number, score: number | null) => {
@@ -66,7 +75,7 @@ const ReviewPage: React.FC<{
     }
 
     try {
-      const response = await fetchWithAuth(`${BASE_URL}/api/v1/review/create`, {
+      const response = await fetchHelper(`${BASE_URL}/api/v1/review/create`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -81,6 +90,9 @@ const ReviewPage: React.FC<{
         goToDetail();
         return;
       }
+      if (Data?.code.startsWith("403")) {
+        router.push("/login");
+      }
       if (Data?.code !== "200-1") {
         setError(`${Data?.msg}`);
       } else {
@@ -88,6 +100,9 @@ const ReviewPage: React.FC<{
       }
       goToDetail();
     } catch (e: any) {
+      if (e.status === 403) {
+        router.push("/login");
+      }
       setError(` ${e.message}`);
       goToDetail();
     } finally {

@@ -9,6 +9,7 @@ import ScoreIcon from "../lib/util/scoreIcon";
 import Link from "next/link";
 import Image from "next/image";
 import { fetchWithAuth } from "../lib/util/fetchWithAuth";
+import { useRouter } from "next/navigation";
 
 interface Me {
   id: number;
@@ -74,32 +75,10 @@ export default function ClientPage() {
     createdAt: "",
     score: 0,
     credit: 0,
-  })
+  });
   const [reservations, setReservations] = useState<Reservations>({
-    rentals: [
-      {
-        id: 0,
-        title: "",
-        image: "",
-        amount: 0,
-        startTime: "",
-        endTime: "",
-        status: "",
-        isReviewed: false,
-      },
-    ],
-    borrows: [
-      {
-        id: 0,
-        title: "",
-        image: "",
-        amount: 0,
-        startTime: "",
-        endTime: "",
-        status: "",
-        isReviewed: false,
-      },
-    ],
+    rentals: [],
+    borrows: [],
   });
   const [eventType, setEventType] = useState("rental");
   const [date, setDate] = useState(new Date());
@@ -111,14 +90,23 @@ export default function ClientPage() {
   );
   const [isCancelButton, setIsCancelButton] = useState(true);
 
-  const BASE_URL = 'http://localhost:8080';
-
   const localizer = momentLocalizer(moment);
+  const router = useRouter();
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
   useEffect(() => {
     getMe();
     getReservations();
   }, []);
+
+  const fetchHelper = async (url: string, options?: RequestInit) => {
+    const accessToken = sessionStorage.getItem("access_token");
+    if (accessToken) {
+      return fetchWithAuth(url, options);
+    } else {
+      return fetch(url, options);
+    }
+  };
 
   const handleNavigate = (newDate: Date) => {
     setDate(newDate);
@@ -232,7 +220,7 @@ export default function ClientPage() {
 
   //유저정보 조회
   const getMe = async () => {
-    const getMyInfo = await fetchWithAuth(`${BASE_URL}/api/v1/mypage/me`, {
+    const getMyInfo = await fetchHelper(`${BASE_URL}/api/v1/mypage/me`, {
       method: "GET",
       credentials: "include",
       headers: {
@@ -242,18 +230,24 @@ export default function ClientPage() {
 
     if (getMyInfo.ok) {
       const Data = await getMyInfo.json();
+      if (Data?.code.startsWith("403")) {
+        router.push("/login");
+      }
       if (Data?.code !== "200-1") {
         console.error(`에러가 발생했습니다. \n${Data?.msg}`);
       }
       setMe(Data?.data);
     } else {
+      if (getMyInfo.status === 403) {
+        router.push("/login");
+      }
       console.error("Error fetching data:", getMyInfo.status);
     }
   };
 
   //예약정보 조회
   const getReservations = async () => {
-    const getMyReservations = await fetchWithAuth(
+    const getMyReservations = await fetchHelper(
       `${BASE_URL}/api/v1/mypage/reservations`,
       {
         method: "GET",
@@ -273,7 +267,7 @@ export default function ClientPage() {
     } else {
       console.error("Error fetching data:", getMyReservations.status);
     }
-  }
+  };
 
   //폼 데이터를 서버로 전송하는 함수
   const handleUploadProfile = async (
@@ -290,7 +284,7 @@ export default function ClientPage() {
     formData.append("profileImage", file);
 
     try {
-      const uploadProfile = await fetchWithAuth(
+      const uploadProfile = await fetchHelper(
         `${BASE_URL}/api/v1/mypage/profile`,
         {
           method: "POST",
@@ -335,7 +329,7 @@ export default function ClientPage() {
 
   const handleDeleteProfile = async () => {
     try {
-      const deleteProfile = await fetchWithAuth(
+      const deleteProfile = await fetchHelper(
         `${BASE_URL}/api/v1/mypage/profile`,
         {
           method: "DELETE",
@@ -382,7 +376,7 @@ export default function ClientPage() {
 
   const handleWithdrawMembership = async () => {
     try {
-      const withdrawMembership = await fetchWithAuth(
+      const withdrawMembership = await fetchHelper(
         `${BASE_URL}/api/v1/mypage/me`,
         {
           method: "DELETE",
@@ -597,8 +591,9 @@ export default function ClientPage() {
               <div>
                 {filteredReservations.length > 0 ? (
                   filteredReservations.map((reservation) => (
-                    <div
-                      key={reservation.id}
+                    <Link href={`/mypage/reservationDetail/${reservation.id}`}
+                      key={1}
+                      // key={reservation.id}
                       className="flex items-center border rounded p-2 mb-2"
                     >
                       <Image
@@ -632,7 +627,7 @@ export default function ClientPage() {
                           상태: {reservationStatus[reservation.status] || ""}
                         </p>
                       </div>
-                    </div>
+                    </Link>
                   ))
                 ) : (
                   <p>예약 내역이 없습니다.</p>

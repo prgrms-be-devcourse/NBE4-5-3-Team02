@@ -34,8 +34,8 @@ public class ReviewController {
             @Login CustomUserDetails customUserDetails,
             @RequestBody @Validated ReviewRequest reviewRequest
     ) {
-        String username = customUserDetails.getUsername();
-        User user = userService.getUserForUsername(username);
+        Long userId = customUserDetails.getUserId();
+        User user = userService.findUserById(userId);
         Optional<Reservation> reservation = reservationService.getReservationByIdForReview(reviewRequest.getReservationId());
         if (reservation.isEmpty()) {
             return new RsData<>(

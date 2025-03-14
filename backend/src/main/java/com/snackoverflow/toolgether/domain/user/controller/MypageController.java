@@ -39,9 +39,7 @@ public class MypageController {
     public RsData<MeInfoResponse> getMyInfo(
         @Login CustomUserDetails customUserDetails
     ) {
-        String username = customUserDetails.getUsername();
-        User user = userService.findByUsername(username);
-        Long userId = user.getId();
+        Long userId = customUserDetails.getUserId();
         MeInfoResponse meInfoResponse = userService.getMeInfo(userId);
 
         return new RsData<>(
@@ -57,9 +55,7 @@ public class MypageController {
     public RsData<Map<String, List<MyReservationInfoResponse>>> getMyReservations(
         @Login CustomUserDetails customUserDetails
     ) {
-        String username = customUserDetails.getUsername();
-        User user = userService.findByUsername(username);
-        Long userId = user.getId();
+        Long userId = customUserDetails.getUserId();
 
         List<Reservation> rentals = reservationService.getRentalReservations(userId);
         List<Reservation> borrows = reservationService.getBorrowReservations(userId);
@@ -106,8 +102,8 @@ public class MypageController {
             @Login CustomUserDetails customUserDetails,
             @RequestParam("profileImage") MultipartFile profileImage
     ) {
-        String username = customUserDetails.getUsername();
-        User user = userService.findByUsername(username);
+        Long userId = customUserDetails.getUserId();
+        User user = userService.findUserById(userId);
         userService.postProfileImage(user, profileImage);
         return new RsData<>(
                 "200-1",
@@ -120,8 +116,8 @@ public class MypageController {
     public RsData<Void> deleteProfileImage(
             @Login CustomUserDetails customUserDetails
     ) {
-        String username = customUserDetails.getUsername();
-        User user = userService.findByUsername(username);
+        Long userId = customUserDetails.getUserId();
+        User user = userService.findUserById(userId);
         userService.deleteProfileImage(user);
         return new RsData<>(
                 "200-1",
@@ -135,8 +131,8 @@ public class MypageController {
             @Login CustomUserDetails customUserDetails,
             @RequestBody @Validated PatchMyInfoRequest request
     ) {
-        String username = customUserDetails.getUsername();
-        User user = userService.findByUsername(username);
+        Long userId = customUserDetails.getUserId();
+        User user = userService.findUserById(userId);
         boolean isGeoInfoValid = userService.checkGeoInfo(request);
         if (!isGeoInfoValid) {
             return new RsData<>(
@@ -164,8 +160,8 @@ public class MypageController {
     public RsData<Void> DeleteMe(
             @Login CustomUserDetails customUserDetails
     ) {
-        String username = customUserDetails.getUsername();
-        User user = userService.findByUsername(username);
+        Long userId = customUserDetails.getUserId();
+        User user = userService.findUserById(userId);
         userService.deleteUser(user);
         return new RsData<>(
                 "200-1",

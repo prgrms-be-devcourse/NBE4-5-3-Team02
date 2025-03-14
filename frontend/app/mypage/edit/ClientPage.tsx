@@ -31,13 +31,6 @@ export default function ClientPage() {
 
   const router = useRouter();
 
-  // TODO: 쿠키 확인 및 리다이렉트 - 작동 안 함. 수정 필요
-  // useEffect(() => {
-  //   const authToken = document.cookie.includes('token');
-  //   if (!authToken) {
-  //     router.push("/");
-  //   }
-  // }, [router]);
 
   useEffect(() => {
     getData();
@@ -62,6 +55,15 @@ export default function ClientPage() {
     );
   }, []);
 
+  const fetchHelper = async (url: string, options?: RequestInit) => {
+    const accessToken = sessionStorage.getItem("access_token");
+    if (accessToken) {
+      return fetchWithAuth(url, options);
+    } else {
+      return fetch(url, options);
+    }
+  };
+
   // 카카오 주소 검색
   const handleAddressSearch = () => {
     if (!window.daum) {
@@ -80,7 +82,7 @@ export default function ClientPage() {
 
   //유저정보 조회
   const getData = async () => {
-    const getMyInfo = await fetchWithAuth(`${BASE_URL}/api/v1/mypage/me`, {
+    const getMyInfo = await fetchHelper(`${BASE_URL}/api/v1/mypage/me`, {
       method: "GET",
       credentials: "include",
       headers: {
@@ -90,6 +92,9 @@ export default function ClientPage() {
 
     if (getMyInfo.ok) {
       const Data = await getMyInfo.json();
+      if (Data?.code.startsWith("403")) {
+        router.push("/login");
+      }
       if (Data?.code !== "200-1") {
         console.error(`에러가 발생했습니다. \n${Data?.msg}`);
       }
@@ -101,6 +106,9 @@ export default function ClientPage() {
       setLatitude(Data?.data?.latitude);
       setLongitude(Data?.data?.longitude);
     } else {
+      if (getMyInfo.status === 403) {
+        router.push("/login");
+      }
       console.error("Error fetching data:", getMyInfo.status);
     }
   };
@@ -252,7 +260,7 @@ export default function ClientPage() {
       longitude,
     });
     try {
-      const response = await fetchWithAuth(`${BASE_URL}/api/v1/mypage/me`, {
+      const response = await fetchHelper(`${BASE_URL}/api/v1/mypage/me`, {
         method: "PATCH",
         credentials: "include",
         headers: {

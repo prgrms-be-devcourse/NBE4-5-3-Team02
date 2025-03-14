@@ -31,9 +31,8 @@ class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize ->
-                        authorize
-                                .requestMatchers("/login/oauth2/code/google", "/api/v1/users/login", "/h2-console/**", "/oauth/users/additional-info", "/api/v1/users/**","/api/v1/posts/**").permitAll() // 특정 경로만 허용
-                                .anyRequest().authenticated() // 나머지 요청은 인증 필요
+                                authorize
+                                        .anyRequest().permitAll() // 모든 요청 허용
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
