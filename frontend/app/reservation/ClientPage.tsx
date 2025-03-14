@@ -8,6 +8,7 @@ import "./CustomCalendar.css";
 import { useEffect, useState } from "react";
 import DateBox from "./DataBox";
 import { useRouter } from "next/navigation";
+import { fetchWithAuth } from "../lib/util/fetchWithAuth";
 
 interface SlotInfo {
   start: Date;
@@ -16,41 +17,34 @@ interface SlotInfo {
   action: "click" | "doubleClick" | "select";
 }
 
-export default function ClientPage({
-  me,
-  post,
-}: {
-  me: {
-    id: number;
-    nickname: string;
-    username: string;
-    profileImage: string;
-    email: string;
-    phoneNumber: string;
-    address: {
-      mainAddress: string;
-      detailAddress: string;
-      zipcode: string;
-    };
-    createdAt: string;
-    score: number;
-    credit: number;
+interface me {
+  id: number;
+  nickname: string;
+  username: string;
+  profileImage: string;
+  email: string;
+  phoneNumber: string;
+  address: {
+    mainAddress: string;
+    detailAddress: string;
+    zipcode: string;
   };
-  post: {
-    userId: any;
-    id: number;
-    title: string;
-    content: string;
-    createdAt: string;
-    updatedAt: string;
-    category: string;
-    priceType: string;
-    price: number;
-    latitude: number;
-    longitude: number;
-    viewCount: number;
-  };
-}) {
+  latitude: number;
+  longitude: number;
+  createdAt: string;
+  score: number;
+  credit: number;
+}
+
+interface post {
+  id: number;
+  userId: number;
+  title: string;
+  priceType: string;
+  price: number;
+}
+
+export default function ClientPage() {
   const [date, setDate] = useState<Date>(new Date());
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [startTime, setStartTime] = useState<string>("00:00");
@@ -61,12 +55,91 @@ export default function ClientPage({
   const [usageDuration, setUsageDuration] = useState<string>("");
   const [reservedDates, setReservedDates] = useState<Date[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [me, setMe] = useState<me>({
+    id: 0,
+    nickname: "",
+    username: "",
+    profileImage: "",
+    email: "",
+    phoneNumber: "",
+    address: {
+      mainAddress: "",
+      detailAddress: "",
+      zipcode: "",
+    },
+    latitude: 0,
+    longitude: 0,
+    createdAt: "",
+    score: 0,
+    credit: 0,
+  });
+
+  const [post, setPost] = useState<post>({
+    id: 0,
+    userId: 0,
+    title: "",
+    priceType: "",
+    price: 0,
+  });
+
+  //유저정보 조회
+  const getMe = async () => {
+    const getMyInfo = await fetchWithAuth(
+      "http://localhost:8080/api/v1/mypage/me",
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (getMyInfo.ok) {
+      const Data = await getMyInfo.json();
+      if (Data?.code !== "200-1") {
+        console.error(`에러가 발생했습니다. \n${Data?.msg}`);
+      }
+      setMe(Data?.data);
+      console.log();
+    } else {
+      console.error("Error fetching data:", getMyInfo.status);
+    }
+  };
+
+  const postid = 1;
+
+  const getPost = async () => {
+    const getMyInfo = await fetchWithAuth(
+      `http://localhost:8080/api/v1/reservations/post/${postid}`,
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (getMyInfo.ok) {
+      const Data = await getMyInfo.json();
+      if (Data?.code !== "200-1") {
+        console.error(`에러가 발생했습니다. \n${Data?.msg}`);
+      }
+      setPost(Data?.data);
+      console.log("data : ", Data?.data);
+    } else {
+      console.error("Error fetching data:", getMyInfo.status);
+    }
+  };
 
   useEffect(() => {
     calculateTotalPrice(dateRange);
   }, [startTime, endTime, dateRange]);
 
   useEffect(() => {
+    getMe();
+    getPost();
     const loadReservedEvents = async () => {
       const events = await fetchReservedEvents(post.id);
       setEvents(events);
@@ -74,13 +147,20 @@ export default function ClientPage({
       processReservedEvents(events);
     };
     loadReservedEvents();
-  }, [me.id, post.id]);
+  }, []);
 
   // 예약된 날짜 가져오기
   const fetchReservedEvents = async (postId: number) => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v1/reservations/reservatedDates/${postId}`
+      const response = await fetchWithAuth(
+        `http://localhost:8080/api/v1/reservations/reservatedDates/${postId}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
       if (response.ok) {
         const data = await response.json();
@@ -323,6 +403,8 @@ export default function ClientPage({
           return; // 예약 처리 중단
         }
 
+        console.log("uid : ", post.userId);
+
         const reservationData = {
           postId: post.id,
           renterId: me.id,
@@ -333,7 +415,9 @@ export default function ClientPage({
           rentalFee: totalPrice,
         };
 
-        const response = await fetch(
+        console.log("request Data : ", reservationData);
+
+        const response = await fetchWithAuth(
           "http://localhost:8080/api/v1/reservations/request",
           {
             method: "POST",
@@ -369,7 +453,7 @@ export default function ClientPage({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center justify-center bg-white">
       <div className="mt-4 flex justify-center w-full">
         <Calendar
           localizer={localizer}

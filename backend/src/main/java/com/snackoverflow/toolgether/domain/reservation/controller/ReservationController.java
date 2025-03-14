@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.snackoverflow.toolgether.domain.reservation.dto.PostReservationResponse;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationRequest;
 import com.snackoverflow.toolgether.domain.reservation.dto.ReservationResponse;
 import com.snackoverflow.toolgether.domain.reservation.entity.FailDue;
@@ -97,6 +98,16 @@ public class ReservationController {
 			"200-1",
 			"%d번 게시글의 예약 일정 조회 성공".formatted(id),
 			reservations
+		);
+	}
+
+	@GetMapping("/post/{postid}")
+	public RsData<PostReservationResponse> getPostReservation(@PathVariable Long postid) {
+		PostReservationResponse p = reservationService.getPostById(postid);
+		return new RsData<>(
+			"200-1",
+			"%d번 게시글 조회 성공".formatted(postid),
+			p
 		);
 	}
 }

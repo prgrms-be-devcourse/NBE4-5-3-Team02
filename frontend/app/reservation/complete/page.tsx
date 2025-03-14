@@ -3,91 +3,151 @@
 import { useSearchParams } from "next/navigation";
 import ClientPage from "./ClientPage";
 import { useEffect, useState } from "react";
+import { fetchWithAuth } from "@/app/lib/util/fetchWithAuth";
+
+interface Reservation {
+  id: number;
+  status: string;
+  postId: number;
+  startTime: string;
+  endTime: string;
+  amount: number;
+  rejectionReason: string;
+  ownerId: number;
+  renterId: number;
+}
+
+interface Deposit {
+  id: number;
+  status: string;
+  amount: number;
+  returnReason: string;
+}
+
+interface post {
+  id: number;
+  userId: number;
+  title: string;
+  priceType: string;
+  price: number;
+}
 
 export default function Page() {
   const searchParams = useSearchParams();
-  const [reservation, setReservation] = useState(null);
-  const [deposit, setDeposit] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [reservation, setReservation] = useState<Reservation>({
+    id: 0,
+    status: "",
+    postId: 0,
+    startTime: "",
+    endTime: "",
+    amount: 0,
+    rejectionReason: "",
+    ownerId: 0,
+    renterId: 0,
+  });
+  const [deposit, setDeposit] = useState<Deposit>({
+    id: 0,
+    status: "",
+    amount: 0,
+    returnReason: "",
+  });
+  const [post, setPost] = useState<post>({
+    id: 0,
+    userId: 0,
+    title: "",
+    priceType: "",
+    price: 0,
+  });
 
-  const fetchReservationData = async (reservationId: string) => {
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/v1/reservations/${reservationId}`,
-        {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+  const getReservation = async (reservationId: string) => {
+    const getReservationInfo = await fetchWithAuth(
+      `http://localhost:8080/api/v1/reservations/${reservationId}`,
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
+    );
 
-      const data = await response.json();
-      setReservation(data);
-      setLoading(false);
-    } catch (error: any) {
-      setError(error);
-      setLoading(false);
+    if (getReservationInfo.ok) {
+      const Data = await getReservationInfo.json();
+      if (Data?.code !== "200-1") {
+        console.error(`에러가 발생했습니다. \n${Data?.msg}`);
+      }
+      setReservation(Data?.data);
+      console.log("deposit : ", Data?.data);
+    } else {
+      console.error("Error fetching data:", getReservationInfo.status);
     }
   };
 
-  const fetchDepositData = async (reservationId: string) => {
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/v1/deposits/rid/${reservationId}`,
-        {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+  const getDeposit = async (reservationId: string) => {
+    const getDepositInfo = await fetchWithAuth(
+      `http://localhost:8080/api/v1/deposits/rid/${reservationId}`,
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
+    );
 
-      const data = await response.json();
-      console.log("Deposit Data:", data);
-      setDeposit(data);
-    } catch (error: any) {
-      console.error("API 요청 중 오류 발생:", error);
-      throw error;
+    if (getDepositInfo.ok) {
+      const Data = await getDepositInfo.json();
+      if (Data?.code !== "200-1") {
+        console.error(`에러가 발생했습니다. \n${Data?.msg}`);
+      }
+      setDeposit(Data?.data);
+      console.log("deposit : ", Data?.data);
+    } else {
+      console.error("Error fetching data:", getDepositInfo.status);
+    }
+  };
+
+  const getPost = async (postid: number) => {
+    const getPostInfo = await fetchWithAuth(
+      `http://localhost:8080/api/v1/reservations/post/${postid}`,
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (getPostInfo.ok) {
+      const Data = await getPostInfo.json();
+      if (Data?.code !== "200-1") {
+        console.error(`에러가 발생했습니다. \n${Data?.msg}`);
+      }
+      setPost(Data?.data);
+      console.log("data : ", Data?.data);
+    } else {
+      console.error("Error fetching data:", getPostInfo.status);
     }
   };
 
   useEffect(() => {
     const reservationId = searchParams.get("reservationId");
     if (reservationId) {
-      fetchReservationData(reservationId);
-      fetchDepositData(reservationId);
+      getReservation(reservationId);
+      getDeposit(reservationId);
     }
   }, [searchParams]);
 
-  if (loading) {
-    return <div>로딩 중...</div>;
-  }
-
-  if (error) {
-    return <div>오류 발생: {error.message}</div>;
-  }
-
-  if (!reservation) {
-    return <div>예약 정보가 없습니다.</div>;
-  }
-
-  if (!deposit) {
-    return <div>보증금 정보가 없습니다.</div>;
-  }
+  useEffect(() => {
+    if (reservation && reservation.postId) {
+      getPost(reservation.postId);
+    }
+  }, [reservation]);
 
   console.log("reservation", reservation);
+  console.log("Post", post);
+  console.log("Deposit", deposit);
 
-  return <ClientPage reservation={reservation.data} deposit={deposit.data} />;
+  return <ClientPage reservation={reservation} deposit={deposit} post={post} />;
 }

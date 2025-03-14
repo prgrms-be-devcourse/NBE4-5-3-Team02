@@ -1,5 +1,8 @@
 package com.snackoverflow.toolgether.domain.reservation.service;
 
+import com.snackoverflow.toolgether.domain.post.dto.PostResponse;
+import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
+import com.snackoverflow.toolgether.domain.reservation.dto.PostReservationResponse;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
 import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository;
@@ -17,6 +20,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.quartz.JobDataMap;
@@ -51,6 +55,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ReservationService {
 	private final ReservationRepository reservationRepository;
+	private final PostRepository postRepository;
 	private final PostService postService;
 	private final UserService userService;
 	private final DepositHistoryService depositHistoryService;
@@ -299,6 +304,19 @@ public class ReservationService {
 			));
 		});
 		return responses;
+	}
+
+	// 예약용 Post 조회 추가
+	@Transactional(readOnly = true)
+	public PostReservationResponse getPostById(Long postId) {
+		Optional<Post> post = postRepository.findById(postId);
+		return new PostReservationResponse(
+			post.get().getId(),
+			post.get().getUser().getId(),
+			post.get().getTitle(),
+			post.get().getPriceType().name(),
+			post.get().getPrice()
+		);
 	}
 
     // 렌탈 예약 정보 DB에서 조회

@@ -19,6 +19,7 @@ function formatDate(dateTimeString: string | number | Date) {
 export default function ClientPage({
   reservation,
   deposit,
+  post,
 }: {
   reservation: {
     id: number;
@@ -32,7 +33,14 @@ export default function ClientPage({
     id: number;
     status: string;
     amount: number;
-    reutrnReason: string;
+    returnReason: string;
+  };
+  post: {
+    id: number;
+    userId: number;
+    title: string;
+    priceType: string;
+    price: number;
   };
 }) {
   const formattedStartTime = formatDate(reservation.startTime);
@@ -45,9 +53,8 @@ export default function ClientPage({
         <p className="text-4xl font-bold text-green-600 mb-4">
           예약을 확인 중입니다
         </p>
-        <p className="text-lg mb-2">예약이 확정되면 알림으로 알려드릴게요!</p>
         {/* 제품명 추가 */}
-        <p className="text-lg mb-2 font-bold">제품명 {reservation.postId}</p>
+        <p className="text-lg mb-2 font-bold">{post.title}</p>
         <p className="text-lg mb-2">
           {formattedStartTime} ~ {formattedEndTime}
         </p>
