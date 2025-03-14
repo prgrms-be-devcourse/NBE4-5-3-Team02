@@ -56,5 +56,5 @@ public class Review {
     private Integer kindnessScore; // 응대 친절도 평가 점수
 
     @CreatedDate
-    private LocalDateTime createAt; // 리뷰 작성 날짜
+    private LocalDateTime createdAt; // 리뷰 작성 날짜
 }

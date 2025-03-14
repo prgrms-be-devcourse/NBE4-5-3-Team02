@@ -26,7 +26,7 @@ export default function ClientPage() {
     longitude?: string;
   }>({});
   const [, setGeoError] = useState("");
-  
+
   const BASE_URL = 'http://localhost:8080';
 
   const router = useRouter();

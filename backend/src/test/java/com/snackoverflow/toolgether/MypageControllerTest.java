@@ -83,7 +83,6 @@ public class MypageControllerTest {
 	@Test
 	@DisplayName("내 정보 조회 테스트")
 	public void testGetMyInfo() throws Exception {
-		// ✅ 유저 정보 생성
 		Address address = Address.builder()
 				.mainAddress("서울시 강남구")
 				.detailAddress("역삼동 123-45")
@@ -357,7 +356,7 @@ public class MypageControllerTest {
 		ResultActions resultActions = mockMvc.perform(multipart("/api/v1/mypage/profile")
 						.file(profileImageFile)
 						.contentType(MediaType.MULTIPART_FORM_DATA)
-						.param("uuid", "testprofile") // ✅ ProfileRequest DTO 를 위한 폼 데이터 추가! - **유지**
+						.param("uuid", "testprofile")
 				)
 				.andDo(print());
 

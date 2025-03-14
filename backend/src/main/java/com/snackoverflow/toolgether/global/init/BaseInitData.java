@@ -51,7 +51,7 @@ public class BaseInitData {
 	@Transactional
 	public void reservationInit() {
 
-//        UserInitData 전부 삭제 후 재생성 코드
+//        UserInitData 전부 삭제 후 재생성 코드(AUTO_INCREMENT 초기화와 함께 주석 풀고 사용)
 //        reviewRepository.deleteAll();
 //        reservationRepository.deleteAll();
 //        postRepository.deleteAll();

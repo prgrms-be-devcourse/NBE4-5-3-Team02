@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.config;
+package com.snackoverflow.toolgether.global.config;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;

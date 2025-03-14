@@ -25,7 +25,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -270,6 +272,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional(readOnly = true)
     public boolean checkGeoInfo(PatchMyInfoRequest request) {
         try {
             // 주소 -> 좌표 변환
@@ -302,5 +305,17 @@ public class UserService {
         } catch (NumberFormatException e) {
             throw new DistanceCalculationException("좌표 파싱 실패: " + e.getMessage());
         }
+    }
+
+    @Transactional
+    public void updateUserScore(Long id, double updatedScore) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+        user.updateScore(updatedScore);
+        userRepository.save(user);
+    }
+
+    public List<User> getUsersWithoutReviewsSince(LocalDateTime date) {
+        return userRepository.findUsersWithoutReviewsSince(date);
     }
 }

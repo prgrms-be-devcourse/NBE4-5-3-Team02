@@ -144,4 +144,8 @@ public class User {
         this.longitude = 0.0;
         this.profileImage = null;
     }
+
+    public void updateScore(double updatedScore) {
+        this.score = (int)Math.round(updatedScore);
+    }
 }
