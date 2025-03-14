@@ -81,6 +81,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 //                log.info("Authentication 생성됨: {}", authentication);
 
+                //test
+//                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+//                Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, authorities);
+
+//                log.info("Authentication 생성됨: {}", authentication);
+
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
             filterChain.doFilter(request, response);

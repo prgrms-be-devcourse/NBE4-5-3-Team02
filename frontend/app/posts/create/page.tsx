@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
-interface Window {
-  daum: any;
-}
+// interface Window {
+//   daum: any;
+// }
 
 interface IAddr {
   address: string;
@@ -174,7 +174,6 @@ export default function CreatePostPage() {
       oncomplete: function (data: IAddr) {
         setAddress(data.address); // 주소 상태 업데이트
         setZipCode(data.zonecode); // 우편번호 상태 업데이트
-        
         document.getElementById("addrDetail")?.focus(); // 상세 주소 입력 필드로 자동 포커스
 
         // 주소 → 위도/경도 변환 요청

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { MapPinIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 interface Availability {
   date: string | null;
@@ -54,10 +54,10 @@ export default function PostsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const [error, setError] = useState("");
-  const [page, setPage] = useState(0);
+  // const [error, setError] = useState("");
+  // const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const observer = useRef<IntersectionObserver | null>(null);
+  // const observer = useRef<IntersectionObserver | null>(null);
 
   // 지역구 목록 (latitude, longitude 포함)
   const districtsWithCoords: {
@@ -122,7 +122,7 @@ export default function PostsPage() {
     if (sortedDates.length === 0) return "예약 없음";
 
     const start = sortedDates[0];
-    const end = sortedDates[sortedDates.length - 1];
+    // const end = sortedDates[sortedDates.length - 1];
 
     // return `${start.toLocaleDateString()} ~ ${end.toLocaleDateString()}`;
     return `${start.toLocaleDateString()} ~ `;
@@ -131,7 +131,7 @@ export default function PostsPage() {
   useEffect(() => {
     updateSearchParams();
     setPosts([]);
-    setPage(0);
+    // setPage(0);
     fetchPosts(0);
   }, [searchQuery, selectedDistrict, distance, priceType, category]); // 카테고리 상태를 useEffect 의존성 배열에 추가
 
@@ -179,7 +179,7 @@ export default function PostsPage() {
 
       setTotalPages(data.data.totalPages);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "알 수 없는 오류 발생");
+      // setError(err instanceof Error ? err.message : "알 수 없는 오류 발생");
     } finally {
       setLoading(false);
     }
