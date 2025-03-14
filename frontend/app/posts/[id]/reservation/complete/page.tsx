@@ -59,7 +59,7 @@ export default function Page() {
     price: 0,
   });
 
-  const BASE_URL = "http://localhost:8080";
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
   const getReservation = async (reservationId: string) => {
     const getReservationInfo = await fetchWithAuth(

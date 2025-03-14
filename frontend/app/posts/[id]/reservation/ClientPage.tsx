@@ -1,7 +1,7 @@
 "use client";
 
 import { Calendar, momentLocalizer } from "react-big-calendar";
-import moment, { duration } from "moment";
+import moment from "moment";
 import "moment/locale/ko";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./CustomCalendar.css";
@@ -49,7 +49,6 @@ export default function ClientPage({ postid }: { postid: number }) {
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [startTime, setStartTime] = useState<string>("00:00");
   const [endTime, setEndTime] = useState<string>("00:00");
-  const [showTimeForm, setShowTimeForm] = useState<boolean>(false);
   const [dateRange, setDateRange] = useState<Date[]>([]);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [usageDuration, setUsageDuration] = useState<string>("");
@@ -82,7 +81,7 @@ export default function ClientPage({ postid }: { postid: number }) {
     price: 0,
   });
 
-  const BASE_URL = "http://localhost:8080";
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
   //유저정보 조회
   const getMe = async () => {
@@ -180,7 +179,7 @@ export default function ClientPage({ postid }: { postid: number }) {
   const processReservedEvents = (events: any[]) => {
     const dates: Date[] = [];
     events.forEach((event) => {
-      let currentDate = moment(event.start).clone();
+      const currentDate = moment(event.start).clone();
       const endDate = moment(event.end).clone();
 
       while (currentDate.isSameOrBefore(endDate, "day")) {
@@ -226,7 +225,7 @@ export default function ClientPage({ postid }: { postid: number }) {
       const start = moment(dates[0]).startOf("day");
       const end = moment(dates[1]).startOf("day");
       const range: Date[] = [];
-      let current = moment(start);
+      const current = moment(start);
 
       while (current.isSameOrBefore(end, "day")) {
         range.push(current.clone().toDate());
@@ -275,7 +274,7 @@ export default function ClientPage({ postid }: { postid: number }) {
   const handleSelectSlot = ({ start, end }: SlotInfo) => {
     const correctedEnd = moment(end).subtract(1, "day").toDate();
     const range: Date[] = [];
-    let current = moment(start).clone();
+    const current = moment(start).clone();
 
     while (current.isSameOrBefore(moment(correctedEnd), "day")) {
       if (
@@ -297,7 +296,6 @@ export default function ClientPage({ postid }: { postid: number }) {
 
     setSelectedDates([start, correctedEnd]);
     calculateDateRange([start, correctedEnd]);
-    setShowTimeForm(true);
   };
 
   const isDateInEventRange = (date: Date, event: any) => {

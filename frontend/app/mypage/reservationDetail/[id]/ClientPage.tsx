@@ -644,17 +644,9 @@ function RejectedStatus({
 function FailedStatus({
   reservation,
   deposit,
-  me,
-  renter,
-  owner,
-  reason,
 }: {
   reservation: Reservation;
   deposit: Deposit;
-  me: me;
-  renter: me | null;
-  owner: me | null;
-  reason: string; // 실패 사유 (API에서 전달받음)
 }) {
   const issueOptions = [
     { value: "DAMAGE_REPORTED", label: "물건 훼손", issueType: "renter" },
@@ -796,7 +788,7 @@ export default function ClientPage({
     price: 0,
   });
 
-  const BASE_URL = "http://localhost:8080";
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
   //유저정보 조회
   const getMe = async () => {
@@ -823,7 +815,7 @@ export default function ClientPage({
   // 예약 정보 조회
   const getReservation = async () => {
     const getReservationInfo = await fetchWithAuth(
-      `${BASE_URL}/api/v1/reservations/${rid}`,
+      `${BASE_URL}/api/v1/reservations/${reservationId}`,
       {
         method: "GET",
         credentials: "include",
@@ -847,7 +839,7 @@ export default function ClientPage({
   // 보증금 정보 조회
   const getDeposit = async () => {
     const getDepositInfo = await fetchWithAuth(
-      `${BASE_URL}/api/v1/deposits/rid/${rid}`,
+      `${BASE_URL}/api/v1/deposits/rid/${reservationId}`,
       {
         method: "GET",
         credentials: "include",
@@ -1009,24 +1001,10 @@ export default function ClientPage({
         <DoneStatus reservation={reservation} deposit={deposit} post={post} />
       )}
       {reservation.status === "FAILED_OWNER_ISSUE" && (
-        <FailedStatus
-          reservation={reservation}
-          deposit={deposit}
-          me={me}
-          renter={renter}
-          owner={owner}
-          reason="OWNER_ISSUE"
-        />
+        <FailedStatus reservation={reservation} deposit={deposit} />
       )}
       {reservation.status === "FAILED_RENTER_ISSUE" && (
-        <FailedStatus
-          reservation={reservation}
-          deposit={deposit}
-          me={me}
-          renter={renter}
-          owner={owner}
-          reason="RENTER_ISSUE"
-        />
+        <FailedStatus reservation={reservation} deposit={deposit} />
       )}
       {reservation.status === "CANCELED" && (
         <CancelledStatus reservation={reservation} />
