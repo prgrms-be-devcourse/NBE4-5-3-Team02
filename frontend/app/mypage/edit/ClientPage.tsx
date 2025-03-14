@@ -76,7 +76,7 @@ export default function ClientPage() {
         setZipcode(data.zonecode);
         setMainAddress(`${data.address} ${data.buildingName || ""}`.trim());
       },
-    // @ts-ignore-error
+    // @ts-expect-error
     }).open();
   };
 
