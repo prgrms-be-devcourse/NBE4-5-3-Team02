@@ -135,7 +135,8 @@ export default function SignupPage() {
                 clearInterval(intervalRef.current);
             }
         } catch (err) {
-            setErrors({email: '인증 코드 전송에 실패했습니다'});
+            console.error('Error sending verification code:', err); // 에러 로그 출력
+            setErrors({ email: '인증 코드 전송에 실패했습니다' });
         }
     };
 
@@ -158,7 +159,8 @@ export default function SignupPage() {
                 setCurrentStep(prev => Math.min(prev + 1, 3)); // 3은 최대 단계 수
             }, 1000);
         } catch (err) {
-            setErrors(prev => ({...prev, verification: '인증 코드가 일치하지 않습니다'}));
+            console.error('Error verifying email:', err); // 에러 로그 출력
+            setErrors(prev => ({ ...prev, verification: '인증 코드가 일치하지 않습니다' }));
         }
     };
 
