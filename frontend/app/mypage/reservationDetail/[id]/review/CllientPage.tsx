@@ -306,6 +306,7 @@ const StepContainer: React.FC<StepContainerProps> = ({
           {selectedScore && scoreDescriptions[selectedScore]}
         </div>
       </div>
+      {children}
       <div
         className={`flex ${!onPrevious ? "justify-end" : "justify-between"}`}
       >

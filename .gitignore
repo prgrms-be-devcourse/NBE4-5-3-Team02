@@ -44,3 +44,5 @@ db_dev.trace.db
 *.jar
 
 .idea/
+
+.env*
