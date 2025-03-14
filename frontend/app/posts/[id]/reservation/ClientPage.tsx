@@ -1,6 +1,7 @@
 "use client";
 
 import { Calendar, momentLocalizer } from "react-big-calendar";
+import { CSSProperties } from "react";
 import moment from "moment";
 import "moment/locale/ko";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -319,7 +320,7 @@ export default function ClientPage({ postid }: { postid: number }) {
     if (events.some((event) => isDateInEventRange(date, event))) {
       return {
         style: {
-          pointerEvents: "none",
+          pointerEvents: "none" as CSSProperties["pointerEvents"],
         },
       };
     }
@@ -335,7 +336,7 @@ export default function ClientPage({ postid }: { postid: number }) {
     ) {
       return {
         style: {
-          pointerEvents: "none",
+          pointerEvents: "none" as CSSProperties["pointerEvents"],
         },
       };
     }
