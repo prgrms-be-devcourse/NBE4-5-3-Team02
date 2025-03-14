@@ -116,6 +116,7 @@ export default function SignupPage() {
                     baseAddress: `${data.address} ${data.buildingName || ''}`.trim()
                 }));
             }
+            // @ts-expect-error: 'open' 메서드에서 타입 오류 발생 가능성 있음
         }).open();
     };
 

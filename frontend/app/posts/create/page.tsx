@@ -180,6 +180,7 @@ export default function CreatePostPage() {
         // 주소 → 위도/경도 변환 요청
         fetchCoordsFromAddress(data.address);
       },
+      // @ts-expect-error: 'open' 메서드에서 타입 오류 발생 가능성 있음
     }).open();
   };
 
