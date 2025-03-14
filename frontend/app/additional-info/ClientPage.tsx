@@ -73,7 +73,7 @@ export default function ClientPage() {
             },
             onresize: (size) => {
                 window.resizeTo(size.width, size.height);
-            }
+            } // @ts-expect-error: 'open' 메서드에서 타입 오류 발생 가능성 있음
         }).open({
             popupTitle: '주소 검색',
             popupKey: 'kakaoPopup'
