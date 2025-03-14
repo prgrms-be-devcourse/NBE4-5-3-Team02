@@ -54,7 +54,8 @@ interface post {
 
 function formatDate(dateTimeString: string | number | Date) {
   const date = new Date(dateTimeString);
-  const options = {
+  const options: Intl.DateTimeFormatOptions = {
+    // 타입 명시
     month: "numeric",
     day: "numeric",
     weekday: "short",
