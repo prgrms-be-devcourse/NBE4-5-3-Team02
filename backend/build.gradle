@@ -67,7 +67,6 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-quartz'
 	implementation 'org.springframework.retry:spring-retry'
-
 }
 
 dependencyManagement { // Spring Cloud Version 명시 (Hoxton.SR6)

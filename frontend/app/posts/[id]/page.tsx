@@ -35,12 +35,15 @@ export default function PostDetailPage() {
   const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
   useEffect(() => {
     const fetchPostDetail = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/v1/posts/${id}`,
+          `${BASE_URL}/api/v1/posts/${id}`,
+
           {
             method: "GET",
             credentials: "include",
@@ -87,7 +90,7 @@ export default function PostDetailPage() {
     return (
       <p className="text-gray-600 text-center py-10">게시물을 불러오는 중...</p>
     );
-    
+
   if (error) return <p className="text-red-600 text-center py-10">{error}</p>;
 
   return (
