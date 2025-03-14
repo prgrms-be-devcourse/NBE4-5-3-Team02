@@ -15,7 +15,7 @@ export default function LoginPage() {
     const {login} = useAuth();
     const hasFetched = useRef(false);
 
-    const BASE_URL = "http://localhost:8080";
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
     // 폼 제출 핸들러
     const handleFormLogin = async (e: React.FormEvent) => {

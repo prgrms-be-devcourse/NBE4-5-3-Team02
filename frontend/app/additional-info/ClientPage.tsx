@@ -23,7 +23,7 @@ export default function ClientPage() {
     const [geoError, setGeoError] = useState('');
     const [isGeoLoading, setIsGeoLoading] = useState(true);
 
-    const BASE_URL = "http://localhost:8080";
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
     // 브라우저 위치 정보 조회
     useEffect(() => {
