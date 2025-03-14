@@ -1,15 +1,11 @@
 import ClientPage from "./ClientPage";
 
-// 페이지 디렉토리 이동 필요 예상 -> (app/post/[id]/reservation/)
+export default async function Page({ params }: { params: any }) {
+  const postId = parseInt(params.id, 10); // 숫자로 변환 (10진수)
 
-export default async function Page({
-  params,
-}: {
-  params: {
-    id: number;
-  };
-}) {
-  const { id } = await params;
+  if (isNaN(postId)) {
+    return <div>Invalid post ID</div>;
+  }
 
-  return <ClientPage postid={id} />;
+  return <ClientPage postid={postId} />;
 }

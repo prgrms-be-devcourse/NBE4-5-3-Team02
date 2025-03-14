@@ -746,7 +746,11 @@ function CancelledStatus({ reservation }: { reservation: Reservation }) {
   );
 }
 
-export default function ClientPage({ rid }: { rid: number }) {
+export default function ClientPage({
+  reservationId,
+}: {
+  reservationId: number;
+}) {
   const [renter, setRenter] = useState<me | null>(null);
   const [owner, setOwner] = useState<me | null>(null);
   const [me, setMe] = useState<me>({
