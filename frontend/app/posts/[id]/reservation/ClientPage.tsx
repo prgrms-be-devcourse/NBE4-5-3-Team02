@@ -8,7 +8,7 @@ import "./CustomCalendar.css";
 import { useEffect, useState } from "react";
 import DateBox from "./DataBox";
 import { useRouter } from "next/navigation";
-import { fetchWithAuth } from "../lib/util/fetchWithAuth";
+import { fetchWithAuth } from "../../../lib/util/fetchWithAuth";
 
 interface SlotInfo {
   start: Date;
@@ -44,7 +44,7 @@ interface post {
   price: number;
 }
 
-export default function ClientPage() {
+export default function ClientPage({ postid }: { postid: number }) {
   const [date, setDate] = useState<Date>(new Date());
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [startTime, setStartTime] = useState<string>("00:00");
@@ -106,8 +106,6 @@ export default function ClientPage() {
       console.error("Error fetching data:", getMyInfo.status);
     }
   };
-
-  const postid = 1;
 
   const getPost = async () => {
     const getMyInfo = await fetchWithAuth(
@@ -434,7 +432,7 @@ export default function ClientPage() {
           alert("예약 신청이 완료되었습니다.");
 
           router.push(
-            `/reservation/complete?reservationId=${reservation.data.id}`
+            `./reservation/complete?reservationId=${reservation.data.id}`
           );
         } else {
           const errorData = await response.json();

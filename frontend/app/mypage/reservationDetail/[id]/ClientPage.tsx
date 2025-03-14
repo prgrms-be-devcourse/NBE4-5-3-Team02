@@ -104,7 +104,6 @@ function RequestedStatus({
   };
 
   const handleCancel = () => {
-    //여기도 수정
     setActionType("cancel");
     setModalMessage("정말 취소하시겠습니까?");
     setShowConfirmModal(true);
@@ -318,6 +317,28 @@ function ApprovedStatus({
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
+
+  const startRental = async () => {
+    try {
+      const response = await fetchWithAuth(
+        `http://localhost:8080/api/v1/reservations/${reservation.id}/start`,
+        {
+          method: "PATCH",
+          credentials: "include",
+        }
+      );
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        alert(`승인 실패: ${errorData.message || "서버 오류"}`);
+      }
+    } catch (error) {
+      alert("승인 처리 중 오류 발생");
+      console.error(error);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center w-[70%] h-150 border rounded-lg shadow-md p-6 bg-green-200">
       <p className="text-5xl font-bold text-green-600 mb-4">✅</p>
@@ -341,8 +362,17 @@ function ApprovedStatus({
           소유자 {owner.nickname}님의 상세 정보 보기
         </button>
       ) : null}
+      <button
+        className="mt-5 bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+        onClick={startRental}
+      >
+        대여 시작하기
+      </button>
       {showModal && owner && (
-        <div className="fixed inset-0 flex justify-center items-center text-center bg-transparent backdrop-filter backdrop-blur-lg">
+        <div
+          className="fixed inset-0 flex justify-center items-center text-center bg-transparent backdrop-filter backdrop-blur-lg"
+          id="modal"
+        >
           <div className="relative p-8 bg-white w-1/2 rounded-lg">
             <h2 className="text-2xl font-bold mb-4">
               {owner.nickname}님의 정보
@@ -440,6 +470,27 @@ function InProgressStatus({
     }
   };
 
+  const completeRental = async () => {
+    try {
+      const response = await fetchWithAuth(
+        `http://localhost:8080/api/v1/reservations/${reservation.id}/complete`,
+        {
+          method: "PATCH",
+          credentials: "include",
+        }
+      );
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        alert(`승인 실패: ${errorData.message || "서버 오류"}`);
+      }
+    } catch (error) {
+      alert("승인 처리 중 오류 발생");
+      console.error(error);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center w-[70%] h-150 border rounded-lg shadow-md p-6 bg-yellow-200">
       <p className="text-5xl font-bold text-yellow-600 mb-4">⏳</p>
@@ -458,6 +509,12 @@ function InProgressStatus({
         onClick={handleIssue}
       >
         문제 보고하기
+      </button>
+      <button
+        className="mt-5 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        onClick={completeRental}
+      >
+        대여 종료하기
       </button>
 
       {/* 확인 모달 */}
@@ -644,8 +701,7 @@ function DoneStatus({
   const router = useRouter(); // useRouter 훅 사용
 
   const goToReviewPage = () => {
-    // 임시 URL.  나중에 실제 리뷰 페이지 URL로 변경해야 함.
-    router.push(`/review/${reservation.id}`);
+    router.push(`./${reservation.id}/review/`);
   };
   return (
     <div className="flex flex-col items-center justify-center w-[70%] h-150 border rounded-lg shadow-md p-6 bg-gray-200">
@@ -663,7 +719,7 @@ function DoneStatus({
       </p>
       <p className="text-lg mb-2 font-bold">합계 {reservation.amount}₩</p>
       <button
-        className="mt-4 bg-green-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded"
+        className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
         onClick={goToReviewPage}
       >
         유저 리뷰하기
@@ -964,7 +1020,7 @@ export default function ClientPage({ rid }: { rid: number }) {
         <CancelledStatus reservation={reservation} />
       )}
       <button
-        className="mt-4 bg-green-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
         onClick={goToMyPage} // 버튼 클릭 시 goToMyPage 함수 호출
       >
         마이페이지로 이동
