@@ -76,7 +76,7 @@ export default function ClientPage() {
         setZipcode(data.zonecode);
         setMainAddress(`${data.address} ${data.buildingName || ""}`.trim());
       },
-    // @ts-expect-error
+    // @ts-expect-error: type problem in mypage-edit in kakao address search
     }).open();
   };
 
