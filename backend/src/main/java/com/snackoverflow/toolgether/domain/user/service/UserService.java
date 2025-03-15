@@ -318,4 +318,10 @@ public class UserService {
     public List<User> getUsersWithoutReviewsSince(LocalDateTime date) {
         return userRepository.findUsersWithoutReviewsSince(date);
     }
+
+    public String getMyProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+        return user.getProfileImage() == null ? "" : user.getProfileImage();
+    }
 }

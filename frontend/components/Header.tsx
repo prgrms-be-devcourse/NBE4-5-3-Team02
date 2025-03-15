@@ -1,14 +1,18 @@
 'use client'
 
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import Link from 'next/link'
+import Image from "next/image";
 import {useAuth} from '@/app/lib/auth-context'
 import AuthButton from '@/components/AuthButton'
 import EcoBadge from "@/components/EcoBadge"
 import {BellIcon, ChatBubbleOvalLeftIcon} from '@heroicons/react/24/outline'
 import {motion} from 'framer-motion'
+import { useRouter } from "next/navigation";
+import { fetchWithAuth } from '@/app/lib/util/fetchWithAuth';
 
 export default function Header() {
+    const [profile, setProfile] = useState<string>();
     const {isLoggedIn} = useAuth()
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
     const [notifications, setNotifications] = useState([
@@ -16,12 +20,56 @@ export default function Header() {
         {id: 2, message: '새로운 예약 요청이 있습니다!', read: false}
     ])
 
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+    const router = useRouter();
+
     const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen)
 
     const markAllAsRead = () => {
         setNotifications([])
         setIsDropdownOpen(false)
     }
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            getMyProfile();
+        }
+      }, [isLoggedIn]);
+
+      const fetchHelper = async (url: string, options?: RequestInit) => {
+        const accessToken = sessionStorage.getItem("access_token");
+        if (accessToken) {
+          return fetchWithAuth(url, options);
+        } else {
+          return fetch(url, options);
+        }
+      };
+
+      const getMyProfile = async () => {
+        const getProfile = await fetchHelper(`${BASE_URL}/api/v1/users/profile`, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+    
+        if (getProfile.ok) {
+          const Data = await getProfile.json();
+          if (Data?.code.startsWith("403")) {
+            router.push("/login");
+          }
+          if (Data?.code !== "200-1") {
+            console.error(`에러가 발생했습니다. \n${Data?.msg}`);
+          }
+          setProfile(Data?.data);
+        } else {
+          if (getProfile.status === 403) {
+            router.push("/login");
+          }
+          console.error("Error fetching data:", getProfile.status);
+        }
+      };
 
     return (
         <header className="flex justify-between items-center p-4 bg-white shadow-md">
@@ -120,11 +168,19 @@ export default function Header() {
                 {isLoggedIn && (
                     <Link href="/mypage"
                         className="relative w-10 h-10 rounded-full bg-gray-200 overflow-hidden border-2 border-green-500">
-                        <img
-                            src="/user-profile.jpg"
+                        {profile ? <Image
+                            src={profile}
                             alt="프로필"
+                            width={40}
+                            height={40}
                             className="w-full h-full object-cover hover:scale-105 transition-transform"
-                        />
+                        /> : 
+                            <div 
+                            className="w-full h-full object-cover hover:scale-105 transition-transform"
+                            >
+                                <div className='bg-gray-200'></div>
+                            </div>
+                        }
                     </Link>
                 )}
 

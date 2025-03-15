@@ -8,6 +8,8 @@ import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.service.UserService;
 import com.snackoverflow.toolgether.domain.user.service.VerificationService;
 import com.snackoverflow.toolgether.global.dto.RsData;
+import com.snackoverflow.toolgether.global.filter.CustomUserDetails;
+import com.snackoverflow.toolgether.global.filter.Login;
 import com.snackoverflow.toolgether.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -98,6 +100,19 @@ public class UserController {
                         "nickname", user.getNickname(),
                         "token", result.token()
                 )
+        );
+    }
+
+    @GetMapping("/profile")
+    public RsData<String> getProfile(
+            @Login CustomUserDetails customUserDetails
+    ) {
+        Long userId = customUserDetails.getUserId();
+        String profile = userService.getMyProfile(userId);
+        return new RsData<>(
+                "200-1",
+                "프로필 조회 성공",
+                profile
         );
     }
 
