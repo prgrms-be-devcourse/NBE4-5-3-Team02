@@ -73,6 +73,13 @@ interface Reservations {
   borrows: Borrow[];
 }
 
+interface InfoCardProps {
+  icon: React.ReactNode;
+  title: string;
+  value: React.ReactNode;
+  color: string;
+}
+
 export default function ClientPage() {
   const [me, setMe] = useState<Me>({
     id: 0,
@@ -169,18 +176,18 @@ export default function ClientPage() {
     color: getRandomColor(),
   }));
 
-  const messages = {
-    today: "오늘",
-    previous: "이전",
-    next: "다음",
-    month: "월",
-    week: "주",
-    day: "일",
-    agenda: "일정",
-    date: "날짜",
-    time: "시간",
-    event: "이벤트",
-  };
+  // const messages = {
+  //   today: "오늘",
+  //   previous: "이전",
+  //   next: "다음",
+  //   month: "월",
+  //   week: "주",
+  //   day: "일",
+  //   agenda: "일정",
+  //   date: "날짜",
+  //   time: "시간",
+  //   event: "이벤트",
+  // };
 
   const reservationStatus: {
     [key: string]: string;
@@ -194,15 +201,15 @@ export default function ClientPage() {
     FAILED_RENTER_ISSUE: "대여자 이슈로 실패",
   };
 
-  const formats = {
-    dateFormat: "D",
-    dayFormat: (date: Date, culture: any, localizer: any) =>
-        localizer.format(date, "dddd", culture),
-    weekdayFormat: (date: Date, culture: any, localizer: any) =>
-        localizer.format(date, "ddd", culture),
-    monthHeaderFormat: (date: Date, culture: any, localizer: any) =>
-        localizer.format(date, "YYYY년 MM월", culture),
-  };
+  // const formats = {
+  //   dateFormat: "D",
+  //   dayFormat: (date: Date, culture: any, localizer: any) =>
+  //       localizer.format(date, "dddd", culture),
+  //   weekdayFormat: (date: Date, culture: any, localizer: any) =>
+  //       localizer.format(date, "ddd", culture),
+  //   monthHeaderFormat: (date: Date, culture: any, localizer: any) =>
+  //       localizer.format(date, "YYYY년 MM월", culture),
+  // };
 
   const filteredReservations = useMemo(() => {
     if (eventType === "rental") {
@@ -235,7 +242,7 @@ export default function ClientPage() {
       },
     });
 
-    if (getMyInfo.ok) {
+    if (getMyInfo?.ok) {
       const Data = await getMyInfo.json();
       if (Data?.code.startsWith("403")) {
         router.push("/login");
@@ -245,10 +252,10 @@ export default function ClientPage() {
       }
       setMe(Data?.data);
     } else {
-      if (getMyInfo.status === 403) {
+      if (getMyInfo?.status === 403) {
         router.push("/login");
       }
-      console.error("Error fetching data:", getMyInfo.status);
+      console.error("Error fetching data:", getMyInfo?.status);
     }
   };
 
@@ -265,14 +272,14 @@ export default function ClientPage() {
       }
     );
 
-    if (getMyReservations.ok) {
+    if (getMyReservations?.ok) {
       const Data = await getMyReservations.json();
       if (Data?.code !== "200-1") {
         console.error(`에러가 발생했습니다. \n${Data?.msg}`);
       }
       setReservations(Data?.data);
     } else {
-      console.error("Error fetching data:", getMyReservations.status);
+      console.error("Error fetching data:", getMyReservations?.status);
     }
   };
 
@@ -300,7 +307,7 @@ export default function ClientPage() {
         }
       );
 
-      if (uploadProfile.ok) {
+      if (uploadProfile?.ok) {
         const Data = await uploadProfile.json();
         if (Data?.code.startsWith("200")) {
           handleModal(
@@ -315,10 +322,10 @@ export default function ClientPage() {
           handleModal("프로필 수정 실패", Data?.msg, null, false);
         }
       } else {
-        console.error("Error fetching data:", uploadProfile.status);
+        console.error("Error fetching data:", uploadProfile?.status);
         handleModal(
           "프로필 수정 실패",
-          `오류가 발생했습니다. (HTTP 상태 코드: ${uploadProfile.status})`,
+          `오류가 발생했습니다. (HTTP 상태 코드: ${uploadProfile?.status})`,
           null,
           false
         );
@@ -347,7 +354,7 @@ export default function ClientPage() {
         }
       );
 
-      if (deleteProfile.ok) {
+      if (deleteProfile?.ok) {
         const Data = await deleteProfile.json();
         if (Data?.code.startsWith("200")) {
           handleModal(
@@ -362,10 +369,10 @@ export default function ClientPage() {
           handleModal("프로필 삭제 실패", Data?.msg, null, false);
         }
       } else {
-        console.error("Error fetching data:", deleteProfile.status);
+        console.error("Error fetching data:", deleteProfile?.status);
         handleModal(
           "프로필 삭제 실패",
-          `오류가 발생했습니다. (HTTP 상태 코드: ${deleteProfile.status})`,
+          `오류가 발생했습니다. (HTTP 상태 코드: ${deleteProfile?.status})`,
           null,
           false
         );
@@ -394,7 +401,7 @@ export default function ClientPage() {
         }
       );
 
-      if (withdrawMembership.ok) {
+      if (withdrawMembership?.ok) {
         const Data = await withdrawMembership.json();
         if (Data?.code.startsWith("200")) {
           handleModal(
@@ -414,10 +421,10 @@ export default function ClientPage() {
           );
         }
       } else {
-        console.error("회원 탈퇴 API 요청 실패:", withdrawMembership.status);
+        console.error("회원 탈퇴 API 요청 실패:", withdrawMembership?.status);
         handleModal(
           "회원 탈퇴 실패",
-          `오류가 발생했습니다. (HTTP 상태 코드: ${withdrawMembership.status})`,
+          `오류가 발생했습니다. (HTTP 상태 코드: ${withdrawMembership?.status})`,
           null,
           false
         );
@@ -433,7 +440,9 @@ export default function ClientPage() {
     }
   };
 
-  const InfoCard = ({ icon, title, value, color }) => (
+  
+
+  const InfoCard = ({ icon, title, value, color }: InfoCardProps) => (
       <div className={`${color} p-4 rounded-xl flex items-center gap-3 transition-transform hover:scale-[1.02]`}>
         <div className="p-2 bg-white rounded-lg shadow-sm">{icon}</div>
         <div>
@@ -442,7 +451,7 @@ export default function ClientPage() {
         </div>
       </div>
   );
-  const TabButton = ({ active, children, onClick, icon }) => (
+  const TabButton = ({ active, children, onClick, icon }: { active: boolean; children: React.ReactNode; onClick: () => void; icon: React.ReactNode }) => (
       <button
           onClick={onClick}
           className={`flex-1 py-3 text-center font-semibold flex items-center justify-center gap-2 transition-all
@@ -457,7 +466,7 @@ export default function ClientPage() {
       </button>
   );
 
-  const ReservationCard = ({ reservation, eventType }) => (
+  const ReservationCard = ({ reservation }: { reservation: Rental | Borrow }) => (
       <Link
           href={`/mypage/reservationDetail/${reservation.id}`}
           className="group block bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
@@ -482,7 +491,7 @@ export default function ClientPage() {
                 {reservation.title}
               </h3>
               <span className={`px-2 py-1 rounded-full text-sm ${
-                  reservationStatusStyle[reservation.status]?.bg
+                  reservationStatusStyle[reservation.status as 'pending' | 'confirmed' | 'completed' | 'canceled']?.bg
                   || 'bg-gray-200 text-gray-600'
               }`}>
             {reservationStatus[reservation.status]}
@@ -515,7 +524,7 @@ export default function ClientPage() {
       </Link>
   );
 
-  const InfoItem = ({ icon, label, value }) => (
+  const InfoItem = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
       <div className="flex items-center gap-2">
         <div className="text-emerald-600">{icon}</div>
         <div>
@@ -526,88 +535,88 @@ export default function ClientPage() {
   );
 
 // 상태 스타일 맵핑
-  const reservationStatusStyle = {
+  const reservationStatusStyle: { [key in 'pending' | 'confirmed' | 'completed' | 'canceled']: { bg: string } } = {
     pending: { bg: 'bg-amber-100 text-amber-800' },
     confirmed: { bg: 'bg-emerald-100 text-emerald-800' },
     completed: { bg: 'bg-blue-100 text-blue-800' },
     canceled: { bg: 'bg-red-100 text-red-800' }
   };
 
-  const CustomToolbar = ({ label, date, view, views, onView, onNavigate }) => {
-    const navigate = (action) => {
-      onNavigate(action);
-    };
+  // const CustomToolbar = ({ label, date, view, views, onView, onNavigate }: { label: string; date: Date; view: string; views: string[]; onView: (view: string) => void; onNavigate: (action: string) => void }) => {
+  //   const navigate = (action: string) => {
+  //     onNavigate(action);
+  //   };
 
-    const viewNames = {
-      month: '월별',
-      week: '주별',
-      day: '일별',
-      agenda: '일정 목록'
-    };
+  //   const viewNames = {
+  //     month: '월별',
+  //     week: '주별',
+  //     day: '일별',
+  //     agenda: '일정 목록'
+  //   };
 
-    return (
-        <div className="flex items-center justify-between mb-4 p-3 bg-emerald-50 rounded-lg">
-          {/* 네비게이션 컨트롤 */}
-          <div className="flex gap-2">
-            <button
-                className="p-2 rounded-lg bg-white text-emerald-600 hover:bg-emerald-100 transition-colors"
-                onClick={() => navigate('PREV')}
-            >
-              <ChevronLeftIcon className="w-5 h-5" />
-            </button>
-            <button
-                className="p-2 rounded-lg bg-white text-emerald-600 hover:bg-emerald-100 transition-colors"
-                onClick={() => navigate('TODAY')}
-            >
-              오늘
-            </button>
-            <button
-                className="p-2 rounded-lg bg-white text-emerald-600 hover:bg-emerald-100 transition-colors"
-                onClick={() => navigate('NEXT')}
-            >
-              <ChevronRightIcon className="w-5 h-5" />
-            </button>
-          </div>
+  //   return (
+  //       <div className="flex items-center justify-between mb-4 p-3 bg-emerald-50 rounded-lg">
+  //         {/* 네비게이션 컨트롤 */}
+  //         <div className="flex gap-2">
+  //           <button
+  //               className="p-2 rounded-lg bg-white text-emerald-600 hover:bg-emerald-100 transition-colors"
+  //               onClick={() => navigate('PREV')}
+  //           >
+  //             <ChevronLeftIcon className="w-5 h-5" />
+  //           </button>
+  //           <button
+  //               className="p-2 rounded-lg bg-white text-emerald-600 hover:bg-emerald-100 transition-colors"
+  //               onClick={() => navigate('TODAY')}
+  //           >
+  //             오늘
+  //           </button>
+  //           <button
+  //               className="p-2 rounded-lg bg-white text-emerald-600 hover:bg-emerald-100 transition-colors"
+  //               onClick={() => navigate('NEXT')}
+  //           >
+  //             <ChevronRightIcon className="w-5 h-5" />
+  //           </button>
+  //         </div>
 
-          {/* 현재 날짜 표시 */}
-          <span className="text-lg font-semibold text-gray-600">
-        {label}
-      </span>
+  //         {/* 현재 날짜 표시 */}
+  //         <span className="text-lg font-semibold text-gray-600">
+  //       {label}
+  //     </span>
 
-          {/* 뷰 선택 버튼 */}
-          <div className="flex gap-2">
-            {views.map((name) => (
-                <button
-                    key={name}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
-                        view === name
-                            ? 'bg-emerald-600 text-white'
-                            : 'bg-white text-emerald-600 hover:bg-emerald-50'
-                    }`}
-                    onClick={() => onView(name)}
-                >
-                  {viewNames[name]}
-                </button>
-            ))}
-          </div>
-        </div>
-    );
-  };
+  //         {/* 뷰 선택 버튼 */}
+  //         <div className="flex gap-2">
+  //           {views.map((name) => (
+  //               <button
+  //                   key={name}
+  //                   className={`px-4 py-2 rounded-lg transition-colors ${
+  //                       view === name
+  //                           ? 'bg-emerald-600 text-white'
+  //                           : 'bg-white text-emerald-600 hover:bg-emerald-50'
+  //                   }`}
+  //                   onClick={() => onView(name)}
+  //               >
+  //                 {viewNames[name]}
+  //               </button>
+  //           ))}
+  //         </div>
+  //       </div>
+  //   );
+  // };
 
-  const CustomEvent = ({ event }) => (
-      <div className="flex items-start p-1 group">
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-white" />
-            <span className="font-medium truncate">{event.title}</span>
-          </div>
-          {event.desc && (
-              <p className="text-xs opacity-80 mt-1 truncate">{event.desc}</p>
-          )}
-        </div>
-        <ChevronRightIcon className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-      </div>
-  );
+  // const CustomEvent = ({ event }) => (
+  //     <div className="flex items-start p-1 group">
+  //       <div className="flex-1">
+  //         <div className="flex items-center gap-2">
+  //           <div className="w-2 h-2 rounded-full bg-white" />
+  //           <span className="font-medium truncate">{event.title}</span>
+  //         </div>
+  //         {event.desc && (
+  //             <p className="text-xs opacity-80 mt-1 truncate">{event.desc}</p>
+  //         )}
+  //       </div>
+  //       <ChevronRightIcon className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+  //     </div>
+  // );
 
   return (
       <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-green-50 p-4 md:p-8">
@@ -827,6 +836,7 @@ export default function ClientPage() {
                     eventPropGetter={(event) => ({
                       style: {
                         backgroundColor: event.color,
+                        //@ts-expect-error: error from mypage clientChange calender border color
                         border: `2px solid ${event.borderColor}`,
                         borderRadius: '8px',
                         color: "white",
@@ -895,6 +905,7 @@ export default function ClientPage() {
                       event: ({ event }) => (
                           <div className="flex items-start">
                             <div className="mr-2 mt-1 h-2 w-2 rounded-full"
+                        //@ts-expect-error: error from mypage clientChange calender border color
                                  style={{ backgroundColor: event.borderColor }} />
                             <div>
                               <p className="font-medium">{event.title}</p>
