@@ -16,7 +16,6 @@ import {
   CalendarIcon,
   CameraIcon, CheckCircleIcon,
   CheckIcon,
-  ChevronLeftIcon,
   ChevronRightIcon,
   ClockIcon,
   CreditCardIcon,

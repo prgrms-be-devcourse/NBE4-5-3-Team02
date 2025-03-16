@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface Props {
   className: string;
   score: number;
@@ -28,6 +30,6 @@ export default function ScoreIcon({ className, score, size, round }: Props) {
   const imageUrl = getLevelIconUrl(level);
 
   return <span className={`${className} ${round ? "rounded-full overflow-hidden" : ""}`}>
-  <img src={imageUrl} width={size || 60} height={size || 60} alt={`Level ${level} Icon`} />
+  <Image src={imageUrl} width={size || 60} height={size || 60} alt={`Level ${level} Icon`} />
   </span>;
 }

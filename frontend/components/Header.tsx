@@ -87,7 +87,6 @@ export default function Header() {
         async function fetchUnreadCount() {
             try {
                 const user_id = sessionStorage.getItem('user_id'); // 사용자 ID 가져오기
-                console.log(user_id);
                 // API 호출
                 const response = await fetch(`${BASE_URL}/api/chat/unread-count?userId=${user_id}`, {
                     method: "GET",
