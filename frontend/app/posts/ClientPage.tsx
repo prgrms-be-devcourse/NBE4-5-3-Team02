@@ -156,9 +156,10 @@ export default function PostsPage() {
                 headers: {'Content-Type': 'application/json'},
             });
 
+            if (!response) throw new Error('No response from server');
             const data = await response.json();
 
-            if (!response.ok) throw new Error('게시물을 불러오는 데 실패했습니다.');
+            if (!response?.ok) throw new Error('게시물을 불러오는 데 실패했습니다.');
             const newPosts: Post[] = data.data.content || [];
 
             setPosts((prevPosts) => {

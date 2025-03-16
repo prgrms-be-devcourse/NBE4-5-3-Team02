@@ -37,6 +37,7 @@ export default function SignupPage() {
     const [countdown, setCountdown] = useState<number>(0);
     const [, setIsLoading] = useState(false);
     const [isEmailVerified, setIsEmailVerified] = useState(false);
+    // @ts-expect-error: signUp useRef 
     const intervalRef = useRef<NodeJS.Timeout>();
     const [error, setError] = useState('');
     const [isVerificationLinkSent, setIsVerificationLinkSent] = useState(false); // 인증 링크 전송 여부 상태
