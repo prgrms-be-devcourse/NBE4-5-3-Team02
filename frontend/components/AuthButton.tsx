@@ -33,7 +33,7 @@ export default function AuthButton() {
                     {isDropdownOpen && (
                         <div className="absolute right-0 top-12 bg-white border border-green-100 rounded-lg shadow-lg w-48 overflow-hidden animate-fade-in">
                             <Link
-                                href="/profile"
+                                href="/mypage"
                                 className="flex items-center px-4 py-3 hover:bg-green-50 transition-colors text-sm text-gray-800"
                             >
                                 <User className="w-4 h-4 mr-2 text-green-600" />

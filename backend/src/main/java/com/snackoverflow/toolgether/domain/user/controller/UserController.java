@@ -1,9 +1,6 @@
 package com.snackoverflow.toolgether.domain.user.controller;
 
-import com.snackoverflow.toolgether.domain.user.dto.request.EmailRequest;
-import com.snackoverflow.toolgether.domain.user.dto.request.LoginRequest;
-import com.snackoverflow.toolgether.domain.user.dto.request.SignupRequest;
-import com.snackoverflow.toolgether.domain.user.dto.request.VerificationRequest;
+import com.snackoverflow.toolgether.domain.user.dto.request.*;
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.service.UserService;
 import com.snackoverflow.toolgether.domain.user.service.VerificationService;
@@ -15,12 +12,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 import static com.snackoverflow.toolgether.domain.user.service.UserService.*;
+import static com.snackoverflow.toolgether.domain.user.service.VerificationService.*;
 
 @Slf4j
 @RestController
@@ -32,7 +31,7 @@ public class UserController {
     private final VerificationService verificationService;
     private final JwtUtil jwtUtil;
 
-    // 이메일 인증
+    // 이메일 인증 코드
     @PostMapping("/send-verification-code")
     public RsData<String> sendVerificationCode(@Validated @RequestBody EmailRequest request,
                                                HttpSession session) {
@@ -56,9 +55,47 @@ public class UserController {
         );
     }
 
+    // 이메일 인증 확인 (링크)
+    @GetMapping("/verify")
+    public RsData<?> verifyEmail(@RequestParam("code") String code,
+                              HttpSession session) {
+        // 세션에서 인증 데이터 가져오기
+        VerificationData data = (VerificationData) session.getAttribute(SESSION_KEY);
+        // 인증 코드 검증
+        if (data != null && data.getCode().equals(code)) {
+            // 인증 성공 처리
+            log.info("이메일 링크 인증 성공 - 세션 정보: {}, 입력 정보:{}", data.getCode(), code);
+            data.setVerified(true);
+            session.setAttribute(SESSION_KEY, data);
+
+            return new RsData<>(
+                    "201-1",
+                    "이메일 인증에 성공하였습니다.",
+                    null
+            );
+        }
+        return new RsData<>(
+                "400-1",
+                "이메일 인증에 실패했습니다.",
+                null
+        );
+    }
+
+    @GetMapping("/verification-status")
+    public RsData<?> getVerificationStatus(HttpSession session) {
+        VerificationData data = (VerificationData) session.getAttribute(SESSION_KEY);
+
+        if (data != null && data.isVerified()) {
+            return new RsData<>("200-1", "인증 완료", true);
+        }
+
+        return new RsData<>("400-1", "인증되지 않았습니다.", false);
+    }
+
     // 회원 가입
     @PostMapping("/signup")
     public RsData<?> signup(@RequestBody @Validated SignupRequest request) {
+
         try {
             // 중복 확인 및 패스워드가 일치하는지 확인
             userService.checkDuplicates(request);
@@ -98,7 +135,7 @@ public class UserController {
                 user.getNickname() + " 님 환영합니다!",
                 Map.of(
                         "nickname", user.getNickname(),
-                        "token", result.token()
+                        "user_id", user.getId()
                 )
         );
     }

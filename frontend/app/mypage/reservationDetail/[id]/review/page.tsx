@@ -1,4 +1,4 @@
-import ClientPage from "./CllientPage";
+import ClientPage from "./ClientPage";
 
 export default function Page({ params }: { params: any }) {
   const { id } = params;

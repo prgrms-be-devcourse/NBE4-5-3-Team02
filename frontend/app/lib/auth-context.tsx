@@ -25,13 +25,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const logout = () => {
         setIsLoggedIn(false);
         sessionStorage.removeItem('access_token');
-        router.push('/login'); // 로그아웃 후 로그인 페이지로 이동
+        sessionStorage.removeItem('user_id');
+        sessionStorage.removeItem('nickname');
     };
 
     // 세션 스토리지에서 로그인 상태 확인
     useEffect(() => {
-        const token = sessionStorage.getItem('access_token');
-        if (token) {
+        const id = sessionStorage.getItem('user_id');
+        if (id) {
             setIsLoggedIn(true);
         }
     }, []);

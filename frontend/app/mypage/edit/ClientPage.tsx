@@ -1,75 +1,77 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // useRouter 훅 import
-import { fetchWithAuth } from "@/app/lib/util/fetchWithAuth";
+import {useState, useEffect} from "react";
+import {useRouter} from "next/navigation"; // useRouter 훅 import
+import {fetchWithAuth} from "@/app/lib/util/fetchWithAuth";
+import {ExclamationCircleIcon} from "@heroicons/react/16/solid";
+import {MagnifyingGlassIcon} from "@heroicons/react/24/outline";
+import {CheckIcon} from "lucide-react";
 
 export default function ClientPage() {
-  const [nickname, setNickname] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [mainAddress, setMainAddress] = useState("");
-  const [detailAddress, setDetailAddress] = useState("");
-  const [zipcode, setZipcode] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
+    const [nickname, setNickname] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [mainAddress, setMainAddress] = useState("");
+    const [detailAddress, setDetailAddress] = useState("");
+    const [zipcode, setZipcode] = useState("");
+    const [latitude, setLatitude] = useState("");
+    const [longitude, setLongitude] = useState("");
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
-  const [validationErrors, setValidationErrors] = useState<{
-    nickname?: string;
-    phoneNumber?: string;
-    mainAddress?: string;
-    detailAddress?: string;
-    zipcode?: string;
-    latitude?: string;
-    longitude?: string;
-  }>({});
-  const [, setGeoError] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
+    const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
+    const [validationErrors, setValidationErrors] = useState<{
+        nickname?: string;
+        phoneNumber?: string;
+        mainAddress?: string;
+        detailAddress?: string;
+        zipcode?: string;
+        latitude?: string;
+        longitude?: string;
+    }>({});
+    const [, setGeoError] = useState("");
 
-  const BASE_URL = 'http://localhost:8080';
+    const BASE_URL = 'http://localhost:8080';
 
-  const router = useRouter();
+    const router = useRouter();
 
+    // TODO: 쿠키 확인 및 리다이렉트 - 작동 안 함. 수정 필요
+    // useEffect(() => {
+    //   const authToken = document.cookie.includes('token');
+    //   if (!authToken) {
+    //     router.push("/");
+    //   }
+    // }, [router]);
 
-  useEffect(() => {
-    getData();
-  }, []);
+    useEffect(() => {
+        getData();
+    }, []);
 
-  // 위치 정보 조회
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setGeoError("브라우저가 위치 서비스를 지원하지 않습니다");
-      return;
-    }
+    // 위치 정보 조회
+    useEffect(() => {
+        if (!navigator.geolocation) {
+            setGeoError("브라우저가 위치 서비스를 지원하지 않습니다");
+            return;
+        }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLatitude(position.coords.latitude.toString());
-        setLongitude(position.coords.longitude.toString());
-      },
-      (err) => {
-        setGeoError(`위치 정보 오류: ${err.message}`);
-        console.error("useEffect: 위치 정보 조회 오류", err);
-      }
-    );
-  }, []);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setLatitude(position.coords.latitude.toString());
+                setLongitude(position.coords.longitude.toString());
+            },
+            (err) => {
+                setGeoError(`위치 정보 오류: ${err.message}`);
+                console.error("useEffect: 위치 정보 조회 오류", err);
+            }
+        );
+    }, []);
 
-  const fetchHelper = async (url: string, options?: RequestInit) => {
-    const accessToken = sessionStorage.getItem("access_token");
-    if (accessToken) {
-      return fetchWithAuth(url, options);
-    } else {
-      return fetch(url, options);
-    }
-  };
+    // 카카오 주소 검색
+    const handleAddressSearch = () => {
+        if (!window.daum) {
+            console.error("카카오 API 로드 실패");
+            return;
+        }
 
-  // 카카오 주소 검색
-  const handleAddressSearch = () => {
-    if (!window.daum) {
-      console.error("카카오 API 로드 실패");
-      return;
-    }
 
     new window.daum.Postcode({
       oncomplete: (data) => {
@@ -80,439 +82,512 @@ export default function ClientPage() {
     }).open();
   };
 
-  //유저정보 조회
-  const getData = async () => {
-    const getMyInfo = await fetchHelper(`${BASE_URL}/api/v1/mypage/me`, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    //유저정보 조회
+    const getData = async () => {
+        const getMyInfo = await fetchWithAuth(`${BASE_URL}/api/v1/mypage/me`, {
+            method: "GET",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
 
-    if (getMyInfo.ok) {
-      const Data = await getMyInfo.json();
-      if (Data?.code.startsWith("403")) {
-        router.push("/login");
-      }
-      if (Data?.code !== "200-1") {
-        console.error(`에러가 발생했습니다. \n${Data?.msg}`);
-      }
-      setNickname(Data?.data?.nickname);
-      setPhoneNumber(Data?.data?.phoneNumber);
-      setMainAddress(Data?.data?.address.mainAddress);
-      setDetailAddress(Data?.data.address.detailAddress);
-      setZipcode(Data?.data?.address.zipcode);
-      setLatitude(Data?.data?.latitude);
-      setLongitude(Data?.data?.longitude);
-    } else {
-      if (getMyInfo.status === 403) {
-        router.push("/login");
-      }
-      console.error("Error fetching data:", getMyInfo.status);
-    }
-  };
-
-  // 유효성 검사
-  const validateNickname = (value: string) => {
-    if (!value) {
-      return "닉네임을 입력해주세요.";
-    }
-    if (!/^[가-힣]{4,10}$/.test(value)) {
-      return "닉네임은 한글 4~10자로 입력해주세요.";
-    }
-    return "";
-  };
-
-  const validatePhoneNumber = (value: string) => {
-    if (!value) {
-      return "전화번호를 입력해주세요.";
-    }
-    if (!/^\d+$/.test(value)) {
-      // 정규식 수정: 하이픈 제외, 숫자만 허용
-      return "전화번호는 하이픈 없이 숫자만 입력해주세요.";
-    }
-    return "";
-  };
-
-  const validateMainAddress = (value: string) => {
-    if (!value) {
-      return "주소를 입력해주세요.";
-    }
-    return "";
-  };
-
-  const validateDetailAddress = (value: string) => {
-    if (!value) {
-      return "상세주소를 입력해주세요.";
-    }
-    return "";
-  };
-
-  const validateZipcode = (value: string) => {
-    if (!value) {
-      return "우편번호를 입력해주세요.";
-    }
-    return "";
-  };
-  const validateLatitude = (value: string) => {
-    if (!value) {
-      return "위도를 입력해주세요."; // 위도 필수 입력으로 변경
-    }
-    if (isNaN(Number(value))) {
-      return "위도는 숫자 형식으로 입력해주세요.";
-    }
-    return "";
-  };
-
-  const validateLongitude = (value: string) => {
-    if (!value) {
-      return "경도를 입력해주세요."; // 경도 필수 입력으로 변경
-    }
-    if (isNaN(Number(value))) {
-      return "경도는 숫자 형식으로 입력해주세요.";
-    }
-    return "";
-  };
-
-  // 입력값 변경 이벤트 핸들러
-  const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setNickname(value);
-    setValidationErrors((prevErrors) => ({
-      ...prevErrors,
-      nickname: validateNickname(value),
-    }));
-  };
-
-  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPhoneNumber(value);
-    setValidationErrors((prevErrors) => ({
-      ...prevErrors,
-      phoneNumber: validatePhoneNumber(value),
-    }));
-  };
-
-  const handleMainAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setMainAddress(value);
-    setValidationErrors((prevErrors) => ({
-      ...prevErrors,
-      mainAddress: validateMainAddress(value),
-    }));
-  };
-
-  const handleDetailAddressChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = e.target.value;
-    setDetailAddress(value);
-    setValidationErrors((prevErrors) => ({
-      ...prevErrors,
-      detailAddress: validateDetailAddress(value),
-    }));
-  };
-  const handleZipcodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setZipcode(value);
-    setValidationErrors((prevErrors) => ({
-      ...prevErrors,
-      zipcode: validateZipcode(value),
-    }));
-  };
-
-  //폼폼 제출 이벤트 핸들러
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    //폼 제출 전 전체 유효성 검사
-    const newValidationErrors: any = {
-      nickname: validateNickname(nickname),
-      phoneNumber: validatePhoneNumber(phoneNumber),
-      mainAddress: validateMainAddress(mainAddress),
-      zipcode: validateZipcode(zipcode),
-      latitude: validateLatitude(latitude.toString()),
-      longitude: validateLongitude(longitude.toString()),
+        if (getMyInfo.ok) {
+            const Data = await getMyInfo.json();
+            if (Data?.code !== "200-1") {
+                console.error(`에러가 발생했습니다. \n${Data?.msg}`);
+            }
+            setNickname(Data?.data?.nickname);
+            setPhoneNumber(Data?.data?.phoneNumber);
+            setMainAddress(Data?.data?.address.mainAddress);
+            setDetailAddress(Data?.data.address.detailAddress);
+            setZipcode(Data?.data?.address.zipcode);
+            setLatitude(Data?.data?.latitude);
+            setLongitude(Data?.data?.longitude);
+        } else {
+            console.error("Error fetching data:", getMyInfo.status);
+        }
     };
-    setValidationErrors(newValidationErrors);
 
-    if (Object.values(newValidationErrors).some((error) => error)) {
-      setSubmitError(Object.values(newValidationErrors).join("\n"));
-      setIsSubmitting(false);
-      setSubmitSuccess(false);
-      return;
-    }
+    // 유효성 검사
+    const validateNickname = (value: string) => {
+        if (!value) {
+            return "닉네임을 입력해주세요.";
+        }
+        if (!/^[가-힣]{4,10}$/.test(value)) {
+            return "닉네임은 한글 4~10자로 입력해주세요.";
+        }
+        return "";
+    };
 
-    setIsSubmitting(true);
-    setSubmitError(null);
-    setSubmitSuccess(false);
+    const validatePhoneNumber = (value: string) => {
+        if (!value) {
+            return "전화번호를 입력해주세요.";
+        }
+        if (!/^\d+$/.test(value)) {
+            // 정규식 수정: 하이픈 제외, 숫자만 허용
+            return "전화번호는 하이픈 없이 숫자만 입력해주세요.";
+        }
+        return "";
+    };
 
-    const body = JSON.stringify({
-      nickname,
-      phoneNumber,
-      address: {
-        mainAddress,
-        detailAddress,
-        zipcode,
-      },
-      latitude,
-      longitude,
-    });
-    try {
-      const response = await fetchHelper(`${BASE_URL}/api/v1/mypage/me`, {
-        method: "PATCH",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body,
-      });
+    const validateMainAddress = (value: string) => {
+        if (!value) {
+            return "주소를 입력해주세요.";
+        }
+        return "";
+    };
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData?.msg || response.status);
-      }
+    const validateDetailAddress = (value: string) => {
+        if (!value) {
+            return "상세주소를 입력해주세요.";
+        }
+        return "";
+    };
 
-      const Data = await response.json();
-      if (Data?.code !== "200-1") {
-        throw new Error(Data?.msg);
-      }
+    const validateZipcode = (value: string) => {
+        if (!value) {
+            return "우편번호를 입력해주세요.";
+        }
+        return "";
+    };
+    const validateLatitude = (value: string) => {
+        if (!value) {
+            return "위도를 입력해주세요."; // 위도 필수 입력으로 변경
+        }
+        if (isNaN(Number(value))) {
+            return "위도는 숫자 형식으로 입력해주세요.";
+        }
+        return "";
+    };
 
-      setSubmitSuccess(true);
-    } catch (error: any) {
-      console.error("마이페이지 수정 에러:", error);
-      setSubmitError(
-        error.message || "마이페이지 수정 중 오류가 발생했습니다."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    const validateLongitude = (value: string) => {
+        if (!value) {
+            return "경도를 입력해주세요."; // 경도 필수 입력으로 변경
+        }
+        if (isNaN(Number(value))) {
+            return "경도는 숫자 형식으로 입력해주세요.";
+        }
+        return "";
+    };
 
-  //모달 닫고 마이페이지로 이동
-  const closeModalAndRedirect = () => {
-    setSubmitSuccess(false);
-    router.push("/mypage");
-  };
+    // 입력값 변경 이벤트 핸들러
+    const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setNickname(value);
+        setValidationErrors((prevErrors) => ({
+            ...prevErrors,
+            nickname: validateNickname(value),
+        }));
+    };
 
-  return (
-    <div className="relative min-h-screen bg-gray-100">
-      <div className="container mx-auto px-4 py-4 max-w-md">
-        <h1 className="text-2xl font-bold text-gray-800">마이페이지 수정</h1>
-        <div className="grid grid-cols-1 gap-4 mt-4">
-          {/* 유저 정보 수정 폼 */}
-          <div className="bg-white shadow-md p-4">
-            <h2 className="text-lg font-bold text-gray-800">내 정보 수정</h2>
+    const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setPhoneNumber(value);
+        setValidationErrors((prevErrors) => ({
+            ...prevErrors,
+            phoneNumber: validatePhoneNumber(value),
+        }));
+    };
 
-            {submitError && (
-              <div
-                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-                role="alert"
-              >
-                <strong className="font-bold">오류!</strong>
-                <span className="block sm:inline"> {submitError}</span>
-              </div>
-            )}
+    const handleMainAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setMainAddress(value);
+        setValidationErrors((prevErrors) => ({
+            ...prevErrors,
+            mainAddress: validateMainAddress(value),
+        }));
+    };
 
-            <form onSubmit={handleSubmit} className="mt-4">
-              {/* 폼 입력 필드들은 이전과 동일 */}
-              <div className="mb-4">
-                <label
-                  htmlFor="nickname"
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                >
-                  닉네임
-                </label>
-                <input
-                  type="text"
-                  id="nickname"
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                    validationErrors.nickname ? "border-red-500" : ""
-                  }`}
-                  placeholder="닉네임"
-                  value={nickname}
-                  onChange={handleNicknameChange}
-                />
-                {validationErrors.nickname && (
-                  <p className="text-red-500 text-xs italic mt-1">
-                    {validationErrors.nickname}
-                  </p>
-                )}
-              </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="phoneNumber"
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                >
-                  전화번호
-                </label>
-                <input
-                  type="tel"
-                  id="phoneNumber"
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                    validationErrors.phoneNumber ? "border-red-500" : ""
-                  }`}
-                  placeholder="전화번호"
-                  value={phoneNumber}
-                  onChange={handlePhoneNumberChange}
-                />
-                {validationErrors.phoneNumber && (
-                  <p className="text-red-500 text-xs italic mt-1">
-                    {validationErrors.phoneNumber}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-end justify-end mb-4">
-                <button
-                  type="button"
-                  className="bg-green-500 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2"
-                  onClick={handleAddressSearch}
-                >
-                  주소 검색
-                </button>
-              </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="mainAddress"
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                >
-                  주소
-                </label>
-                <input
-                  type="text"
-                  id="mainAddress"
-                  disabled
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline disabled:bg-gray-200 disabled:text-gray-500 ${
-                    validationErrors.mainAddress ? "border-red-500" : ""
-                  }`}
-                  placeholder="주소"
-                  value={mainAddress}
-                  onChange={handleMainAddressChange}
-                />
-                {validationErrors.mainAddress && (
-                  <p className="text-red-500 text-xs italic mt-1">
-                    {validationErrors.mainAddress}
-                  </p>
-                )}
-              </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="detailAddress"
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                >
-                  상세 주소
-                </label>
-                <input
-                  type="text"
-                  id="detailAddress"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  placeholder="상세 주소"
-                  value={detailAddress}
-                  onChange={handleDetailAddressChange}
-                />
-                {validationErrors.detailAddress && (
-                  <p className="text-red-500 text-xs italic mt-1">
-                    {validationErrors.detailAddress}
-                  </p>
-                )}
-              </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="zipcode"
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                >
-                  우편번호
-                </label>
-                <input
-                  type="text"
-                  id="zipcode"
-                  disabled
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline disabled:bg-gray-200 disabled:text-gray-500`}
-                  placeholder="우편번호"
-                  value={zipcode}
-                  onChange={handleZipcodeChange}
-                />
-                {validationErrors.zipcode && (
-                  <p className="text-red-500 text-xs italic mt-1">
-                    {validationErrors.zipcode}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-center justify-between">
-                <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                  type="submit"
-                  disabled={isSubmitting} // 요청 중에는 버튼 비활성화
-                >
-                  {isSubmitting ? "수정 중..." : "수정 완료"}
-                </button>
-                <button
-                  type="button"
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                  onClick={()=> router.push("/mypage")}
-                >
-                  취소
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
+    const handleDetailAddressChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const value = e.target.value;
+        setDetailAddress(value);
+        setValidationErrors((prevErrors) => ({
+            ...prevErrors,
+            detailAddress: validateDetailAddress(value),
+        }));
+    };
+    const handleZipcodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setZipcode(value);
+        setValidationErrors((prevErrors) => ({
+            ...prevErrors,
+            zipcode: validateZipcode(value),
+        }));
+    };
 
-      {/* 성공 모달 */}
-      {submitSuccess && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 transition-opacity"
-              aria-hidden="true"
-            >
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-            <span
-              className="hidden sm:inline-block sm:align-middle sm:h-screen"
-              aria-hidden="true"
-            >
-              &#8203;
-            </span>
-            <div
-              className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="modal-headline"
-            >
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3
-                      className="text-lg leading-6 font-medium text-gray-900"
-                      id="modal-headline"
-                    >
-                      수정 완료
-                    </h3>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        마이페이지 정보가 성공적으로 수정되었습니다.
-                      </p>
+    //폼폼 제출 이벤트 핸들러
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        //폼 제출 전 전체 유효성 검사
+        const newValidationErrors: any = {
+            nickname: validateNickname(nickname),
+            phoneNumber: validatePhoneNumber(phoneNumber),
+            mainAddress: validateMainAddress(mainAddress),
+            zipcode: validateZipcode(zipcode),
+            latitude: validateLatitude(latitude.toString()),
+            longitude: validateLongitude(longitude.toString()),
+        };
+        setValidationErrors(newValidationErrors);
+
+        if (Object.values(newValidationErrors).some((error) => error)) {
+            setSubmitError(Object.values(newValidationErrors).join("\n"));
+            setIsSubmitting(false);
+            setSubmitSuccess(false);
+            return;
+        }
+
+        setIsSubmitting(true);
+        setSubmitError(null);
+        setSubmitSuccess(false);
+
+        const body = JSON.stringify({
+            nickname,
+            phoneNumber,
+            address: {
+                mainAddress,
+                detailAddress,
+                zipcode,
+            },
+            latitude,
+            longitude,
+        });
+        try {
+            const response = await fetchWithAuth(`${BASE_URL}/api/v1/mypage/me`, {
+                method: "PATCH",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData?.msg || response.status);
+            }
+
+            const Data = await response.json();
+            if (Data?.code !== "200-1") {
+                throw new Error(Data?.msg);
+            }
+
+            setSubmitSuccess(true);
+        } catch (error: any) {
+            console.error("마이페이지 수정 에러:", error);
+            setSubmitError(
+                error.message || "마이페이지 수정 중 오류가 발생했습니다."
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    //모달 닫고 마이페이지로 이동
+    const closeModalAndRedirect = () => {
+        setSubmitSuccess(false);
+        router.push("/mypage");
+    };
+
+    return (
+        <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-green-50 p-4 md:p-8">
+            <div className="relative z-10 mx-auto px-4 md:px-8 py-12 max-w-4xl">
+
+                <div className="absolute -top-32 -right-32 w-64 h-64 bg-emerald-200/20 rounded-full" />
+                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-300/15 rounded-full" />
+
+                <div className="bg-white rounded-3xl shadow-xl border border-emerald-100 p-6 md:p-8">
+
+                    <h1 className="text-3xl font-bold text-gray-600 mb-6 text-center">
+                        내 정보 수정하기
+                    </h1>
+
+                    <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 border border-emerald-100">
+                    {/* 유저 정보 수정 폼 */}
+
+                        {submitError && (
+                            <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg">
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0">
+                                        <svg
+                                            className="h-5 w-5 text-red-400"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                        >
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div className="ml-3">
+                                        <h3 className="text-sm font-medium text-red-800"> 수정이 불가능합니다 </h3>
+                                        <div className="mt-2 text-sm text-red-700">
+                                            <p>{submitError}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="mt-4">
+
+                            <div className="mb-6">
+                                <label
+                                    htmlFor="nickname"
+                                    className="block text-sm font-medium text-gray-600 mb-2"
+                                >
+                                    닉네임
+                                </label>
+                                <input
+                                    type="text"
+                                    id="nickname"
+                                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-gray-700 duration-200 ${
+                                        validationErrors.nickname
+                                            ? "border-emerald-500 bg-emerald-50"
+                                            : "border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50"
+                                    }`}
+                                    placeholder="닉네임을 입력해주세요"
+                                    value={nickname}
+                                    onChange={handleNicknameChange}
+                                />
+                                {validationErrors.nickname && (
+                                    <div className="flex items-center gap-1.5 mt-2 text-emerald-600">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="w-4 h-4 flex-shrink-0"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                        >
+                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                        </svg>
+                                        <span className="text-sm">{validationErrors.nickname}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mb-6">
+                                <label
+                                    htmlFor="phoneNumber"
+                                    className="block text-sm font-medium text-gray-600 mb-2"
+                                >
+                                    전화번호
+                                    <span className="text-emerald-600 ml-1">*</span>
+                                </label>
+
+                                <div className="relative">
+                                    <input
+                                        type="tel"
+                                        id="phoneNumber"
+                                        className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-gray-700 placeholder-gray-400 ${
+                                            validationErrors.phoneNumber
+                                                ? "border-emerald-500 bg-emerald-50"
+                                                : "border-emerald-200 hover:border-emerald-300"
+                                        }`}
+                                        placeholder="예) 01012345678"
+                                        value={phoneNumber}
+                                        onChange={handlePhoneNumberChange}
+                                    />
+
+                                    {/* 유효성 검사 아이콘 */}
+                                    {validationErrors.phoneNumber && (
+                                        <div className="absolute inset-y-0 right-3 flex items-center">
+                                            <svg
+                                                className="w-5 h-5 text-emerald-500"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                            >
+                                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                            </svg>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* 오류 메시지 */}
+                                {validationErrors.phoneNumber && (
+                                    <div className="flex items-center gap-1.5 mt-2 text-emerald-600">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="w-4 h-4 flex-shrink-0"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                        >
+                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                        </svg>
+                                        <span className="text-sm">{validationErrors.phoneNumber}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 주소 검색 섹션 */}
+                            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 mb-6">
+                                <div>
+                                    <label htmlFor="zipcode" className="block text-sm font-medium text-gray-600 mb-2">
+                                        우편번호
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="zipcode"
+                                        disabled
+                                        className="w-full px-4 py-2.5 border border-emerald-200 rounded-lg bg-emerald-50 text-gray-600 focus:ring-2 focus:ring-emerald-500 disabled:opacity-75"
+                                        placeholder="우편번호를 검색해주세요"
+                                        value={zipcode}
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleAddressSearch}
+                                    className="bg-gradient-to-r from-emerald-600 to-green-600 text-white px-6 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 hover:from-emerald-700 hover:to-green-700 transition-all duration-300 mt-[28px]"
+                                >
+                                    <MagnifyingGlassIcon className="w-5 h-5" />
+                                    주소 검색
+                                </button>
+                            </div>
+
+                            {/* 주소 입력 필드 */}
+                            <div className="space-y-4">
+                                <div>
+                                    <label htmlFor="mainAddress" className="block text-sm font-medium text-gray-600 mb-2">
+                                        기본 주소
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            id="mainAddress"
+                                            disabled
+                                            className="w-full px-4 py-2.5 border border-emerald-200 rounded-lg bg-emerald-50 text-gray-600 focus:ring-2 focus:ring-emerald-500 disabled:opacity-75"
+                                            placeholder="주소를 검색해주세요"
+                                            value={mainAddress}
+                                        />
+                                        {validationErrors.mainAddress && (
+                                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                <ExclamationCircleIcon className="w-5 h-5 text-emerald-600" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    {validationErrors.mainAddress && (
+                                        <div className="flex items-center gap-1.5 mt-2 text-emerald-600">
+                                            <ExclamationCircleIcon className="w-4 h-4 flex-shrink-0" />
+                                            <span className="text-sm">{validationErrors.mainAddress}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label htmlFor="detailAddress" className="block text-sm font-medium text-gray-600 mb-2">
+                                        상세 주소
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            id="detailAddress"
+                                            className="w-full px-4 py-2.5 border border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 placeholder-gray-400 transition-all text-gray-700"
+                                            placeholder="상세 주소를 입력해주세요"
+                                            value={detailAddress}
+                                            onChange={handleDetailAddressChange}
+                                        />
+                                        {validationErrors.detailAddress && (
+                                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                <ExclamationCircleIcon className="w-5 h-5 text-emerald-600" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    {validationErrors.detailAddress && (
+                                        <div className="flex items-center gap-1.5 mt-2 text-emerald-600">
+                                            <ExclamationCircleIcon className="w-4 h-4 flex-shrink-0" />
+                                            <span className="text-sm">{validationErrors.detailAddress}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between gap-4 mt-8">
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className={`relative w-full md:w-auto px-10 py-4 text-base font-semibold rounded-2xl transition-all duration-300 flex items-center justify-center gap-2
+      ${
+                                        isSubmitting
+                                            ? 'bg-emerald-400 cursor-not-allowed'
+                                            : 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700'
+                                    }
+      text-white shadow-lg hover:shadow-xl
+      focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2
+      disabled:opacity-75`}
+                                >
+                                    {isSubmitting && (
+                                        <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                                        </svg>
+                                    )}
+                                    {isSubmitting ? "저장 중..." : "정보 수정 완료"}
+                                    {!isSubmitting && <CheckIcon className="w-4 h-4 ml-1" />}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => router.push("/mypage")}
+                                    className="w-full md:w-auto px-10 py-4 text-base font-semibold text-gray-600 bg-white border-2 border-emerald-100 rounded-2xl hover:bg-emerald-50 transition-colors duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
+                                >
+                                    취소하기
+                                </button>
+                            </div>
+
+                        </form>
                     </div>
-                  </div>
                 </div>
-              </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button
-                  type="button"
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={closeModalAndRedirect} // 확인 버튼 클릭 시 모달 닫고 리다이렉트
-                >
-                  확인
-                </button>
-              </div>
             </div>
-          </div>
+
+            {/* 성공 모달 */}
+            {submitSuccess && (
+                <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md transform transition-all">
+                        {/* 모달 컨텐츠 */}
+                        <div className="p-6 text-center">
+                            {/* 체크 아이콘 애니메이션 */}
+                            <div
+                                className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100 mb-4">
+                                <svg
+                                    className="w-6 h-6 text-emerald-600 animate-check"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M5 13l4 4L19 7"
+                                    />
+                                </svg>
+                            </div>
+
+                            {/* 타이틀 & 설명 */}
+                            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                                정보 수정 완료
+                            </h3>
+                            <p className="text-gray-600">
+                                마이페이지 정보가 성공적으로 수정되었습니다
+                            </p>
+                        </div>
+
+                        {/* 액션 버튼 */}
+                        <div className="bg-gray-50 px-6 py-4 rounded-b-2xl">
+                            <button
+                                type="button"
+                                onClick={closeModalAndRedirect}
+                                className="w-full inline-flex justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-base font-medium text-white hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 transition-colors"
+                            >
+                                확인
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }

@@ -40,3 +40,17 @@ body {
     border-color: green;
   }
 }
+
+@layer utilities {
+  .custom-scrollbar {
+    &::-webkit-scrollbar {
+      @apply w-2 h-2;
+    }
+    &::-webkit-scrollbar-thumb {
+      @apply bg-gray-500/30 rounded-full hover:bg-gray-500/50 transition-colors;
+    }
+    &::-webkit-scrollbar-track {
+      @apply bg-transparent;
+    }
+  }
+}
