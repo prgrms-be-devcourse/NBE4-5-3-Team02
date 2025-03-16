@@ -30,8 +30,8 @@ const ReviewPage: React.FC<{
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const BASE_URL = "http://localhost:8080";
-
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+  
   const handleScoreChange = useCallback(
     (step: number, score: number | null) => {
       switch (step) {

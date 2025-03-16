@@ -65,6 +65,7 @@ export default function CreatePostPage() {
   ]);
   const [images, setImages] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
   // 카테고리 및 가격 타입 옵션
   const categoryOptions = ["ELECTRONICS", "TOOL"];
@@ -177,7 +178,7 @@ export default function CreatePostPage() {
 
       // API 요청
       const response = await fetchWithAuth(
-        "http://localhost:8080/api/v1/posts",
+        `${BASE_URL}/api/v1/posts`,
         {
           method: "POST",
           credentials: "include",

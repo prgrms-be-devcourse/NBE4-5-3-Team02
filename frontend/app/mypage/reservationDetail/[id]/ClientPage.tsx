@@ -689,7 +689,7 @@ function InProgressStatus({
   const completeRental = async () => {
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/v1/reservations/${reservation.id}/complete`,
+        `${BASE_URL}/api/v1/reservations/${reservation.id}/complete`,
         {
           method: "PATCH",
           credentials: "include",

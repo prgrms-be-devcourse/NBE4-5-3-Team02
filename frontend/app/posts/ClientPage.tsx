@@ -67,6 +67,7 @@ export default function PostsPage() {
     const distanceOptions = ['1', '3', '5']; // 반경 거리 (km)
     const priceTypeOptions = ['HOUR', 'DAY']; // 가격 타입
     const categoryOptions = ['TOOL', 'ELECTRONICS']; // 카테고리
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
     // 필터 변경 시 URL 업데이트 & 즉시 API 호출
     const updateSearchParams = () => {
@@ -135,7 +136,7 @@ export default function PostsPage() {
         setLoading(true);
 
         try {
-            const url = new URL('http://localhost:8080/api/v1/posts/search');
+            const url = new URL(`${BASE_URL}/api/v1/posts/search`);
             url.searchParams.append('page', pageNumber.toString());
             if (searchQuery) url.searchParams.append('keyword', searchQuery);
 
