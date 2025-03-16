@@ -3,13 +3,12 @@ package com.snackoverflow.toolgether.domain.post.dto;
 import com.snackoverflow.toolgether.domain.post.entity.Post;
 import com.snackoverflow.toolgether.domain.postavailability.dto.PostAvailabilityResponse;
 import com.snackoverflow.toolgether.domain.postavailability.entity.PostAvailability;
+
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.Nullable;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
