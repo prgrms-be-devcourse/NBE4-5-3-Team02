@@ -525,7 +525,7 @@ export default function ClientPage({ postid }: { postid: number }) {
           alert("예약 신청이 완료되었습니다.");
 
           router.push(
-            `/reservation/complete?reservationId=${reservation.data.id}`
+            `./reservation/complete?reservationId=${reservation.data.id}`
           );
         } else {
           const errorData = await response?.json();
