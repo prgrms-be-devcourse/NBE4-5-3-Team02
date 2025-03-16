@@ -42,25 +42,6 @@ interface PostDetail {
   availabilities: Availability[];
 }
 
-interface me {
-  id: number;
-  nickname: string;
-  username: string;
-  profileImage: string;
-  email: string;
-  phoneNumber: string;
-  address: {
-    mainAddress: string;
-    detailAddress: string;
-    zipcode: string;
-  };
-  latitude: number;
-  longitude: number;
-  createdAt: string;
-  score: number;
-  credit: number;
-}
-
 interface post {
   id: number;
   userId: number;
