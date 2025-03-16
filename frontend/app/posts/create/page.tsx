@@ -15,9 +15,9 @@ import {ArrowPathIcon, ClockIcon, MagnifyingGlassIcon, SparklesIcon} from "@hero
 import {fetchWithAuth} from "@/app/lib/util/fetchWithAuth";
 import {MapPinIcon} from "@heroicons/react/24/solid";
 
-interface Window {
-    daum: any;
-}
+// interface Window {
+//     daum: any;
+// }
 
 interface IAddr {
     address: string;
@@ -460,7 +460,7 @@ export default function CreatePostPage() {
                                     <div className="flex items-center space-x-4 mb-6">
                                         <button
                                             type="button"
-                                            onClick={(e) => handleAvailabilityChange(index, 'isRecurring', !a.isRecurring)}
+                                            onClick={() => handleAvailabilityChange(index, 'isRecurring', !a.isRecurring)}
                                             className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors ${
                                                 a.isRecurring
                                                     ? 'bg-emerald-600 text-white'

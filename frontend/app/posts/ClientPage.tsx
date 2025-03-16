@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
@@ -52,7 +52,7 @@ export default function PostsPage() {
     // 게시물 상태값
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(false);
-    const [ setError] = useState('');
+    // const [ setError] = useState('');
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
 
@@ -116,7 +116,7 @@ export default function PostsPage() {
         if (sortedDates.length === 0) return '예약 없음';
 
         const start = sortedDates[0];
-        const end = sortedDates[sortedDates.length - 1];
+        // const end = sortedDates[sortedDates.length - 1];
 
         // return `${start.toLocaleDateString()} ~ ${end.toLocaleDateString()}`;
         return `${start.toLocaleDateString()} ~ `;

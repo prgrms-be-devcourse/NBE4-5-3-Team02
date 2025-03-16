@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PhoneIcon, MapPinIcon, DocumentMagnifyingGlassIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
 import { AddressData } from "@/types/d";
 import {CheckCircleIcon} from "lucide-react";
-import { fetchWithAuth } from '../lib/util/fetchWithAuth';
 
 export default function ClientPage() {
     const router = useRouter();
