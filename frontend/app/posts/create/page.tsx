@@ -185,7 +185,7 @@ export default function CreatePostPage() {
         }
       );
 
-      if (!response.ok) throw new Error("게시물 등록 실패");
+      if (!response?.ok) throw new Error("게시물 등록 실패");
 
       router.push("/posts"); // 게시물 목록 페이지로 이동
     } catch (err) {
