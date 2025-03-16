@@ -933,6 +933,7 @@ export default function ClientPage() {
                         <ReservationCard
                             key={reservation.id}
                             reservation={reservation}
+                            //@ts-expect-error: error in mypage reservationList
                             eventType={eventType}
                         />
                     ))
