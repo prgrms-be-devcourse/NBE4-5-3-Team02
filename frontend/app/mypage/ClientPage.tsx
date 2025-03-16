@@ -176,19 +176,6 @@ export default function ClientPage() {
     color: getRandomColor(),
   }));
 
-  // const messages = {
-  //   today: "오늘",
-  //   previous: "이전",
-  //   next: "다음",
-  //   month: "월",
-  //   week: "주",
-  //   day: "일",
-  //   agenda: "일정",
-  //   date: "날짜",
-  //   time: "시간",
-  //   event: "이벤트",
-  // };
-
   const reservationStatus: {
     [key: string]: string;
   } = {
@@ -200,16 +187,6 @@ export default function ClientPage() {
     FAILED_OWNER_ISSUE: "대여자 이슈로 실패",
     FAILED_RENTER_ISSUE: "대여자 이슈로 실패",
   };
-
-  // const formats = {
-  //   dateFormat: "D",
-  //   dayFormat: (date: Date, culture: any, localizer: any) =>
-  //       localizer.format(date, "dddd", culture),
-  //   weekdayFormat: (date: Date, culture: any, localizer: any) =>
-  //       localizer.format(date, "ddd", culture),
-  //   monthHeaderFormat: (date: Date, culture: any, localizer: any) =>
-  //       localizer.format(date, "YYYY년 MM월", culture),
-  // };
 
   const filteredReservations = useMemo(() => {
     if (eventType === "rental") {
@@ -541,82 +518,6 @@ export default function ClientPage() {
     completed: { bg: 'bg-blue-100 text-blue-800' },
     canceled: { bg: 'bg-red-100 text-red-800' }
   };
-
-  // const CustomToolbar = ({ label, date, view, views, onView, onNavigate }: { label: string; date: Date; view: string; views: string[]; onView: (view: string) => void; onNavigate: (action: string) => void }) => {
-  //   const navigate = (action: string) => {
-  //     onNavigate(action);
-  //   };
-
-  //   const viewNames = {
-  //     month: '월별',
-  //     week: '주별',
-  //     day: '일별',
-  //     agenda: '일정 목록'
-  //   };
-
-  //   return (
-  //       <div className="flex items-center justify-between mb-4 p-3 bg-emerald-50 rounded-lg">
-  //         {/* 네비게이션 컨트롤 */}
-  //         <div className="flex gap-2">
-  //           <button
-  //               className="p-2 rounded-lg bg-white text-emerald-600 hover:bg-emerald-100 transition-colors"
-  //               onClick={() => navigate('PREV')}
-  //           >
-  //             <ChevronLeftIcon className="w-5 h-5" />
-  //           </button>
-  //           <button
-  //               className="p-2 rounded-lg bg-white text-emerald-600 hover:bg-emerald-100 transition-colors"
-  //               onClick={() => navigate('TODAY')}
-  //           >
-  //             오늘
-  //           </button>
-  //           <button
-  //               className="p-2 rounded-lg bg-white text-emerald-600 hover:bg-emerald-100 transition-colors"
-  //               onClick={() => navigate('NEXT')}
-  //           >
-  //             <ChevronRightIcon className="w-5 h-5" />
-  //           </button>
-  //         </div>
-
-  //         {/* 현재 날짜 표시 */}
-  //         <span className="text-lg font-semibold text-gray-600">
-  //       {label}
-  //     </span>
-
-  //         {/* 뷰 선택 버튼 */}
-  //         <div className="flex gap-2">
-  //           {views.map((name) => (
-  //               <button
-  //                   key={name}
-  //                   className={`px-4 py-2 rounded-lg transition-colors ${
-  //                       view === name
-  //                           ? 'bg-emerald-600 text-white'
-  //                           : 'bg-white text-emerald-600 hover:bg-emerald-50'
-  //                   }`}
-  //                   onClick={() => onView(name)}
-  //               >
-  //                 {viewNames[name]}
-  //               </button>
-  //           ))}
-  //         </div>
-  //       </div>
-  //   );
-  // };
-
-  // const CustomEvent = ({ event }) => (
-  //     <div className="flex items-start p-1 group">
-  //       <div className="flex-1">
-  //         <div className="flex items-center gap-2">
-  //           <div className="w-2 h-2 rounded-full bg-white" />
-  //           <span className="font-medium truncate">{event.title}</span>
-  //         </div>
-  //         {event.desc && (
-  //             <p className="text-xs opacity-80 mt-1 truncate">{event.desc}</p>
-  //         )}
-  //       </div>
-  //       <ChevronRightIcon className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-  //     </div>
-  // );
 
   return (
       <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-green-50 p-4 md:p-8">

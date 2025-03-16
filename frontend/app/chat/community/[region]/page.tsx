@@ -30,9 +30,12 @@ export default function ChatPage() {
 
     const currentRegion = decodeURIComponent(params.region); // URL 디코딩
     const [openSessionCount, setOpenSessionCount] = useState(0);
+
+    const BASE_URL: string = process.env.NEXT_PUBLIC_BASE_URL as string;
+    const strippedURL = BASE_URL.split("http://")[1];
     // WebSocket 연결 설정
     useEffect(() => {
-        ws.current = new WebSocket(`ws://localhost:8080/chat?userId=${sessionStorage.getItem('user_id')}`);
+        ws.current = new WebSocket(`ws://${strippedURL}/chat?userId=${sessionStorage.getItem('user_id')}`);
 
         ws.current.onmessage = (event) => {
             try {

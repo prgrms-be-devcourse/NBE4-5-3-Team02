@@ -31,7 +31,8 @@ export default function ChatPage() {
     const [selectedChat, setSelectedChat] = useState<string | null>(null); // 선택된 채팅방
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const BASE_URL = "http://localhost:8080";
+    const BASE_URL: string = process.env.NEXT_PUBLIC_BASE_URL as string;
+    const strippedURL = BASE_URL.split("http://")[1];
 
     // 날짜 포맷팅 유틸 함수 추가
     const formatDate = (dateString: string) => {
@@ -152,7 +153,7 @@ export default function ChatPage() {
 
     // WebSocket 연결 설정
     useEffect(() => {
-        ws.current = new WebSocket(`ws://localhost:8080/chat?userId=${sessionStorage.getItem('user_id')}`); // 서버 WebSocket URL
+        ws.current = new WebSocket(`ws://${strippedURL}/chat?userId=${sessionStorage.getItem('user_id')}`); // 서버 WebSocket URL
         ws.current.onopen = () => console.log("WebSocket 연결 성공");
         ws.current.onmessage = (event) => {
             try {
