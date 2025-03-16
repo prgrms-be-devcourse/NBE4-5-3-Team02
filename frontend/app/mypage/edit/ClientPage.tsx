@@ -92,7 +92,7 @@ export default function ClientPage() {
             },
         });
 
-        if (getMyInfo.ok) {
+        if (getMyInfo?.ok) {
             const Data = await getMyInfo.json();
             if (Data?.code !== "200-1") {
                 console.error(`에러가 발생했습니다. \n${Data?.msg}`);
@@ -105,7 +105,7 @@ export default function ClientPage() {
             setLatitude(Data?.data?.latitude);
             setLongitude(Data?.data?.longitude);
         } else {
-            console.error("Error fetching data:", getMyInfo.status);
+            console.error("Error fetching data:", getMyInfo?.status);
         }
     };
 
@@ -190,15 +190,6 @@ export default function ClientPage() {
         }));
     };
 
-    const handleMainAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setMainAddress(value);
-        setValidationErrors((prevErrors) => ({
-            ...prevErrors,
-            mainAddress: validateMainAddress(value),
-        }));
-    };
-
     const handleDetailAddressChange = (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
@@ -207,14 +198,6 @@ export default function ClientPage() {
         setValidationErrors((prevErrors) => ({
             ...prevErrors,
             detailAddress: validateDetailAddress(value),
-        }));
-    };
-    const handleZipcodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setZipcode(value);
-        setValidationErrors((prevErrors) => ({
-            ...prevErrors,
-            zipcode: validateZipcode(value),
         }));
     };
 
@@ -266,9 +249,13 @@ export default function ClientPage() {
                 body,
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData?.msg || response.status);
+            if (!response?.ok) {
+                if (response) {
+                    const errorData = await response.json();
+                    throw new Error(errorData?.msg || response.status);
+                } else {
+                    throw new Error("Response is undefined");
+                }
             }
 
             const Data = await response.json();
