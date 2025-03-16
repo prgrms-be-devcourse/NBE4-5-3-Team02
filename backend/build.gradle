@@ -71,6 +71,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.retry:spring-retry'
+
+	// Google
+	implementation 'com.google.api-client:google-api-client:2.7.2'
+	implementation 'com.google.http-client:google-http-client-gson:1.43.3'
+	implementation 'org.springframework.boot:spring-boot-starter-quartz'
+	implementation 'org.springframework.retry:spring-retry'
 }
 
 dependencyManagement { // Spring Cloud Version 명시 (Hoxton.SR6)
