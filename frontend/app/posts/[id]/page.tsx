@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, JSX } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {fetchWithAuth} from "@/app/lib/util/fetchWithAuth";
@@ -47,7 +47,7 @@ interface PostDetail {
 }
 
 interface DateCardProps {
-    date: string;
+    date: string | null;
     days?: number[];
     startTime: string;
     endTime: string;
@@ -72,7 +72,7 @@ export default function PostDetailPage() {
                     headers: {'Content-Type': 'application/json'},
                 });
 
-                if (!response.ok) throw new Error('게시물을 불러오는 데 실패했습니다.');
+                if (!response?.ok) throw new Error('게시물을 불러오는 데 실패했습니다.');
 
                 const data = await response.json();
                 console.log("넘어온 데이터 확인: ", data.data);
@@ -102,7 +102,7 @@ export default function PostDetailPage() {
     if (loading) return <p className="text-gray-600 text-center py-10">게시물을 불러오는 중...</p>;
     if (error) return <p className="text-red-600 text-center py-10">{error}</p>;
 
-    const InfoRow = ({ label, value, icon }) => (
+    const InfoRow = ({ label, value, icon }: { label: string; value: string; icon: JSX.Element }) => (
         <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-xl border border-emerald-100">
             <div className="flex items-center gap-x-2 text-gray-600">
                 {icon}
@@ -112,7 +112,7 @@ export default function PostDetailPage() {
         </div>
     );
 
-    const InfoCard = ({ label, value, icon }) => (
+    const InfoCard = ({ label, value, icon }: { label: string; value: string; icon: JSX.Element }) => (
         <div className="p-5 bg-white rounded-xl border-2 border-emerald-100 hover:border-emerald-200 transition-colors">
             <div className="flex items-center gap-x-3 mb-2">
                 <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600">
@@ -219,7 +219,7 @@ export default function PostDetailPage() {
                         </div>
 
                         {/* 네비게이션 컨트롤 */}
-                        {post?.images?.length > 1 && (
+                        {post?.images && post.images.length > 1 && (
                             <>
                                 {/* 좌우 화살표 */}
                                 <button
@@ -360,14 +360,16 @@ export default function PostDetailPage() {
                                     date={date.date}
                                     startTime={date.startTime}
                                     endTime={date.endTime}
+                                    recurring={false}
                                 />
                             ))}
 
                             {recurringDates.map((date, index) => (
                                 <DateCard
                                     key={`recur-${index}`}
+                                    date={null}
                                     recurring
-                                    days={date.recurrenceDays}
+                                    days={[date.recurrenceDays]}
                                     startTime={date.startTime}
                                     endTime={date.endTime}
                                 />

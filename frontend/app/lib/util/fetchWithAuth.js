@@ -34,7 +34,7 @@ const fetchWithAuth = async (url, options = {}, retry = true) => {
             if (window.location.pathname !== '/login') {
                 window.location.href = '/login';
             }
-            return; // 함수 종료
+            return null; // 함수 종료
         }
 
         // user_id만 있고 access_token이 없으면 일반 fetch 실행
