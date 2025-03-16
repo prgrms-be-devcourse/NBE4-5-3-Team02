@@ -38,9 +38,6 @@ public class MailService {
         // HTML 본문 생성
         helper.setText(buildEmailTemplate(code), true); // HTML 컨텐츠로 설정
 
-        // 로고 이미지 삽입
-        // helper.addInline("logo", new ClassPathResource("static/images/logo.png"));
-
         return message;
     }
 
@@ -97,33 +94,41 @@ public class MailService {
                     </h1>
                     <p style="font-size: 16px; color: #555; line-height: 1.6; margin: 0;">
                         안녕하세요! <strong style="color: #2c8c4a;">소유에서 공유로</strong>의 가치를 실현하는<br>
-                        <span style="background: linear-gradient(120deg, #28a745, #90d26d); -webkit-background-clip: text; color: transparent; font-weight: 700;">
-                            Toolgether
-                        </span> 팀입니다.<br>
+                            Toolgether 팀입니다.<br>
                         🔄 <em>구매 대신 이웃과 공유</em>하는 지속 가능한 라이프스타일을 함께 만들어가요!
                     </p>
                 </header>
 
                 <!-- 본문 섹션 -->
-                <main style="padding: 25px 0;">
-                    <div style="padding: 25px; background: #eafce4; border-radius: 12px; border: 1px dashed #90d26d;">
-                        <p style="font-size: 14px; color: #4a7c59; margin: 0 0 12px 0;">
-                            🚨 아래 코드를 입력해 주세요
-                        </p>
-                        <div style="font-size: 36px; color: #28a745; font-weight: 800; letter-spacing: 2px; margin: 15px 0;">
-                            %s
-                        </div>
-                        <div style="font-size: 14px; color: #666;">
-                            ⏳ 유효 시간: <strong>15분</strong>
-                        </div>
-                    </div>
-                </main>
+                               <main style="padding: 25px 0;">
+                                   <div style="padding: 25px; background: #eafce4; border-radius: 12px; border: 1px dashed #90d26d;">
+                                       <p style="font-size: 14px; color: #4a7c59; margin: 0 0 12px 0;">
+                                           🚨 아래 링크 클릭 후 인증을 완료해 주세요
+                                       </p>
+                                       <a href="http://localhost:8080/api/v1/users/verify?code=%s"\s
+                                          style="display: inline-block;
+                                                 padding: 12px 24px;
+                                                 background: #28a745;
+                                                 color: white;
+                                                 font-size: 18px;
+                                                 font-weight: 600;
+                                                 text-decoration: none;
+                                                 border-radius: 8px;
+                                                 transition: background 0.3s ease;
+                                                 margin: 15px 0;">
+                                           인증 바로가기
+                                       </a>
+                                       <div style="font-size: 14px; color: #666; margin-top: 20px;">
+                                           ⏳ 유효 시간: <strong>15분</strong>
+                                       </div>
+                                   </div>
+                               </main>
 
                 <!-- 푸터 섹션 -->
                 <footer style="margin-top: 30px; text-align: center; color: #888; font-size: 14px;">
                     <hr style="border: none; border-top: 1px solid #e0f0e9; margin: 20px 0;">
                     <p style="margin: 8px 0;">
-                        💬 문의: 
+                        💬 문의:
                         <a href="mailto:support@toolgether.com" 
                            style="color: #28a745; text-decoration: none; font-weight: 500;">
                             support@toolgether.com

@@ -10,6 +10,22 @@ import Link from "next/link";
 import Image from "next/image";
 import { fetchWithAuth } from "../lib/util/fetchWithAuth";
 import { useRouter } from "next/navigation";
+import {ArrowDownTrayIcon, ArrowUpTrayIcon, DocumentMagnifyingGlassIcon, PencilSquareIcon, PhotoIcon} from "@heroicons/react/16/solid";
+import {PhoneIcon} from "@heroicons/react/24/solid";
+import {
+  CalendarIcon,
+  CameraIcon, CheckCircleIcon,
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ClockIcon,
+  CreditCardIcon,
+  MapPinIcon,
+  StarIcon,
+  TrashIcon
+} from "lucide-react";
+import {UserCircleIcon} from "@heroicons/react/24/outline";
+import {ArrowRightOnRectangleIcon} from "@heroicons/react/20/solid";
 
 interface Me {
   id: number;
@@ -99,15 +115,6 @@ export default function ClientPage() {
     getReservations();
   }, []);
 
-  const fetchHelper = async (url: string, options?: RequestInit) => {
-    const accessToken = sessionStorage.getItem("access_token");
-    if (accessToken) {
-      return fetchWithAuth(url, options);
-    } else {
-      return fetch(url, options);
-    }
-  };
-
   const handleNavigate = (newDate: Date) => {
     setDate(newDate);
   };
@@ -139,24 +146,24 @@ export default function ClientPage() {
   };
   const scheduleReservations = {
     rentals: reservations?.rentals.filter(
-      (rental) =>
-        rental.status === "APPROVED" || rental.status === "IN_PROGRESS"
+        (rental) =>
+            rental.status === "APPROVED" || rental.status === "IN_PROGRESS"
     ),
     borrows: reservations?.borrows.filter(
-      (borrow) =>
-        borrow.status === "APPROVED" || borrow.status === "IN_PROGRESS"
+        (borrow) =>
+            borrow.status === "APPROVED" || borrow.status === "IN_PROGRESS"
     ),
   };
   const rentalEvents = scheduleReservations.rentals.map((rental) => ({
     id: rental.id,
-    title: `빌리기: ${rental.title}`,
+    title: `빌려주기: ${rental.title}`,
     start: moment(rental.startTime).toDate(),
     end: moment(rental.endTime).toDate(),
     color: getRandomColor(),
   }));
   const borrowEvents = scheduleReservations.borrows.map((borrow) => ({
     id: borrow.id,
-    title: `빌려주기: ${borrow.title}`,
+    title: `빌리기: ${borrow.title}`,
     start: new Date(borrow.startTime),
     end: new Date(borrow.endTime),
     color: getRandomColor(),
@@ -190,11 +197,11 @@ export default function ClientPage() {
   const formats = {
     dateFormat: "D",
     dayFormat: (date: Date, culture: any, localizer: any) =>
-      localizer.format(date, "dddd", culture),
+        localizer.format(date, "dddd", culture),
     weekdayFormat: (date: Date, culture: any, localizer: any) =>
-      localizer.format(date, "ddd", culture),
+        localizer.format(date, "ddd", culture),
     monthHeaderFormat: (date: Date, culture: any, localizer: any) =>
-      localizer.format(date, "YYYY년 MM월", culture),
+        localizer.format(date, "YYYY년 MM월", culture),
   };
 
   const filteredReservations = useMemo(() => {
@@ -206,10 +213,10 @@ export default function ClientPage() {
   }, [eventType, reservations]);
 
   const handleModal = (
-    title: string,
-    content: string,
-    confirmAction: (() => void) | null = null,
-    isCancelButton: boolean = true
+      title: string,
+      content: string,
+      confirmAction: (() => void) | null = null,
+      isCancelButton: boolean = true
   ) => {
     setModalTitle(title);
     setModalContent(content);
@@ -220,7 +227,7 @@ export default function ClientPage() {
 
   //유저정보 조회
   const getMe = async () => {
-    const getMyInfo = await fetchHelper(`${BASE_URL}/api/v1/mypage/me`, {
+    const getMyInfo = await fetchWithAuth(`${BASE_URL}/api/v1/mypage/me`, {
       method: "GET",
       credentials: "include",
       headers: {
@@ -247,7 +254,7 @@ export default function ClientPage() {
 
   //예약정보 조회
   const getReservations = async () => {
-    const getMyReservations = await fetchHelper(
+    const getMyReservations = await fetchWithAuth(
       `${BASE_URL}/api/v1/mypage/reservations`,
       {
         method: "GET",
@@ -271,7 +278,7 @@ export default function ClientPage() {
 
   //폼 데이터를 서버로 전송하는 함수
   const handleUploadProfile = async (
-    e: React.ChangeEvent<HTMLInputElement>
+      e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = e.target.files?.[0];
 
@@ -284,7 +291,7 @@ export default function ClientPage() {
     formData.append("profileImage", file);
 
     try {
-      const uploadProfile = await fetchHelper(
+      const uploadProfile = await fetchWithAuth(
         `${BASE_URL}/api/v1/mypage/profile`,
         {
           method: "POST",
@@ -329,7 +336,7 @@ export default function ClientPage() {
 
   const handleDeleteProfile = async () => {
     try {
-      const deleteProfile = await fetchHelper(
+      const deleteProfile = await fetchWithAuth(
         `${BASE_URL}/api/v1/mypage/profile`,
         {
           method: "DELETE",
@@ -376,7 +383,7 @@ export default function ClientPage() {
 
   const handleWithdrawMembership = async () => {
     try {
-      const withdrawMembership = await fetchHelper(
+      const withdrawMembership = await fetchWithAuth(
         `${BASE_URL}/api/v1/mypage/me`,
         {
           method: "DELETE",
@@ -426,306 +433,592 @@ export default function ClientPage() {
     }
   };
 
-  return (
-    <div className="relative min-h-screen bg-gray-100">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800">마이페이지</h1>
-          <Link href="/mypage/edit">
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
-              마이페이지 수정
-            </button>
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 gap-4 mt-4">
-          <div className="shadow-md p-4 bg-white grid grid-cols-2 gap-4">
-            {/* 유저 정보 */}
-            <div className="">
-              <h2 className="text-lg font-bold text-gray-800">나의 정보</h2>
-              <div className="mt-4">
-                <p className="text-gray-800">
-                  <span className="font-bold">닉네임: </span>
-                  {me?.nickname}
-                </p>
-                <p className="text-gray-800">
-                  <span className="font-bold">전화번호: </span>
-                  {me?.phoneNumber}
-                </p>
-                {me?.username ? (
-                  <p className="text-gray-800">
-                    <span className="font-bold">아이디: </span> {me?.username}
-                  </p>
-                ) : (
-                  <p className="text-gray-800">
-                    <span className="font-bold">이메일: </span> {me?.email}
-                  </p>
-                )}
-                <p className="text-gray-800">
-                  <span className="font-bold">주소: </span>{" "}
-                  {me?.address.mainAddress} {me?.address.detailAddress} (
-                  {me?.address.zipcode})
-                </p>
-                <p className="text-gray-800">
-                  <span className="font-bold">가입일:</span>{" "}
-                  {localizer.format(me?.createdAt, "YYYY년 MM월 DD일", "ko")}
-                </p>
-                <p className="text-gray-800">
-                  <span className="flex flex-row">
-                    <span className="font-bold">평점: </span>
-                    {me?.score}
-                    <ScoreIcon
-                      className="ml-2"
-                      score={me?.score}
-                      size={25}
-                      round
-                    />
-                  </span>
-                </p>
-                <p className="text-gray-800">
-                  <span className="font-bold">크레딧: </span> {me?.credit}
-                </p>
-              </div>
-            </div>
-            {/* 프로필 */}
-            <div className="flex flex-col items-center justify-center">
-              <div className="relative">
-                {!me?.profileImage ? (
-                  <div className="w-30 h-30 bg-gray-200 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center">
-                    {/* 프로필 추가 버튼 (프로필 이미지 없을 때) */}
-                    <button
-                      className="text-gray-600 hover:text-gray-800"
-                      onClick={() =>
-                        document.getElementById("profile-upload-input")?.click()
-                      }
-                    >
-                      프로필 추가
-                    </button>
-                  </div>
-                ) : (
-                  <div className="relative w-30 h-30 rounded-full overflow-hidden border-2 border-gray-300">
-                    <Image
-                      src={me?.profileImage}
-                      alt="profile"
-                      fill
-                      sizes="100%"
-                      style={{ objectFit: "cover" }}
-                    />
-                    {/* 프로필 수정 및 삭제 버튼 (프로필 이미지 있을 때) */}
-                    <div className="absolute bottom-0 left-0 right-0 flex justify-around bg-gray-100 bg-opacity-75 p-1">
-                      <button
-                        className="text-blue-500 hover:text-blue-700"
-                        onClick={() =>
-                          document
-                            .getElementById("profile-upload-input")
-                            ?.click()
-                        }
-                      >
-                        수정
-                      </button>
-                      <button
-                        className="text-red-500 hover:text-red-700"
-                        onClick={() =>
-                          handleModal(
-                            "프로필 삭제",
-                            "프로필을 삭제하시겠습니까?",
-                            handleDeleteProfile
-                          )
-                        }
-                      >
-                        삭제
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* 예약 현황 */}
-          <div className="bg-white shadow-md p-4">
-            <h2 className="text-lg font-bold text-gray-800">예약 현황</h2>
-            <div className="flex border-b-2 mh-4">
-              <button
-                onClick={() => setEventType("rental")}
-                className={`flex-1 py-2 text-center text-lg font-semibold border-1 cursor-pointer transition-all
-                  ${
-                    eventType === "rental"
-                      ? "bg-white text-gray-800 border-b-2 border-gray-800"
-                      : "bg-gray-200 text-gray-800 hover:bg-white active:bg-white"
-                  }`}
-              >
-                빌리기
-              </button>
-              <button
-                onClick={() => setEventType("borrow")}
-                className={`flex-1 py-2 text-center text-lg font-semibold border-1 cursor-pointer transition-all
-                  ${
-                    eventType === "borrow"
-                      ? "bg-white text-gray-800 border-b-2 border-gray-800"
-                      : "bg-gray-200 text-gray-800 hover:bg-white active:bg-white"
-                  }`}
-              >
-                빌려주기
-              </button>
-            </div>
-            <div className="grid grid-cols-1 gap-4 mt-4">
-              {/* 캘린더 */}
-              <div className="mt-4">
-                <Calendar
-                  localizer={localizer}
-                  events={eventType === "rental" ? rentalEvents : borrowEvents}
-                  startAccessor="start"
-                  endAccessor="end"
-                  style={{ height: 800 }}
-                  date={date}
-                  onNavigate={handleNavigate}
-                  eventPropGetter={(event) => ({
-                    style: { backgroundColor: event.color, color: "white" },
-                  })}
-                  views={{ month: true }}
-                  messages={messages}
-                  formats={formats}
-                />
-              </div>
-              {/* 예약 목록 */}
-              <div>
-                {filteredReservations.length > 0 ? (
-                  filteredReservations.map((reservation) => (
-                    <Link href={`/mypage/reservationDetail/${reservation.id}`}
-                      key={1}
-                      // key={reservation.id}
-                      className="flex items-center border rounded p-2 mb-2"
-                    >
-                      <Image
-                        src={reservation.image}
-                        alt={reservation.title}
-                        className="w-20 h-20 object-cover rounded mr-4"
-                        width={80}
-                        height={80}
-                      />
-                      <div>
-                        <h3 className="font-bold text-gray-800">
-                          {reservation.title}
-                        </h3>
-                        <p className="text-gray-600">
-                          대여:{" "}
-                          {moment(reservation.startTime).format(
-                            "YYYY년MM월DD일 HH시mm분"
-                          )}
-                        </p>
-                        <p className="text-gray-600">
-                          반납:{" "}
-                          {moment(reservation.endTime).format(
-                            "YYYY년MM월DD일 HH시mm분"
-                          )}
-                        </p>
-                        <p className="text-gray-600"></p>
-                        <p className="text-gray-600">
-                          가격: {reservation.amount}원
-                        </p>
-                        <p className="text-gray-600">
-                          상태: {reservationStatus[reservation.status] || ""}
-                        </p>
-                      </div>
-                    </Link>
-                  ))
-                ) : (
-                  <p>예약 내역이 없습니다.</p>
-                )}
-              </div>
-            </div>
-          </div>
-          {/* 회원 탈퇴 버튼 추가 */}
-          <div className="flex justify-end">
-            <button
-              className="py-2 px-4"
-              onClick={() =>
-                handleModal(
-                  "회원 탈퇴",
-                  "정말로 회원 탈퇴하시겠습니까?",
-                  handleWithdrawMembership,
-                  true
-                )
-              }
-            >
-              회원 탈퇴
-            </button>
-          </div>
+  const InfoCard = ({ icon, title, value, color }) => (
+      <div className={`${color} p-4 rounded-xl flex items-center gap-3 transition-transform hover:scale-[1.02]`}>
+        <div className="p-2 bg-white rounded-lg shadow-sm">{icon}</div>
+        <div>
+          <p className="text-xs text-gray-500">{title}</p>
+          <p className="text-gray-600 font-semibold">{value}</p>
         </div>
       </div>
+  );
+  const TabButton = ({ active, children, onClick, icon }) => (
+      <button
+          onClick={onClick}
+          className={`flex-1 py-3 text-center font-semibold flex items-center justify-center gap-2 transition-all
+      ${
+              active
+                  ? 'text-emerald-700 border-b-2 border-emerald-600'
+                  : 'text-gray-600 hover:text-emerald-600 hover:bg-emerald-50'
+          }`}
+      >
+        {icon}
+        <span className="text-lg">{children}</span>
+      </button>
+  );
 
-      {/* 성공 모달 */}
-      {isModal && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 transition-opacity"
-              aria-hidden="true"
-            >
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+  const ReservationCard = ({ reservation, eventType }) => (
+      <Link
+          href={`/mypage/reservationDetail/${reservation.id}`}
+          className="group block bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+      >
+        <div className="flex p-4 gap-4 items-start">
+          {/* 이미지 섹션 */}
+          <div className="relative w-24 h-24 flex-shrink-0">
+            <Image
+                src={reservation.image}
+                alt={reservation.title}
+                fill
+                className="object-cover rounded-lg"
+                sizes="(max-width: 768px) 100vw, 25vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 rounded-lg" />
+          </div>
+
+          {/* 정보 섹션 */}
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <h3 className="text-gray-600 font-semibold text-lg">
+                {reservation.title}
+              </h3>
+              <span className={`px-2 py-1 rounded-full text-sm ${
+                  reservationStatusStyle[reservation.status]?.bg
+                  || 'bg-gray-200 text-gray-600'
+              }`}>
+            {reservationStatus[reservation.status]}
+          </span>
             </div>
-            <span
-              className="hidden sm:inline-block sm:align-middle sm:h-screen"
-              aria-hidden="true"
+
+            {/* 타임라인 */}
+            <div className="grid grid-cols-2 gap-3 text-gray-600">
+              <InfoItem
+                  icon={<ClockIcon className="w-5 h-5" />}
+                  label="대여 시간"
+                  value={moment(reservation.startTime).format("MM/DD HH:mm")}
+              />
+              <InfoItem
+                  icon={<ClockIcon className="w-5 h-5" />}
+                  label="반납 시간"
+                  value={moment(reservation.endTime).format("MM/DD HH:mm")}
+              />
+            </div>
+
+            {/* 가격 & 상태 */}
+            <div className="mt-3 flex items-center gap-4">
+              <p className="text-emerald-600 font-bold">
+                {reservation.amount.toLocaleString()}원
+              </p>
+              <ChevronRightIcon className="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+        </div>
+      </Link>
+  );
+
+  const InfoItem = ({ icon, label, value }) => (
+      <div className="flex items-center gap-2">
+        <div className="text-emerald-600">{icon}</div>
+        <div>
+          <p className="text-sm text-gray-500">{label}</p>
+          <p className="text-gray-600 font-medium">{value}</p>
+        </div>
+      </div>
+  );
+
+// 상태 스타일 맵핑
+  const reservationStatusStyle = {
+    pending: { bg: 'bg-amber-100 text-amber-800' },
+    confirmed: { bg: 'bg-emerald-100 text-emerald-800' },
+    completed: { bg: 'bg-blue-100 text-blue-800' },
+    canceled: { bg: 'bg-red-100 text-red-800' }
+  };
+
+  const CustomToolbar = ({ label, date, view, views, onView, onNavigate }) => {
+    const navigate = (action) => {
+      onNavigate(action);
+    };
+
+    const viewNames = {
+      month: '월별',
+      week: '주별',
+      day: '일별',
+      agenda: '일정 목록'
+    };
+
+    return (
+        <div className="flex items-center justify-between mb-4 p-3 bg-emerald-50 rounded-lg">
+          {/* 네비게이션 컨트롤 */}
+          <div className="flex gap-2">
+            <button
+                className="p-2 rounded-lg bg-white text-emerald-600 hover:bg-emerald-100 transition-colors"
+                onClick={() => navigate('PREV')}
             >
-              &#8203;
-            </span>
-            <div
-              className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="modal-headline"
+              <ChevronLeftIcon className="w-5 h-5" />
+            </button>
+            <button
+                className="p-2 rounded-lg bg-white text-emerald-600 hover:bg-emerald-100 transition-colors"
+                onClick={() => navigate('TODAY')}
             >
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3
-                      className="text-lg leading-6 font-medium text-gray-900"
-                      id="modal-headline"
-                    >
-                      {modalTitle}
-                    </h3>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">{modalContent}</p>
+              오늘
+            </button>
+            <button
+                className="p-2 rounded-lg bg-white text-emerald-600 hover:bg-emerald-100 transition-colors"
+                onClick={() => navigate('NEXT')}
+            >
+              <ChevronRightIcon className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* 현재 날짜 표시 */}
+          <span className="text-lg font-semibold text-gray-600">
+        {label}
+      </span>
+
+          {/* 뷰 선택 버튼 */}
+          <div className="flex gap-2">
+            {views.map((name) => (
+                <button
+                    key={name}
+                    className={`px-4 py-2 rounded-lg transition-colors ${
+                        view === name
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-white text-emerald-600 hover:bg-emerald-50'
+                    }`}
+                    onClick={() => onView(name)}
+                >
+                  {viewNames[name]}
+                </button>
+            ))}
+          </div>
+        </div>
+    );
+  };
+
+  const CustomEvent = ({ event }) => (
+      <div className="flex items-start p-1 group">
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-white" />
+            <span className="font-medium truncate">{event.title}</span>
+          </div>
+          {event.desc && (
+              <p className="text-xs opacity-80 mt-1 truncate">{event.desc}</p>
+          )}
+        </div>
+        <ChevronRightIcon className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
+  );
+
+  return (
+      <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-green-50 p-4 md:p-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+
+          <div className="flex justify-between items-center">
+            {/* 제목 영역 */}
+            <div className="space-y-1">
+              <h1 className="text-3xl font-bold text-gray-600 tracking-tight">
+                마이페이지
+              </h1>
+              <p className="text-gray-500 text-sm">최근 업데이트: 3시간 전</p>
+            </div>
+
+            {/* 수정 버튼 영역 */}
+            <Link
+                href="/mypage/edit"
+                className="group flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-lg transition-all duration-200 ease-out hover:translate-y-[-2px] active:translate-y-0 shadow-md hover:shadow-emerald-200"
+            >
+              <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 group-hover:rotate-12 transition-transform"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+              >
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                />
+              </svg>
+              <span className="font-semibold">수정하기</span>
+            </Link>
+          </div>
+
+          {/* 구분선 */}
+          <div className="my-6 border-t border-emerald-100/60" />
+
+
+          <div className="grid grid-cols-1 gap-4 mt-4">
+            <div className="shadow-2xl p-8 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8 transition-all duration-300 hover:shadow-3xl">
+              {/* 유저 정보 섹션 */}
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-600 flex items-center gap-2">
+                  <UserCircleIcon className="w-8 h-8 text-emerald-600" />
+                  나의 정보
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* 정보 카드 그룹 */}
+                  <div className="col-span-2 bg-white p-6 rounded-xl shadow-sm border border-green-100">
+                    <div className="space-y-4">
+                      {/* 개별 정보 항목 */}
+                      <div className="flex justify-between items-center group hover:bg-green-50 rounded-lg p-2 transition-colors">
+                        <div>
+                          <p className="text-sm text-gray-400 font-medium">닉네임</p>
+                          <p className="text-gray-600 font-semibold">{me?.nickname}</p>
+                        </div>
+                        <PencilSquareIcon
+                            className="w-5 h-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                        />
+                      </div>
+
+                      {/* 연락처 정보 */}
+                      <div className="flex items-center gap-3 p-2">
+                        <PhoneIcon className="w-5 h-5 text-emerald-600 shrink-0" />
+                        <div>
+                          <p className="text-sm text-gray-400">연락처</p>
+                          <p className="text-gray-600">{me?.phoneNumber || '미등록'}</p>
+                        </div>
+                      </div>
+
+                      {/* 주소 정보 */}
+                      <div className="group relative p-2 rounded-lg hover:bg-green-50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <MapPinIcon className="w-5 h-5 text-emerald-600 shrink-0" />
+                          <div className="truncate">
+                            <p className="text-sm text-gray-400">주소</p>
+                            <p className="text-gray-600">
+                              {me?.address.mainAddress}
+                              <span className="block text-sm">{me?.address.detailAddress}</span>
+                            </p>
+                          </div>
+                        </div>
+                        <button className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-600 text-sm">
+                          변경
+                        </button>
+                      </div>
                     </div>
+                  </div>
+
+                  {/* 부가 정보 그리드 */}
+                  <div className="grid grid-cols-1 gap-3">
+                    <InfoCard
+                        icon={<CalendarIcon className="w-6 h-6" />}
+                        title="가입일"
+                        value={localizer.format(me?.createdAt, "YYYY년 MM월 DD일", "ko")}
+                        color="bg-emerald-100"
+                    />
+
+                    <InfoCard
+                        icon={<StarIcon className="w-6 h-6" />}
+                        title="평점"
+                        value={
+                          <div className="flex items-center justify-end gap-2 w-full"> {/* gap 확대 */}
+                            <span className="text-lg font-bold text-amber-700">{me?.score}</span> {/* 텍스트 강조 */}
+                            <div className="rounded-full bg-amber-200 p-[6px] overflow-hidden w-9 h-9 shadow-sm">
+                              {/* 크기 조정: w-9 h-9 */}
+                              <ScoreIcon
+                                  score={me?.score}
+                                  className="w-full h-full object-cover transform hover:scale-110 transition-transform"
+                                  size={32}
+                              />
+                            </div>
+                          </div>
+                        }
+                        color="bg-amber-100"
+                    />
+
+                    <InfoCard
+                        icon={<CreditCardIcon className="w-6 h-6" />}
+                        title="크레딧"
+                        value={`${me?.credit?.toLocaleString()} P`}
+                        color="bg-blue-100"
+                    />
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button
-                  type="button"
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => {
-                    if (onConfirmModal) {
-                      onConfirmModal();
-                    }
-                    setIsModal(false);
-                  }}
-                >
-                  확인
-                </button>
-                {isCancelButton && (
-                  <button
-                    type="button"
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                    onClick={() => setIsModal(false)}
+
+              {/* 프로필 섹션 */}
+              <div className="flex flex-col items-center justify-center gap-6">
+                <div className="relative group">
+                  <div className={`w-48 h-48 rounded-full shadow-lg border-4 border-emerald-100 transition-all duration-300 
+        ${me?.profileImage ? 'hover:scale-105 hover:border-emerald-200' : 'border-dashed animate-pulse'}`}>
+                    {me?.profileImage ? (
+                        <>
+                          <Image
+                              src={me.profileImage}
+                              alt="Profile"
+                              fill
+                              className="object-cover rounded-full"
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 rounded-full flex items-center justify-center gap-4 transition-opacity">
+                            <CameraIcon
+                                className="w-8 h-8 text-white cursor-pointer hover:text-emerald-300 transition-colors"
+                                onClick={() => document.getElementById('profile-upload-input')?.click()}
+                            />
+                            <TrashIcon
+                                className="w-8 h-8 text-white cursor-pointer hover:text-red-400 transition-colors"
+                                onClick={() => handleModal("프로필 삭제", "프로필을 삭제하시겠습니까?", handleDeleteProfile)}
+                            />
+                          </div>
+                        </>
+                    ) : (
+                        <button
+                            className="w-full h-full flex flex-col items-center justify-center text-emerald-600 hover:text-emerald-700"
+                            onClick={() => document.getElementById('profile-upload-input')?.click()}
+                        >
+                          <PhotoIcon className="w-16 h-16 mb-2" />
+                          <span className="font-medium">프로필 사진 추가</span>
+                        </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* 상태 표시 바 */}
+                <div className="w-full max-w-[200px] bg-emerald-600 rounded-full h-3">  {/* 커스텀 최대 너비 */}
+                  <div
+                      className="bg-emerald-600 h-0 rounded-full transition-all duration-500"
+                      style={{ width: `${(me?.credit / 1000) * 100}%` }}
+                  />
+                </div>
+                <p className="text-sm text-gray-500">다음 등급까지 {1000 - (me?.credit % 1000)}P 남았습니다</p>
+              </div>
+            </div>
+
+            {/* 예약 현황 */}
+            <div className="bg-gradient-to-br from-green-50 to-green-100 shadow-xl rounded-2xl p-6">
+              {/* 헤더 및 탭 버튼 */}
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-gray-600 flex items-center gap-2 mb-6">
+                  <CalendarIcon className="w-6 h-6 text-emerald-600" />
+                  예약 관리
+                </h2>
+
+                <div className="flex border-b-2 border-emerald-100">
+                  <TabButton
+                      active={eventType === "borrow"}
+                      onClick={() => setEventType("borrow")}
+                      icon={<ArrowUpTrayIcon className="w-5 h-5" />}
                   >
-                    취소
-                  </button>
+                    나의 예약 요청
+                  </TabButton>
+                  <TabButton
+                      active={eventType === "rental"}
+                      onClick={() => setEventType("rental")}
+                      icon={<ArrowDownTrayIcon className="w-5 h-5" />}
+                  >
+                    예약 대기 목록
+                  </TabButton>
+                </div>
+              </div>
+
+              {/* 캘린더 섹션 */}
+              <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl shadow-lg border border-emerald-100 p-6">
+                <Calendar
+                    localizer={localizer}
+                    events={eventType === "rental" ? rentalEvents : borrowEvents}
+                    startAccessor="start"
+                    endAccessor="end"
+                    date={date}
+                    onNavigate={handleNavigate}
+                    style={{ height: '600px' }}
+                    eventPropGetter={(event) => ({
+                      style: {
+                        backgroundColor: event.color,
+                        border: `2px solid ${event.borderColor}`,
+                        borderRadius: '8px',
+                        color: "white",
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                        padding: '4px 8px',
+                        fontSize: '0.875rem'
+                      },
+                    })}
+                    formats={{
+                      dayFormat: 'D',
+                      monthHeaderFormat: 'YYYY년 MM월',
+                      dayHeaderFormat: 'M/D (ddd)',
+                      timeGutterFormat: 'HH:mm'
+                    }}
+                    messages={{
+                      today: '오늘',
+                      previous: '←',
+                      next: '→',
+                      month: '월별',
+                      week: '주별',
+                      day: '일별',
+                      agenda: '일정 목록'
+                    }}
+                    components={{
+                      toolbar: (props) => (
+                          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <button
+                                  className="rounded-lg bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700"
+                                  onClick={() => props.onView('month')}
+                              >
+                                월별
+                              </button>
+                              <button
+                                  className="rounded-lg bg-emerald-100 px-4 py-2 text-emerald-700 hover:bg-emerald-200"
+                                  onClick={() => props.onView('agenda')}
+                              >
+                                목록 보기
+                              </button>
+                            </div>
+                            <span className="text-xl font-bold text-gray-800">
+            {moment(props.date).format('YYYY년 MM월')}
+          </span>
+                            <div className="flex gap-2">
+                              <button
+                                  className="rounded-lg p-2 hover:bg-emerald-100"
+                                  onClick={() => props.onNavigate('PREV')}
+                              >
+                                ←
+                              </button>
+                              <button
+                                  className="rounded-lg p-2 hover:bg-emerald-100"
+                                  onClick={() => props.onNavigate('TODAY')}
+                              >
+                                오늘
+                              </button>
+                              <button
+                                  className="rounded-lg p-2 hover:bg-emerald-100"
+                                  onClick={() => props.onNavigate('NEXT')}
+                              >
+                                →
+                              </button>
+                            </div>
+                          </div>
+                      ),
+                      event: ({ event }) => (
+                          <div className="flex items-start">
+                            <div className="mr-2 mt-1 h-2 w-2 rounded-full"
+                                 style={{ backgroundColor: event.borderColor }} />
+                            <div>
+                              <p className="font-medium">{event.title}</p>
+                              <p className="text-xs opacity-80">
+                                {moment(event.start).format('HH:mm')}~
+                                {moment(event.end).format('HH:mm')}
+                              </p>
+                            </div>
+                          </div>
+                      )
+                    }}
+                    dayPropGetter={(date) => ({
+                      className: moment(date).isSame(new Date(), 'day')
+                          ? 'bg-emerald-100/50'
+                          : ''
+                    })}
+                    className="[&_.rbc-header]:bg-emerald-100 [&_.rbc-header]:py-3 [&_.rbc-header]:text-emerald-800 [&_.rbc-day-bg+.rbc-day-bg]:border-l-emerald-50"
+                />
+              </div>
+
+              {/* 예약 목록 */}
+              <div className="space-y-4">
+                {filteredReservations.length > 0 ? (
+                    filteredReservations.map((reservation) => (
+                        <ReservationCard
+                            key={reservation.id}
+                            reservation={reservation}
+                            eventType={eventType}
+                        />
+                    ))
+                ) : (
+                    <div className="bg-emerald-50 p-6 rounded-xl text-center">
+                      <DocumentMagnifyingGlassIcon className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
+                      <p className="text-gray-600 font-medium">등록된 예약이 없습니다</p>
+                    </div>
                 )}
               </div>
             </div>
+
+            {/* 회원 탈퇴 버튼 추가 */}
+            <div className="flex justify-end mt-8">
+              <button
+                  onClick={() =>
+                      handleModal(
+                          "회원 탈퇴",
+                          "정말로 회원 탈퇴하시겠습니까?",
+                          handleWithdrawMembership,
+                          true
+                      )
+                  }
+                  className="flex items-center gap-2 rounded-lg border border-emerald-600 px-4 py-2 text-gray-600 transition-colors hover:bg-emerald-50 hover:shadow-sm"
+              >
+                <ArrowRightOnRectangleIcon className="h-5 w-5 text-emerald-600" />
+                <span className="font-medium">회원 탈퇴</span>
+              </button>
+            </div>
+
           </div>
         </div>
-      )}
-      {/* 이미지 선택 input (숨김) */}
-      <input
-        type="file"
-        id="profile-upload-input"
-        accept="image/*" // 이미지 파일만 허용
-        className="hidden" // 숨김 처리
-        onChange={handleUploadProfile} // 이미지 선택 시 이벤트 핸들러 호출
-      />
-    </div>
+
+        {/* 성공 모달 */}
+        {isModal && (
+            <div className="fixed inset-0 z-50 bg-emerald-100/80 backdrop-blur-sm transition-opacity">
+              <div className="flex min-h-screen items-center justify-center p-4 text-center">
+                <div
+                    className="relative transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="modal-headline"
+                >
+                  {/* 컨텐츠 영역 */}
+                  <div className="bg-emerald-50 p-6 sm:p-8">
+                    <div className="flex flex-col items-center space-y-4">
+                      {/* 아이콘 배지 */}
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600">
+                        <CheckIcon className="h-8 w-8 text-white" />
+                      </div>
+
+                      {/* 텍스트 컨텐츠 */}
+                      <div className="text-center">
+                        <h3 className="text-xl font-bold text-gray-600">
+                          {modalTitle}
+                        </h3>
+                        <p className="mt-2 text-gray-600">
+                          {modalContent}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 액션 버튼 그룹 */}
+                  <div className="grid grid-cols-1 gap-3 bg-white p-6 sm:grid-cols-2">
+                    {isCancelButton && (
+                        <button
+                            onClick={() => setIsModal(false)}
+                            className="rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-600 transition-colors hover:bg-gray-50"
+                        >
+                          취소
+                        </button>
+                    )}
+                    <button
+                        onClick={() => {
+                          onConfirmModal?.()
+                          setIsModal(false)
+                        }}
+                        className="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-white transition-colors hover:bg-emerald-700"
+                    >
+                      <CheckCircleIcon className="h-5 w-5" />
+                      확인
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+        )}
+
+        {/* 이미지 선택 input (숨김) */}
+        <input
+            type="file"
+            id="profile-upload-input"
+            accept="image/*" // 이미지 파일만 허용
+            className="hidden" // 숨김 처리
+            onChange={handleUploadProfile} // 이미지 선택 시 이벤트 핸들러 호출
+        />
+      </div>
   );
 }

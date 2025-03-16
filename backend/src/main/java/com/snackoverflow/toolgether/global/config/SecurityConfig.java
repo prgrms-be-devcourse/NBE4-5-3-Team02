@@ -1,5 +1,6 @@
 package com.snackoverflow.toolgether.global.config;
 
+import com.snackoverflow.toolgether.global.filter.GoogleAccessTokenFilter;
 import com.snackoverflow.toolgether.global.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,16 +26,18 @@ import java.util.List;
 class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final GoogleAccessTokenFilter googleAccessTokenFilter;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize ->
-                                authorize
-                                        .anyRequest().permitAll() // 모든 요청 허용
+                        authorize
+                                .anyRequest().permitAll() // 모든 요청 허용
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(googleAccessTokenFilter, JwtAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers((headers) -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(

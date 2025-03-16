@@ -6,6 +6,7 @@ import com.snackoverflow.toolgether.domain.postavailability.entity.PostAvailabil
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -16,6 +17,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PostResponse {
     private Long id;
+    @Nullable private Long userid;
+    @Nullable private String nickname;
     private String title;
     private String content;
     private String category;
@@ -32,6 +35,8 @@ public class PostResponse {
 
     public PostResponse(Post post, Set<String> images, Set<PostAvailability> availabilities) {
         this.id = post.getId();
+        this.userid = post.getUser().getId();
+        this.nickname = post.getUser().getNickname();
         this.title = post.getTitle();
         this.content = post.getContent();
         this.category = post.getCategory().name();

@@ -38,6 +38,8 @@ export default function LoginPage() {
             if (response.ok) {
                 login(); // AuthContext의 login 호출
                 sessionStorage.setItem('sessionActive', 'true'); // 세션 플래그 설정
+                sessionStorage.setItem('nickname', data.data.nickname);
+                sessionStorage.setItem('user_id', data.data.user_id)
                 router.push('/')
             }
             if (!response.ok) {
@@ -84,6 +86,7 @@ export default function LoginPage() {
                     // 세션 스토리지에 액세스 토큰과 provider_id 저장
                     sessionStorage.setItem('access_token', data.data.access_token);
                     sessionStorage.setItem('user_id', data.data.user_id);
+                    sessionStorage.setItem('nickname', data.data.nickname);
 
                     // 🔥 추가 정보 필요 여부 체크
                     if (data.data?.additionalInfoRequired) {

@@ -76,7 +76,7 @@ public class JwtUtil {
                 .httpOnly(true) // 자바스크립트 접근 차단 (XSS 방지)
                 .path("/") // 전체 사이트에서 접근 가능
                 .sameSite("None") // 외부 사이트 요청 차단 (CSRF 방지)
-                .maxAge(Duration.ofMinutes(30)) // Access Token 만료 시간
+                .maxAge(Duration.ofDays(1)) // Access Token 만료 시간
                 .secure(true) // HTTPS 통신 시에만 전송
                 .build();
 

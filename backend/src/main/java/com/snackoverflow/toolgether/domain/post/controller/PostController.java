@@ -38,7 +38,7 @@ public class PostController {
     //    @Operation(summary = "게시물 등록")
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE,MediaType.MULTIPART_FORM_DATA_VALUE})
     public RsData<PostResponse> createPost(@Login CustomUserDetails customUserDetails,
-                                            @RequestPart("request") @Valid PostCreateRequest request,
+                                           @RequestPart("request") @Valid PostCreateRequest request,
                                            @RequestPart("images") List<MultipartFile> images) {
         Long userId = customUserDetails.getUserId();
         User user = userService.findByUserId(userId)
@@ -50,8 +50,6 @@ public class PostController {
                 postService.createPost(user,request,images)
         );
     }
-
-
     /**
      * 게시물 상세조회
      */

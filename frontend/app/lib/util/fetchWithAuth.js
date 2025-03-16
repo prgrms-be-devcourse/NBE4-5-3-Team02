@@ -1,6 +1,8 @@
+const BASE_URL = "http://localhost:8080";
+
 const refreshAccessToken = async () => {
     try {
-        const response = await fetch('http://localhost:8080/oauth/token/refresh', {
+        const response = await fetch(`${BASE_URL}/oauth/token/refresh`, {
             method: 'POST',
             credentials: 'include', // 쿠키 포함
         });
@@ -17,22 +19,37 @@ const refreshAccessToken = async () => {
         return data.data.access_token; // 새 액세스 토큰 반환
     } catch (error) {
         console.error('토큰 갱신 실패:', error);
-        sessionStorage.removeItem('access_token'); // 만료된 액세스 토큰 제거
-        window.location.href = '/login'; // 로그인 페이지로 리디렉션
     }
 };
 
 const fetchWithAuth = async (url, options = {}, retry = true) => {
     try {
-        // 세션 스토리지에서 액세스 토큰 가져오기
+        // 세션 스토리지에서 user_id와 access_token 가져오기
+        const userId = sessionStorage.getItem('user_id');
         const accessToken = sessionStorage.getItem('access_token');
 
-        // Authorization 헤더 추가
+        // user_id가 없으면 로그인 화면으로 리디렉션
+        if (!userId) {
+            console.warn('사용자 ID 없음, 로그인 화면으로 이동합니다.');
+            if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
+            }
+            return; // 함수 종료
+        }
+
+        // user_id만 있고 access_token이 없으면 일반 fetch 실행
+        if (userId && !accessToken) {
+            console.warn('액세스 토큰 없음, 일반 fetch 실행');
+            return await fetch(url, options);
+        }
+
+        // user_id와 access_token 둘 다 있으면 Authorization 헤더 추가하여 fetchWithAuth 실행
         const headers = {
-            'Authorization': `Bearer ${accessToken}`,
             ...options.headers,
+            'Authorization': `Bearer ${accessToken}`,
         };
 
+        // Content-Type 헤더 추가 (FormData가 아닌 경우에만)
         if (!(options.body instanceof FormData)) {
             headers['Content-Type'] = 'application/json';
         }
@@ -42,6 +59,7 @@ const fetchWithAuth = async (url, options = {}, retry = true) => {
             headers,
         });
 
+        // 401 또는 403 상태 처리
         if (response.status === 401 || response.status === 403) {
             if (retry) {
                 console.warn('액세스 토큰 만료, 리프레시 토큰으로 갱신 시도 중...');
@@ -54,14 +72,12 @@ const fetchWithAuth = async (url, options = {}, retry = true) => {
                     return fetchWithAuth(url, options, false);
                 }
             }
-            throw new Error('인증 실패: 다시 로그인하세요.');
         }
 
         return response;
     } catch (error) {
         console.error('API 호출 오류:', error);
-        throw error;
     }
 };
 
-export { fetchWithAuth };
+export {fetchWithAuth};

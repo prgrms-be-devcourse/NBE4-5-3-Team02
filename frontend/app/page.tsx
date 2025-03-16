@@ -88,7 +88,7 @@ export default function MainPage() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="검색어를 입력해주세요"
-                        className="flex-grow bg-transparent text-lg focus:outline-none placeholder-green-300" // 크기 및 색상 변경
+                        className="flex-grow bg-transparent text-lg focus:outline-none placeholder-green-300 text-gray-700" // 크기 및 색상 변경
                     />
 
                     {/* 검색 버튼 */}
