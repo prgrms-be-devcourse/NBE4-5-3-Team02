@@ -60,9 +60,9 @@ export default function ChatPage() {
 
             try {
                 const response = await fetchWithAuth(`${BASE_URL}/api/chat/channels?userId=${userId}`);
-                if (response.ok) {
+
+                if (response?.ok) {
                     const result: RsData<string[]> = await response.json();
-                    console.log("채팅 목록:", result.data);
                     setChatRooms(result.data); // API 응답에서 채널 목록 설정
                 } else {
                     console.error("Failed to fetch chat rooms");
