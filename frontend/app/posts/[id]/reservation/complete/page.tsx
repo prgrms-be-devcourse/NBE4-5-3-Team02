@@ -73,7 +73,7 @@ export default function Page() {
       }
     );
 
-    if (getReservationInfo.ok) {
+    if (getReservationInfo?.ok) {
       const Data = await getReservationInfo.json();
       if (Data?.code !== "200-1") {
         console.error(`에러가 발생했습니다. \n${Data?.msg}`);
@@ -81,7 +81,7 @@ export default function Page() {
       setReservation(Data?.data);
       console.log("deposit : ", Data?.data);
     } else {
-      console.error("Error fetching data:", getReservationInfo.status);
+      console.error("Error fetching data:", getReservationInfo?.status);
     }
   };
 
@@ -97,7 +97,7 @@ export default function Page() {
       }
     );
 
-    if (getDepositInfo.ok) {
+    if (getDepositInfo?.ok) {
       const Data = await getDepositInfo.json();
       if (Data?.code !== "200-1") {
         console.error(`에러가 발생했습니다. \n${Data?.msg}`);
@@ -105,7 +105,7 @@ export default function Page() {
       setDeposit(Data?.data);
       console.log("deposit : ", Data?.data);
     } else {
-      console.error("Error fetching data:", getDepositInfo.status);
+      console.error("Error fetching data:", getDepositInfo?.status);
     }
   };
 
@@ -121,7 +121,7 @@ export default function Page() {
       }
     );
 
-    if (getPostInfo.ok) {
+    if (getPostInfo?.ok) {
       const Data = await getPostInfo.json();
       if (Data?.code !== "200-1") {
         console.error(`에러가 발생했습니다. \n${Data?.msg}`);
@@ -129,7 +129,7 @@ export default function Page() {
       setPost(Data?.data);
       console.log("data : ", Data?.data);
     } else {
-      console.error("Error fetching data:", getPostInfo.status);
+      console.error("Error fetching data:", getPostInfo?.status);
     }
   };
 
