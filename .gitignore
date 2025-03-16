@@ -46,3 +46,6 @@ db_dev.trace.db
 .idea/
 
 .env*
+
+### ssl ###
+backend/src/main/resources/ssl/
