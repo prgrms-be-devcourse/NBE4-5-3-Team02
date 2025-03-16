@@ -81,25 +81,6 @@ export default function ClientPage({ postid }: { postid: number }) {
   const [events, setEvents] = useState<any[]>([]);
   const [postDetail, setPostDetail] = useState<PostDetail | null>(null);
 
-  const [me, setMe] = useState<me>({
-    id: 0,
-    nickname: "",
-    username: "",
-    profileImage: "",
-    email: "",
-    phoneNumber: "",
-    address: {
-      mainAddress: "",
-      detailAddress: "",
-      zipcode: "",
-    },
-    latitude: 0,
-    longitude: 0,
-    createdAt: "",
-    score: 0,
-    credit: 0,
-  });
-
   const [post, setPost] = useState<post>({
     id: 0,
     userId: 0,
@@ -200,28 +181,6 @@ export default function ClientPage({ postid }: { postid: number }) {
     setDate(newDate); // 상태 업데이트
   };
 
-  //유저정보 조회
-  const getMe = async () => {
-    const getMyInfo = await fetchWithAuth(`${BASE_URL}/api/v1/mypage/me`, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (getMyInfo?.ok) {
-      const Data = await getMyInfo.json();
-      if (Data?.code !== "200-1") {
-        console.error(`에러가 발생했습니다. \n${Data?.msg}`);
-      }
-      setMe(Data?.data);
-      console.log();
-    } else {
-      console.error("Error fetching data:", getMyInfo?.status);
-    }
-  };
-
   const getPost = async () => {
     const getMyInfo = await fetchWithAuth(
       `${BASE_URL}/api/v1/reservations/post/${postid}`,
@@ -251,7 +210,6 @@ export default function ClientPage({ postid }: { postid: number }) {
   }, [startTime, endTime, dateRange]);
 
   useEffect(() => {
-    getMe();
     getPost();
     const loadReservedEvents = async () => {
       const events = await fetchReservedEvents(post.id);

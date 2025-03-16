@@ -450,6 +450,27 @@ function ApprovedStatus({
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
 
+  const startRental = async () => {
+    try {
+      const response = await fetchWithAuth(
+        `${BASE_URL}/api/v1/reservations/${reservation.id}/start`,
+        {
+          method: "PATCH",
+          credentials: "include",
+        }
+      );
+      if (response?.ok) {
+        window.location.reload();
+      } else {
+        const errorData = await response?.json();
+        alert(`승인 실패: ${errorData.message || "서버 오류"}`);
+      }
+    } catch (error) {
+      alert("승인 처리 중 오류 발생");
+      console.error(error);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center w-full max-w-4xl h-auto rounded-3xl shadow-2xl p-8 bg-gradient-to-br from-emerald-50 to-green-100 relative overflow-hidden">
       {/* 배경 디자인 요소 */}
@@ -526,6 +547,12 @@ function ApprovedStatus({
           </div>
         </button>
       )}
+      <button
+        className="mt-5 bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+        onClick={startRental}
+      >
+        대여 시작하기
+      </button>
 
       {/* 모달 창 개선 */}
       {showModal && owner && (
@@ -598,7 +625,6 @@ function InProgressStatus({
   BASE_URL: string;
 }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
   const [selectedIssue, setSelectedIssue] = useState<{
     value: string;
     label: string;
@@ -621,7 +647,6 @@ function InProgressStatus({
   ];
 
   const handleIssue = () => {
-    setModalMessage("문제가 발생했습니까?");
     setShowConfirmModal(true);
   };
 
@@ -657,6 +682,27 @@ function InProgressStatus({
       }
     } catch (error) {
       alert("문제 해결 요청 중 오류 발생");
+      console.error(error);
+    }
+  };
+
+  const completeRental = async () => {
+    try {
+      const response = await fetchWithAuth(
+        `http://localhost:8080/api/v1/reservations/${reservation.id}/complete`,
+        {
+          method: "PATCH",
+          credentials: "include",
+        }
+      );
+      if (response?.ok) {
+        window.location.reload();
+      } else {
+        const errorData = await response?.json();
+        alert(`승인 실패: ${errorData.message || "서버 오류"}`);
+      }
+    } catch (error) {
+      alert("승인 처리 중 오류 발생");
       console.error(error);
     }
   };
@@ -728,6 +774,13 @@ function InProgressStatus({
           문제 신고하기
         </button>
       </div>
+
+      <button
+        className="mt-5 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        onClick={completeRental}
+      >
+        대여 종료하기
+      </button>
 
       {/* 문제 신고 모달 */}
       {showConfirmModal && (
