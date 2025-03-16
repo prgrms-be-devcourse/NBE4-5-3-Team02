@@ -1,12 +1,13 @@
 'use client'
 
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import Link from 'next/link'
 import {useAuth} from '@/app/lib/auth-context'
 import AuthButton from '@/components/AuthButton'
 import EcoBadge from "@/components/EcoBadge"
 import {BellIcon, ChatBubbleOvalLeftIcon} from '@heroicons/react/24/outline'
 import {motion} from 'framer-motion'
+import { useRouter } from "next/navigation";
 
 interface RsData<T> {
     code: string;
@@ -16,6 +17,10 @@ interface RsData<T> {
 
 export default function Header() {
     const {isLoggedIn} = useAuth()
+
+    const [profile, setProfile] = useState<string>();
+    const router = useRouter();
+
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
     const [notifications, setNotifications] = useState([
         {id: 1, message: '새 리뷰가 등록되었어요!', read: false},
@@ -29,11 +34,52 @@ export default function Header() {
         setIsDropdownOpen(false)
     }
 
+    useEffect(() => {
+        if (isLoggedIn) {
+            getMyProfile();
+        }
+    }, [isLoggedIn]);
+
+    const fetchHelper = async (url: string, options?: RequestInit) => {
+        const accessToken = sessionStorage.getItem("access_token");
+        if (accessToken) {
+            return fetch(url, options);
+        } else {
+            return fetch(url, options);
+        }
+    };
+
+    const getMyProfile = async () => {
+        const getProfile = await fetchHelper(`${BASE_URL}/api/v1/users/profile`, {
+            method: "GET",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (getProfile.ok) {
+            const Data = await getProfile.json();
+            if (Data?.code.startsWith("403")) {
+                router.push("/login");
+            }
+            if (Data?.code !== "200-1") {
+                console.error(`에러가 발생했습니다. \n${Data?.msg}`);
+            }
+            setProfile(Data?.data);
+        } else {
+            if (getProfile.status === 403) {
+                router.push("/login");
+            }
+            console.error("Error fetching data:", getProfile.status);
+        }
+    };
+
     const [unreadCount, setUnreadCount] = useState<number | null>(null);
     const markChatsAsRead = async () => {
         setUnreadCount(0);
     }
-    const BASE_URL = "http://localhost:8080";
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
     // API 호출을 통해 읽지 않은 메시지 개수를 가져오기
     useEffect(() => {
         async function fetchUnreadCount() {
