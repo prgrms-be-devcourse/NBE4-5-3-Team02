@@ -51,7 +51,7 @@ export default function LoginPage() {
     };
 
     // Google 로그인 URL 생성 + 리프레시 토큰 요청
-    const googleLoginUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=14635661476-clsktcbo2qdhshsd60onck423l80v223.apps.googleusercontent.com&redirect_uri=http://localhost:3000/redirect&scope=openid%20https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email&access_type=offline&prompt=consent`;
+    const googleLoginUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=14635661476-clsktcbo2qdhshsd60onck423l80v223.apps.googleusercontent.com&redirect_uri=${BASE_URL}/redirect&scope=openid%20https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email&access_type=offline&prompt=consent`;
 
     // 인증 코드 처리
     useEffect(() => {
