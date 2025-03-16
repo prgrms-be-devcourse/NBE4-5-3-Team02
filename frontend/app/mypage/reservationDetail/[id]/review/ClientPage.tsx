@@ -77,6 +77,11 @@ const ReviewPage: React.FC<{
         body: JSON.stringify(reviewData),
       });
 
+      if (!response) {
+        setError("No response from server.");
+        goToDetail();
+        return;
+      }
       const Data = await response.json();
       if (!response.ok) {
         setError(`${Data.msg || ""} ${response.statusText}`);
@@ -275,7 +280,7 @@ interface StepContainerProps {
 const StepContainer: React.FC<StepContainerProps> = ({
   step,
   title,
-  children,
+  // children,
   onNext,
   onPrevious,
   isFinalStep,
