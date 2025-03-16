@@ -148,7 +148,7 @@ export default function ChatPage() {
         }
     };
 
-    const [unreadCount, setUnreadCount] = useState(0); // 읽지 않은 메시지 카운트 상태
+    const [, setUnreadCount] = useState(0); // 읽지 않은 메시지 카운트 상태
 
     // WebSocket 연결 설정
     useEffect(() => {
