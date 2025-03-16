@@ -380,7 +380,7 @@ const styles: { [key: string]: CSSProperties } = {
         width: "30%",
         backgroundColor: "#1a1a1a",
         padding: "0",
-        overflowY: "auto" as "auto",
+        overflowY: "auto" as const,
         borderRight: "1px solid #2d2d2d",
 
         // 신규 스크롤바 디자인
