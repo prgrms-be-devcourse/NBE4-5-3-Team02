@@ -192,6 +192,9 @@ export default function ClientPage({ postid }: { postid: number }) {
 
   useEffect(() => {
     getPost();
+  }, []);
+
+  useEffect(() => {
     const loadReservedEvents = async () => {
       const events = await fetchReservedEvents(post.id);
       setEvents(events);
@@ -199,7 +202,7 @@ export default function ClientPage({ postid }: { postid: number }) {
       processReservedEvents(events);
     };
     loadReservedEvents();
-  }, []);
+  }, [post]);
 
   // 예약된 날짜 가져오기
   const fetchReservedEvents = async (postId: number) => {
@@ -216,6 +219,7 @@ export default function ClientPage({ postid }: { postid: number }) {
       );
       if (response?.ok) {
         const data = await response.json();
+        console.log("events : ", data);
         return data.data.map((reservation: any) => ({
           title: `예약중`,
           start: moment(reservation.startTime).toDate(),
@@ -344,18 +348,8 @@ export default function ClientPage({ postid }: { postid: number }) {
     };
 
     while (current.isSameOrBefore(moment(correctedEnd), "day")) {
-      // 이미 예약된 날짜 확인
-      const isReserved = reservedDates.some((reservedDate) =>
-        current.isSame(moment(reservedDate), "day")
-      );
-
       // 클릭 가능한 날짜 확인
       const clickable = isClickableDate(current.toDate());
-
-      if (isReserved) {
-        alert("선택하신 날짜는 이미 예약되어 있습니다.");
-        return;
-      }
 
       if (!clickable) {
         alert("선택하신 날짜는 이용할 수 없습니다.");
@@ -371,10 +365,6 @@ export default function ClientPage({ postid }: { postid: number }) {
   };
 
   const dayPropGetter = (date: Date) => {
-    const isReserved = reservedDates.some((reservedDate) =>
-      moment(date).isSame(moment(reservedDate), "day")
-    );
-
     const isClickable = availabilities.some((availability) => {
       const startDate = moment(availability.startTime).startOf("day");
       const endDate = moment(availability.endTime).startOf("day");
@@ -384,46 +374,16 @@ export default function ClientPage({ postid }: { postid: number }) {
       );
     });
 
-    // 공통 클래스
-    const baseClasses = `
-    transition-colors 
-    duration-200 
-    !text-gray-600
-  `;
-
-    if (isReserved) {
-      return {
-        className: `
-      ${baseClasses}
-      bg-red-100/80
-      text-red-800
-      hover:bg-red-200/60
-      cursor-not-allowed
-      pointer-events-none
-    `,
-      };
-    }
+    const baseClasses = `transition-colors duration-200 !text-gray-600`;
 
     if (!isClickable) {
       return {
-        className: `
-        ${baseClasses}
-        bg-gray-100/80
-        text-gray-500
-        hover:bg-gray-200/60
-        cursor-not-allowed
-        pointer-events-none
-      `,
+        className: `${baseClasses} bg-gray-100/80 text-gray-500 hover:bg-gray-200/60 cursor-not-allowed pointer-events-none`,
       };
     }
 
     return {
-      className: `
-      ${baseClasses}
-      hover:bg-green-100/60
-      active:bg-green-200/40
-      hover:scale-[1.02]
-    `,
+      className: `${baseClasses} hover:bg-green-100/60 active:bg-green-200/40 hover:scale-[1.02]`,
     };
   };
 
