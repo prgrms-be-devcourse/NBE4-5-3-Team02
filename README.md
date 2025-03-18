@@ -11,11 +11,11 @@
 
 # 👥 Our Team
 
-|                                        최지선                                        |                                        윤상민                                        |                                        이태경                                        |                                        최현민                                        |
-|:---------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------:|
-| <img src="https://github.com/wesawth3sun.png" alt="최지선" width="210"> | <img src="https://github.com/skvhffpdyd.png" alt="윤상민" width="210"> | <img src="https://github.com/dlfjsld1.png" alt="이태경" width="210"> | <img src="https://github.com/hmhmchm.png" alt="최현민" width="210"> |
+|                                        최지선                                        |                                        윤상민                                        |                                        이태경                                        |
+|:---------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------:|
+| <img src="https://github.com/wesawth3sun.png" alt="최지선" width="210"> | <img src="https://github.com/skvhffpdyd.png" alt="윤상민" width="210"> | <img src="https://github.com/dlfjsld1.png" alt="이태경" width="210"> |
 |                                       PM/TL                                       |                                        TM                                         |                                        TM                                         |                                        TM                                         |
-|           [GitHub](https://github.com/wesawth3sun)           |           [GitHub](https://github.com/skvhffpdyd)           |            [GitHub](https://github.com/dlfjsld1)            |            [GitHub](https://github.com/hmhmchm)  
+|           [GitHub](https://github.com/wesawth3sun)           |           [GitHub](https://github.com/skvhffpdyd)           |            [GitHub](https://github.com/dlfjsld1)           
 <br/>
 <br/>
 
