@@ -7,7 +7,15 @@ jwt:
   secret: [change]
   expiration: 86400000 # 24시간(초 단위)
 
+cors:
+  allowed:
+    origins: http://localhost:3000, https://toolgether-delta.vercel.app
+
 spring:
+  data:
+    redis:
+      host: toolgether-redis
+      port: 6379
   
   security:
     oauth2:
@@ -16,7 +24,7 @@ spring:
           google:
             client-id: [change]
             client-secret: [change]
-            redirect-uri: http://localhost:3000/redirect
+            redirect-uri: https://toolgether-delta.vercel.app/redirect
             scope:
               - openid
               - https://www.googleapis.com/auth/userinfo.profile
@@ -54,8 +62,8 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
-        default_batch_fetch_size: 10
-    #open-in-view: false
+        default_batch_fetch_size: 100
+    open-in-view: false
 
 logging:
   level:

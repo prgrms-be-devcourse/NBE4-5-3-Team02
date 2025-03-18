@@ -1,6 +1,5 @@
 package com.snackoverflow.toolgether.domain.review.service;
 
-import com.snackoverflow.toolgether.domain.reservation.dto.ReservationResponse;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 import com.snackoverflow.toolgether.domain.review.dto.request.ReviewRequest;
 import com.snackoverflow.toolgether.domain.review.entity.Review;

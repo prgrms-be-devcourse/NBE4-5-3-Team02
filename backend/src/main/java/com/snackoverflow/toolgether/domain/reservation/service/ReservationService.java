@@ -1,6 +1,5 @@
 package com.snackoverflow.toolgether.domain.reservation.service;
 
-import com.snackoverflow.toolgether.domain.post.dto.PostResponse;
 import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
 import com.snackoverflow.toolgether.domain.reservation.dto.PostReservationResponse;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
@@ -8,14 +7,11 @@ import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
 import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,7 +44,6 @@ import com.snackoverflow.toolgether.domain.user.service.UserService;
 import com.snackoverflow.toolgether.global.exception.custom.ErrorResponse;
 import com.snackoverflow.toolgether.global.exception.custom.CustomException;
 
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -68,24 +63,36 @@ public class ReservationService {
 	@PostConstruct
 	public void init() {
 		try {
-			if (!scheduler.isStarted()) { // 이미 시작되었는지 확인.  불필요한 재시작 방지.
+			if (!scheduler.isStarted()) { // 이미 시작되었는지 확인, 불필요한 재시작 방지
 				scheduler.start();
 				log.info("Quartz Scheduler started.");
 			}
 		} catch (SchedulerException e) {
 			log.error("Failed to start Quartz Scheduler", e);
 			// throw new RuntimeException("Failed to start Quartz Scheduler", e); // 또는 다른 예외 처리
-			// 시작 실패 시, 애플리케이션을 중단시키는 것이 좋을 수도 있음.
+			// 시작 실패 시, 애플리케이션을 중단시키는 것이 좋을 수도 있음
 		}
 	}
 
 	// 예약 요청 (일정 충돌 방지 로직 필요)
 	@Transactional
 	public ReservationResponse requestReservation(ReservationRequest reservationRequest) {
+		// 1. Post, Renter, Owner 조회
 		Post post = postService.findPostById(reservationRequest.postId());
 		User renter = userService.findUserById(reservationRequest.renterId());
 		User owner = userService.findUserById(reservationRequest.ownerId());
 
+		// 2. 일정 충돌 검증 (비관적 락 적용)
+		List<Reservation> conflictingReservations = reservationRepository.findConflictingReservations(
+				reservationRequest.postId(),
+				reservationRequest.startTime(),
+				reservationRequest.endTime());
+
+		if (!conflictingReservations.isEmpty()) {
+			throw new IllegalArgumentException("해당 시간대에는 이미 예약이 존재합니다.");
+		}
+
+		// 3. 예약 생성 및 저장
 		Double totalAmount = reservationRequest.deposit() + reservationRequest.rentalFee();
 		Reservation reservation = Reservation.builder()
 			.post(post)
@@ -100,7 +107,7 @@ public class ReservationService {
 
 		reservationRepository.save(reservation);
 
-		// 예약 요청 시 보증금 결제 -> DepositHistory 추가
+		// 4. DepositHistory 생성 및 저장
 		DepositHistory depositHistory = DepositHistory.builder()
 			.reservation(reservation)
 			.user(reservation.getRenter()) // 보증금은 대여자가 지불
@@ -110,6 +117,8 @@ public class ReservationService {
 			.build();
 
 		depositHistoryService.createDepositHistory(depositHistory);
+
+		// 5. Response 반환
 		return new ReservationResponse(reservation.getId(),
 			reservation.getStatus().name(),
 			reservation.getPost().getId(),

@@ -3,6 +3,7 @@ package com.snackoverflow.toolgether.global.config;
 import com.snackoverflow.toolgether.global.filter.GoogleAccessTokenFilter;
 import com.snackoverflow.toolgether.global.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,6 +28,9 @@ class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final GoogleAccessTokenFilter googleAccessTokenFilter;
+
+    @Value("${cors.allowed.origins}")
+    private String[] allowedOrigins;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -56,7 +60,7 @@ class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // 허용할 오리진 설정
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://toolgether-delta.vercel.app"));
+        configuration.setAllowedOrigins(List.of(allowedOrigins));
         // 허용할 HTTP 메서드 설정
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
         // 자격 증명 허용 설정

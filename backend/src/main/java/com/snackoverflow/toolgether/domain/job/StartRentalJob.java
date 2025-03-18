@@ -21,7 +21,6 @@ public class StartRentalJob implements Job {
 	@Override
 	public void execute(JobExecutionContext context) {
 		JobDataMap jobDataMap = context.getMergedJobDataMap(); // 수정: getMergedJobDataMap() 사용
-		//Long reservationId = (Long) jobDataMap.get("reservationId");  // 타입 캐스팅 + null 체크
 		Object reservationIdObj = jobDataMap.get("reservationId");
 		Long reservationId = null;
 		if(reservationIdObj instanceof Long){

@@ -1,11 +1,13 @@
 package com.snackoverflow.toolgether.domain.post.dto;
 
-import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType;
 import com.snackoverflow.toolgether.domain.post.entity.enums.Category;
+import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import javax.annotation.Nullable;
 
 @Getter
 @Setter
@@ -13,6 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PostSearchRequest {
 
+    @Nullable String userId;
     private String keyword;      // 제목 또는 내용 키워드
     private Category category;   // 카테고리 필터
     private PriceType priceType; // 가격 유형 필터

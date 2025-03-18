@@ -59,33 +59,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // 인증 객체 생성 및 저장
                 CustomUserDetails customUserDetails = new CustomUserDetails(username, email, userId);
-                /*Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails,
-                        null, Collections.emptyList());
-                log.info("authentication={}", authentication);*/
-
-                //test
-                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
-                Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, authorities);
-
-                log.info("Authentication 생성됨: {}", authentication);
-
-                //test
-//                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
-//                Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, authorities);
-
-//                log.info("Authentication 생성됨: {}", authentication);
-
-                //test
-//                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
-//                Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, authorities);
-
-//                log.info("Authentication 생성됨: {}", authentication);
-
-                //test
-//                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
-//                Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, authorities);
-
-//                log.info("Authentication 생성됨: {}", authentication);
+                Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails,
+                        null, customUserDetails.getAuthorities());
+                log.info("authentication={}", authentication);
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
@@ -99,6 +75,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String requestURI = request.getRequestURI();
-        return requestURI.startsWith("/h2-console") || requestURI.matches(".*\\.(css|js|gif|png|jpg|ico)$");
+        return requestURI.startsWith("/h2-console") ||
+                requestURI.startsWith("/login/oauth2/code/google") ||
+                requestURI.startsWith("/api/v1/users") ||
+                requestURI.matches(".*\\.(css|js|gif|png|jpg|ico)$");
     }
 }

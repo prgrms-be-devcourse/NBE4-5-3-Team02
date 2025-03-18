@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   toolgether-mysql:
     image: mysql:8.4.1
@@ -15,6 +13,17 @@ services:
       - mysql_data:/var/lib/mysql  # MySQL 데이터 유지
     networks:
       - toolgether-network
+  
+  redis:
+    image: redis:7.2-alpine # Redis 최신 버전 사용 (필요 시 버전 변경 가능)
+    container_name: toolgether-redis
+    restart: always
+    ports:
+      - "6379:6379" # Redis 기본 포트 매핑
+    volumes:
+      - redis_data:/data # Redis 데이터 유지
+    networks:
+      - toolgether-network
 
 networks:
   toolgether-network:
@@ -22,3 +31,4 @@ networks:
 
 volumes:
   mysql_data:
+  redis_data:

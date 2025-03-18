@@ -1,19 +1,14 @@
 package com.snackoverflow.toolgether.domain.user.entity;
 
-import com.snackoverflow.toolgether.domain.user.dto.request.PatchMyInfoRequest;
 import com.snackoverflow.toolgether.global.util.Util;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.FilterDef;
-import org.hibernate.annotations.ParamDef;
-import org.hibernate.annotations.SQLDelete;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Getter

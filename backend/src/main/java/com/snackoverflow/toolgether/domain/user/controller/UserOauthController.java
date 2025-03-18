@@ -24,7 +24,6 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 public class UserOauthController {
 
     private final OauthService oauthService;
@@ -77,8 +76,9 @@ public class UserOauthController {
                     "신규 회원 가입 완료 - 추가 정보 입력 필요",
                     Map.of("additionalInfoRequired", socialUser.isAdditionalInfoRequired(),
                             "access_token", tokens.get("access_token"),
-                            "user_id", (String) userInfo.get("sub"))
-            );
+                            "user_id", String.valueOf(socialUser.getId()),
+                            "nickname", socialUser.getNickname()
+            ));
         } catch (Exception e) {
             throw new RuntimeException("액세스 토큰 추출 중 오류 발생!");
         }

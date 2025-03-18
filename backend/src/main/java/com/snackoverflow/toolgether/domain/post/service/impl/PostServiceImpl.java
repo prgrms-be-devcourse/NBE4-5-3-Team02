@@ -9,7 +9,6 @@ import com.snackoverflow.toolgether.domain.postavailability.entity.PostAvailabil
 import com.snackoverflow.toolgether.domain.postavailability.repository.PostAvailabilityRepository;
 import com.snackoverflow.toolgether.domain.postimage.entity.PostImage;
 import com.snackoverflow.toolgether.domain.postimage.repository.PostImageRepository;
-import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
 import com.snackoverflow.toolgether.global.exception.BadRequestException;
 import com.snackoverflow.toolgether.global.exception.NotFoundException;
 import com.snackoverflow.toolgether.domain.post.dto.PostCreateRequest;
@@ -39,15 +38,11 @@ public class PostServiceImpl implements PostService {
     private final PostRepositoryCustom postQueryRepository;
     private final PostImageRepository postImageRepository;
     private final PostAvailabilityRepository postAvailabilityRepository;
-    private final UserRepository userRepository;
     private final S3Service s3Service;
 
     @Transactional
     @Override
     public PostResponse createPost(User user,PostCreateRequest request, List<MultipartFile> images) {
-        // 임시로 user_id=1 사용 (실제 로직에서는 인증된 사용자 정보 가져오기)
-//        User user = userRepository.findById(1L)
-//                .orElseThrow(() -> new NotFoundException("404-1", "사용자를 찾을 수 없습니다."));
 
         if (request.getTitle() == null || request.getTitle().isBlank()) {
             throw new BadRequestException("400-1", "제목은 필수 입력값입니다.");
