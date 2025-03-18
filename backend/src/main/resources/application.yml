@@ -14,9 +14,9 @@ cors:
 spring:
   data:
     redis:
-      host: toolgether-redis
+      host: localhost
       port: 6379
-  
+
   security:
     oauth2:
       client:

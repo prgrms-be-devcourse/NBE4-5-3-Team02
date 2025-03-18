@@ -6,6 +6,7 @@ import com.snackoverflow.toolgether.domain.user.service.OauthService;
 import com.snackoverflow.toolgether.global.exception.custom.user.UserNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -37,12 +39,16 @@ public class GoogleAccessTokenFilter extends OncePerRequestFilter {
 
         log.info("GoogleAccessTokenFilter 실행됨");
         String authHeader = request.getHeader("Authorization");
+        Cookie[] cookies = request.getCookies();
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String accessToken = authHeader.substring(7);// "Bearer " 제거
+            String refreshToken = Arrays.stream(cookies)
+                    .filter(cookie -> "refresh_token".equals(cookie.getName()))
+                    .map(Cookie::getValue).findFirst().get();
             log.info("accessToken = {}", accessToken);
             try {
-                Map<String, Object> userInfo = oauthService.getUserInfo(accessToken);
+                Map<String, Object> userInfo = oauthService.getUserInfo(accessToken, refreshToken);
                 String email = (String) userInfo.get("email");
                 User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 

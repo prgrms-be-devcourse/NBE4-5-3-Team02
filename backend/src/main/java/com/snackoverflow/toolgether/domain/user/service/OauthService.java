@@ -78,20 +78,37 @@ public class OauthService {
     }
 
     // 액세스 토큰을 이용해서 유저 정보 가져오기 (Calendar API 추후 추가할 수도 있음)
-    public Map<String, Object> getUserInfo(String accessToken) {
+    public Map<String, Object> getUserInfo(String accessToken, String refreshToken) {
         String userInfoUrl = "https://www.googleapis.com/oauth2/v3/userinfo";
         // WebClient 를 사용하여 GET 요청
-        Map<String, Object> response = webClient.get()
-                .uri(userInfoUrl)
-                .header("Authorization", "Bearer " + accessToken)  // Authorization 헤더에 액세스 토큰 추가
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
-                .block();
-        if (response != null) {
-            return response;
-        } else {
-            throw new RuntimeException("사용자 정보를 가져오지 못했습니다.");
+        try {
+            Map<String, Object> response = webClient.get()
+                    .uri(userInfoUrl)
+                    .header("Authorization", "Bearer " + accessToken)  // Authorization 헤더에 액세스 토큰 추가
+                    .retrieve()
+                    .onStatus(status -> status.value() == 401,
+                            clientResponse -> Mono.error(new RuntimeException("액세스 토큰이 만료되었습니다.")))
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                    })
+                    .block();
+            if (response != null && response.containsKey("sub")) {
+                return response;
+            } else {
+                throw new RuntimeException("사용자 정보를 가져오지 못했습니다.");
+            }
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("액세스 토큰이 만료되었습니다.")) {
+                log.info("액세스 토큰 만료됨. 리프레시 토큰으로 새 액세스 토큰 발급 시도.");
+                try {
+                    String newAccessToken = refreshAccessToken(refreshToken);
+                    // 새로 발급된 액세스 토큰으로 다시 사용자 정보 요청
+                    return getUserInfo(newAccessToken, refreshToken);
+                } catch (IOException ioException) {
+                    throw new RuntimeException("새로운 액세스 토큰 발급 실패: " + ioException.getMessage(), ioException);
+                }
+            } else {
+                throw e;  // 다른 예외는 그대로 던짐
+            }
         }
     }
 
@@ -205,11 +222,11 @@ public class OauthService {
     public String refreshAccessToken(String refreshToken) throws IOException {
         log.info("토큰 재발행 로직 시작");
         GoogleTokenResponse tokenResponse = new GoogleRefreshTokenRequest(
-            new NetHttpTransport(),
-            GsonFactory.getDefaultInstance(),
-            refreshToken,
-            clientId,
-            clientSecret
+                new NetHttpTransport(),
+                GsonFactory.getDefaultInstance(),
+                refreshToken,
+                clientId,
+                clientSecret
         ).execute();
 
         // 새로 발급된 액세스 토큰

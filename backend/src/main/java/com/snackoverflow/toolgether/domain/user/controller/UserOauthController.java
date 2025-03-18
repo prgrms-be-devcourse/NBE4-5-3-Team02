@@ -46,7 +46,7 @@ public class UserOauthController {
             setRefreshTokenCookie(response, tokens.get("refresh_token"));
 
             // 액세스 토큰에서 유저 정보 추출
-            Map<String, Object> userInfo = oauthService.getUserInfo(tokens.get("access_token"));
+            Map<String, Object> userInfo = oauthService.getUserInfo(tokens.get("access_token"), tokens.get("refresh_token"));
             String email = (String) userInfo.get("email");
             log.info("userInfo = {}", userInfo);
 
@@ -78,7 +78,7 @@ public class UserOauthController {
                             "access_token", tokens.get("access_token"),
                             "user_id", String.valueOf(socialUser.getId()),
                             "nickname", socialUser.getNickname()
-            ));
+                    ));
         } catch (Exception e) {
             throw new RuntimeException("액세스 토큰 추출 중 오류 발생!");
         }
