@@ -57,6 +57,7 @@ const fetchWithAuth = async (url, options = {}, retry = true) => {
         const response = await fetch(url, {
             ...options,
             headers,
+            credentials: 'include', // 쿠키 포함 설정
         });
 
         // 401 또는 403 상태 처리

@@ -1,4 +1,5 @@
 package com.snackoverflow.toolgether.global.chat.dto;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -14,7 +15,12 @@ public class ChatMessage {
     private String senderName; // 보내는 사람 닉네임
     private String receiverName; // 받는 사람 닉네임
 
+    private boolean deletedSender;   // 보낸 사람 기준 삭제 여부
+    private boolean deletedReceiver; // 받는 사람 기준 삭제 여부
+
     public ChatMessage() {
         this.timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        this.deletedSender = false;
+        this.deletedReceiver = false;
     }
 }

@@ -19,6 +19,7 @@ interface Availability {
 }
 
 interface Post {
+    userId: string;
     id: number;
     title: string;
     content: string;
@@ -137,6 +138,7 @@ export default function PostsPage() {
 
         try {
             const url = new URL(`${BASE_URL}/api/v1/posts/search`);
+            url.searchParams.append('userId', sessionStorage.getItem('user_id'));
             url.searchParams.append('page', pageNumber.toString());
             if (searchQuery) url.searchParams.append('keyword', searchQuery);
 

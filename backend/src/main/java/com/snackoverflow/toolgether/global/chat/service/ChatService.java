@@ -1,6 +1,7 @@
 package com.snackoverflow.toolgether.global.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.snackoverflow.toolgether.global.chat.dto.ChatMessage;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -33,6 +35,8 @@ public class ChatService {
         messageData.put("content", chatMessage.getContent());
         messageData.put("senderName", chatMessage.getSenderName());
         messageData.put("receiverName", chatMessage.getReceiverName());
+        messageData.put("deletedSender", chatMessage.isDeletedSender());
+        messageData.put("deletedReceiver", chatMessage.isDeletedReceiver());
 
         try {
             String jsonMessage = new ObjectMapper().writeValueAsString(messageData);
@@ -53,12 +57,19 @@ public class ChatService {
         // userId가 포함된 키만 필터링하여 채널명 추출
         return keys.stream()
                 .filter(key -> key.contains(userId)) // userId가 포함된 키만 선택
+                .filter(key -> !isChannelEmpty(key)) // 비어 있지 않은 채널만 선택
                 .map(key -> key.replace("chat:", "")) // "chat:" 접두사 제거
                 .toList();
     }
 
+    // 특정 채널이 비어 있는지 확인
+    private boolean isChannelEmpty(String redisKey) {
+        Long size = redisTemplate.opsForZSet().size(redisKey);
+        return size == null || size == 0; // 메시지가 없으면 true 반환
+    }
+
     // 특정 채널에 대한 모든 내역을 반환
-    public List<ChatMessage> getChatHistory(String channelName) {
+    public List<ChatMessage> getChatHistory(String channelName, String userId) {
         log.info("Redis 에서 가져올 채팅:{}", channelName);
 
         // ZSet의 값과 score를 함께 가져옴
@@ -78,7 +89,6 @@ public class ChatService {
                     Double score = tuple.getScore();
                     // Unix -> String
                     String timestamp = convertUnixTimestampToString(score);
-                    log.info("불러온 채팅 내역:{}, {}", json, timestamp);
 
                     try {
                         ChatMessage response = objectMapper.readValue(json, ChatMessage.class);
@@ -92,6 +102,15 @@ public class ChatService {
                     }
                 })
                 .filter(Objects::nonNull)
+                // 현재 사용자 기준으로 필터링
+                .filter(message -> {
+                    if (userId.equals(message.getSender())) {
+                        return !message.isDeletedSender(); // sender인 경우 deletedSender가 false인 메시지만 포함
+                    } else if (userId.equals(message.getReceiver())) {
+                        return !message.isDeletedReceiver(); // receiver인 경우 deletedReceiver가 false인 메시지만 포함
+                    }
+                    return true; // 그 외의 경우 필터링하지 않음
+                })
                 .toList();
         for (ChatMessage response : chatHistory) {
             log.info("불러온 채팅 내역 -> 변환: {}", response);
@@ -99,17 +118,47 @@ public class ChatService {
         return chatHistory;
     }
 
-    // 채팅 삭제
-    public void deleteChannelMessages(String channelName) {
+    @Transactional
+    public void deleteChannelMessages(String channelName, String userId) {
         String redisKey = "chat:" + channelName;
 
-        Boolean isDeleted = redisTemplate.delete(redisKey);
+        // 특정 채널의 채팅 내역 가져오기
+        List<ChatMessage> chatHistory = getChatHistory(channelName, userId);
 
-        if (isDeleted.equals(true)) {
-            log.info("Redis Sorted Set 삭제 완료 - 채널: {}", channelName);
-        } else {
-            log.warn("Redis Sorted Set 삭제 실패 또는 존재하지 않음 - 채널: {}", channelName);
+        if (chatHistory.isEmpty()) {
+            log.info("채널 {}에 저장된 메시지가 없습니다.", channelName);
+            return;
         }
+
+        for (ChatMessage message : chatHistory) {
+                // Redis에서 기존 점수(timeStamp)를 가져오기
+                double score = timestampConvert(message.getTimeStamp());
+
+                // sender와 receiver 비교하여 deletedSender와 deletedReceiver 업데이트
+                if (userId.equals(message.getSender())) {
+                    message.setDeletedSender(true);
+                }
+                if (userId.equals(message.getReceiver())) {
+                    message.setDeletedReceiver(true);
+                }
+
+                // 기존 메시지 삭제 (점수를 기준으로)
+                redisTemplate.opsForZSet().removeRangeByScore(redisKey, score, score);
+
+                // 수정된 메시지를 저장 (기존 점수 유지)
+                saveMessage(channelName, message);
+        }
+
+        // 모든 메시지가 논리적으로 삭제되었는지 확인
+        boolean allDeleted = chatHistory.stream()
+                .allMatch(msg -> msg.isDeletedSender() && msg.isDeletedReceiver());
+
+        if (allDeleted) {
+            redisTemplate.expire(redisKey, 7, TimeUnit.DAYS); // TTL 설정
+            log.info("채널 {}에 대해 TTL 설정 완료 (7일 후 삭제)", channelName);
+        }
+
+        log.info("채널 {}의 메시지 논리 삭제 완료", channelName);
     }
 
     // 읽지 않은 메시지 카운트

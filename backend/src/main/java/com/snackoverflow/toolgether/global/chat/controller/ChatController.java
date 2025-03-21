@@ -1,6 +1,5 @@
 package com.snackoverflow.toolgether.global.chat.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.snackoverflow.toolgether.global.chat.dto.ChatMessage;
 import com.snackoverflow.toolgether.global.chat.service.ChatService;
 import com.snackoverflow.toolgether.global.dto.RsData;
@@ -44,8 +43,9 @@ public class ChatController {
      * @return 채팅 메시지 목록 (JSON 형태)
      */
     @GetMapping("/history")
-    public RsData<?> getChatHistory(@RequestParam("channelName") String channelName) {
-        List<ChatMessage> chatHistory = chatService.getChatHistory(channelName);
+    public RsData<?> getChatHistory(@RequestParam("channelName") String channelName,
+                                    @RequestParam("userId") String userId) {
+        List<ChatMessage> chatHistory = chatService.getChatHistory(channelName, userId);
         log.info("저장한 채팅 - 채널:{}, 내역:{}", channelName, chatHistory);
         return new RsData<>(
                 "200-1",
@@ -56,8 +56,9 @@ public class ChatController {
 
     // 채팅방 삭제
     @DeleteMapping("/delete")
-    public RsData<?> deleteChat(@RequestParam("channelName") String channelName) {
-        chatService.deleteChannelMessages(channelName);
+    public RsData<?> deleteChat(@RequestParam("channel") String channel,
+                                @RequestParam("userId") String userId) {
+        chatService.deleteChannelMessages(channel, userId);
         return new RsData<>(
                 "201-1",
                 "채널 삭제 완료",

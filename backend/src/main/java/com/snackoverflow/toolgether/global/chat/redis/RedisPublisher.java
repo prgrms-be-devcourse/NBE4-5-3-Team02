@@ -5,9 +5,7 @@ import com.snackoverflow.toolgether.global.chat.dto.CommunityMessage;
 import com.snackoverflow.toolgether.global.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
 @Slf4j

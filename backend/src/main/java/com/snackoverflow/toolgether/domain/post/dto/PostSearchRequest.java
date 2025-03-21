@@ -2,17 +2,13 @@ package com.snackoverflow.toolgether.domain.post.dto;
 
 import com.snackoverflow.toolgether.domain.post.entity.enums.Category;
 import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.annotation.Nullable;
 
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class PostSearchRequest {
 
     @Nullable String userId;

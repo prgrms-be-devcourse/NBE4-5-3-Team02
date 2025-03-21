@@ -84,7 +84,7 @@ export default function ChatPage() {
 
     const fetchChatHistory = async (channelName: string) => {
         try {
-            const response = await fetchWithAuth(`${BASE_URL}/api/chat/history?channelName=${channelName}`);
+            const response = await fetchWithAuth(`${BASE_URL}/api/chat/history?channelName=${channelName}&userId=${sessionStorage.getItem('user_id')}`);
             if (response?.ok) {
                 const result: RsData<Message[]> = await response.json();
                 console.log("채팅 내역:", result.data);
@@ -125,7 +125,7 @@ export default function ChatPage() {
 
         try {
             const response = await fetchWithAuth(
-                `${BASE_URL}/api/chat/delete?channelName=${selectedChat}`,
+                `${BASE_URL}/api/chat/delete?channel=${selectedChat}&userId=${sessionStorage.getItem('user_id')}`,
                 {method: "DELETE"}
             );
 
