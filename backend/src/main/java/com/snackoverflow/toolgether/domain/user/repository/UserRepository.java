@@ -29,4 +29,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u LEFT JOIN Review r ON r.reviewee = u AND r.createdAt >= :date WHERE r.reviewee IS NULL")
     List<User> findUsersWithoutReviewsSince(LocalDateTime date);
+
+    @Query("SELECT u.profileImage FROM User u WHERE u.profileImage IS NOT NULL")
+    List<String> findAllProfileImageUrl();
 }
