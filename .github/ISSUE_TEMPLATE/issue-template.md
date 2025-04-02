@@ -1,14 +1,14 @@
 ---
 name: issue template
 about: Describe this issue template's purpose here.
-title: ''
+title: "[FEAT] "
 labels: ''
 assignees: ''
 
 ---
 
 ## 🔍 title
-- title: "[FEAT] 로그인 버튼 추가
+- title: "[FEAT] 로그인 버튼 추가"
 
 ## 🎯 Purpose
 > *기능 목적/해결 과제 명확히 작성*
