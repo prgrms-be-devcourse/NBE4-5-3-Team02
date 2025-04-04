@@ -688,6 +688,7 @@ export default function ClientPage({ postid }: { postid: number }) {
               onTimeChange={handleStartTimeChange}
               time={startTime}
               events={events}
+              availabilities={availabilities}
             />
           </div>
 
@@ -704,6 +705,7 @@ export default function ClientPage({ postid }: { postid: number }) {
               onTimeChange={handleEndTimeChange}
               time={endTime}
               events={events}
+              availabilities={availabilities}
             />
           </div>
         </div>

@@ -4,6 +4,8 @@ import com.snackoverflow.toolgether.domain.post.entity.Post;
 import com.snackoverflow.toolgether.domain.post.entity.enums.Category;
 import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType;
 import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
+import com.snackoverflow.toolgether.domain.postavailability.entity.PostAvailability;
+import com.snackoverflow.toolgether.domain.postavailability.repository.PostAvailabilityRepository;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
 import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository;
@@ -23,6 +25,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Configuration
 @RequiredArgsConstructor
@@ -32,6 +36,7 @@ public class BaseInitData {
 	private final PasswordEncoder passwordEncoder;
 
     private final ReservationRepository reservationRepository;
+	private final PostAvailabilityRepository postAvailabilityRepository;
     private final ReviewRepository reviewRepository;
 
 	@Autowired
@@ -81,7 +86,8 @@ public class BaseInitData {
 			.longitude(126.9780)
 			.build();
 		userRepository.save(user1);
-		postRepository.save(Post.builder()
+		Set<PostAvailability> sp = new HashSet<>();
+		Post post = Post.builder() // Post 객체를 먼저 생성
 			.user(user1)
 			.title("제목입니다.")
 			.content("내용입니다.")
@@ -90,7 +96,20 @@ public class BaseInitData {
 			.price(10000)
 			.latitude(37.5665)
 			.longitude(126.9780)
-			.build());
+			.build();
+		Post savedPost = postRepository.save(post); // post 를 먼저 저장하고 저장된 post를 받음
+
+		PostAvailability sp1 = PostAvailability.builder()
+			.isRecurring(false)
+			.recurrence_days(0)
+			.date(LocalDateTime.of(2025, 3, 25, 0, 0, 0))
+			.startTime(LocalDateTime.of(2025, 3, 25, 10, 0, 0))
+			.endTime(LocalDateTime.of(2025, 3, 25, 17, 0, 0))
+			.post(savedPost) // Post 객체 할당
+			.build();
+		sp.add(sp1);
+		savedPost.setPostAvailabilities(sp); // post에 postAvailability 설정
+		postRepository.save(savedPost); // post를 다시 저장.
 
 		String password2 = "password123";
 		password2 = passwordEncoder.encode(password2);

@@ -1,12 +1,13 @@
 "use client";
 import moment from "moment";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 interface DateBoxProps {
   date: Date | null;
   onTimeChange: (time: string) => void;
   time: string;
   events: any[];
+  availabilities: { startTime: string; endTime: string }[];
 }
 
 const DateBox: React.FC<DateBoxProps> = ({
@@ -14,6 +15,7 @@ const DateBox: React.FC<DateBoxProps> = ({
   onTimeChange,
   time,
   events,
+  availabilities,
 }) => {
   if (!date) {
     return (
@@ -27,6 +29,28 @@ const DateBox: React.FC<DateBoxProps> = ({
     // 24개 블록으로 변경
     return `${i.toString().padStart(2, "0")}:00`;
   });
+
+  const availableTimes = useMemo(() => {
+    if (!availabilities || availabilities.length === 0) {
+      return [];
+    }
+
+    const dateString = moment(date).format("YYYY-MM-DD");
+    const available = availabilities.reduce((acc, availability) => {
+      const startTime = moment(availability.startTime);
+      const endTime = moment(availability.endTime);
+
+      if (moment(dateString).isSame(startTime, "day")) {
+        let currentTime = moment(startTime).clone();
+        while (currentTime.isBefore(endTime)) {
+          acc.push(currentTime.format("HH:mm"));
+          currentTime.add(1, "hour");
+        }
+      }
+      return acc;
+    }, [] as string[]);
+    return available;
+  }, [date, availabilities]);
 
   const isTimeReserved = useCallback(
     (timeBlock: string) => {
@@ -63,11 +87,22 @@ const DateBox: React.FC<DateBoxProps> = ({
     [date, events]
   );
 
+  const isTimeAvailable = useCallback(
+    (timeBlock: string) => {
+      return availableTimes.includes(timeBlock);
+    },
+    [availableTimes]
+  );
+
   const handleTimeBlockClick = (timeBlock: string) => {
-    if (!isTimeReserved(timeBlock)) {
+    if (isTimeAvailable(timeBlock) && !isTimeReserved(timeBlock)) {
       onTimeChange(timeBlock);
     } else {
-      alert("선택하신 시간은 이미 예약되었습니다.");
+      alert(
+        isTimeReserved(timeBlock)
+          ? "선택하신 시간은 이미 예약되었습니다."
+          : "선택하신 시간은 이용 불가능합니다."
+      );
     }
   };
 
@@ -92,13 +127,17 @@ const DateBox: React.FC<DateBoxProps> = ({
             {timeBlocks.slice(0, 12).map((timeBlock) => (
               <button
                 key={timeBlock}
-                disabled={isTimeReserved(timeBlock)}
+                disabled={
+                  !isTimeAvailable(timeBlock) || isTimeReserved(timeBlock)
+                }
                 className={`px-3 py-2 rounded-lg border-2 transition-all duration-200
               ${
                 isTimeReserved(timeBlock)
                   ? "bg-green-500/20 border-green-400 text-gray-600/50 cursor-not-allowed"
                   : time === timeBlock
                   ? "bg-green-400 border-green-600 text-gray-700 shadow-md"
+                  : !isTimeAvailable(timeBlock)
+                  ? "bg-red-500/20 border-red-400 text-gray-600/50 cursor-not-allowed"
                   : "bg-white border-green-200 text-gray-600 hover:bg-green-100 hover:border-green-300"
               }
             }`}
@@ -123,11 +162,15 @@ const DateBox: React.FC<DateBoxProps> = ({
                   ? "bg-green-500/20 border-green-400 text-gray-600/50 cursor-not-allowed"
                   : time === timeBlock
                   ? "bg-green-400 border-green-600 text-gray-700 shadow-md"
+                  : !isTimeAvailable(timeBlock)
+                  ? "bg-red-500/20 border-red-400 text-gray-600/50 cursor-not-allowed"
                   : "bg-white border-green-200 text-gray-600 hover:bg-green-100 hover:border-green-300"
               }
             }`}
                 onClick={() => handleTimeBlockClick(timeBlock)}
-                disabled={isTimeReserved(timeBlock)}
+                disabled={
+                  !isTimeAvailable(timeBlock) || isTimeReserved(timeBlock)
+                }
               >
                 {timeBlock}
               </button>
@@ -139,7 +182,9 @@ const DateBox: React.FC<DateBoxProps> = ({
       {/* 안내 메시지 */}
       <div className="mt-6 text-sm text-gray-600/90 text-center">
         <p>✅ 예약 가능 시간을 클릭해주세요</p>
-        <p className="mt-1">⛔️ 비활성화된 블록은 이미 예약된 시간입니다</p>
+        <p className="mt-1">
+          ⛔️ 비활성화된 블록은 이미 예약된 시간이거나 이용 불가능한 시간입니다.
+        </p>
       </div>
     </div>
   );

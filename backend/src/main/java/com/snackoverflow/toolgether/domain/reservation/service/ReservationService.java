@@ -1,6 +1,8 @@
 package com.snackoverflow.toolgether.domain.reservation.service;
 
+import com.snackoverflow.toolgether.domain.Notification.NotificationService;
 import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
+import com.snackoverflow.toolgether.domain.reservation.controller.SseController;
 import com.snackoverflow.toolgether.domain.reservation.dto.PostReservationResponse;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
@@ -54,6 +56,7 @@ public class ReservationService {
 	private final PostService postService;
 	private final UserService userService;
 	private final DepositHistoryService depositHistoryService;
+	private final NotificationService notificationService;
 
 	// Quartz
 	private final Scheduler scheduler; // Quartz 스케줄러
@@ -118,6 +121,9 @@ public class ReservationService {
 
 		depositHistoryService.createDepositHistory(depositHistory);
 
+		// 알림 전송 (소유자에게 알림)
+		notificationService.createNotification(reservation.getOwner().getId(), "[%d] '%s' 새로운 예약 요청이 있습니다.".formatted(reservation.getId(), reservation.getPost().getTitle()));
+
 		// 5. Response 반환
 		return new ReservationResponse(reservation.getId(),
 			reservation.getStatus().name(),
@@ -137,6 +143,9 @@ public class ReservationService {
 		try {
 			Reservation reservation = findReservationByIdOrThrow(reservationId);
 			reservation.approve();
+
+			// 알림 전송 (대여자에게 알림)
+			notificationService.createNotification(reservation.getRenter().getId(), "[%d] '%s' 예약이 승인되었습니다.".formatted(reservationId, reservation.getPost().getTitle()));
 
 			// Quartz Job 등록 (Start Rental)
 			JobDataMap startJobDataMap = new JobDataMap();
@@ -186,6 +195,7 @@ public class ReservationService {
 				scheduler.checkExists(startJob.getKey()), scheduler.checkExists(completeJob.getKey()));
 			log.info("Trigger scheduled. StartTrigger exists: {}, CompleteTrigger exists: {}",
 				scheduler.checkExists(startTrigger.getKey()), scheduler.checkExists(completeTrigger.getKey()));
+
 		}  catch (SchedulerException e) {
 			// SchedulerException을 RuntimeException으로 래핑하여 던짐
 			throw new RuntimeException("Failed to schedule start/complete rental job", e);
@@ -204,6 +214,11 @@ public class ReservationService {
 
 		// 대여자 크레딧 업데이트
 		userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
+
+		String title = reservation.getPost().getTitle();
+
+		// 알림 전송 (대여자에게 알림)
+		notificationService.createNotification(reservation.getRenter().getId(), "[%d] '%s' 예약이 거절되었습니다.".formatted(reservationId, reservation.getPost().getTitle()));
 	}
 
 	// 대여 시작 (IN_PROGRESS 상태)
@@ -211,6 +226,10 @@ public class ReservationService {
 	public void startRental(Long reservationId) {
 		Reservation reservation = findReservationByIdOrThrow(reservationId);
 		reservation.startRental();
+
+		// 알림 전송
+		notificationService.createNotification(reservation.getRenter().getId(), "[%d] '%s' 대여가 시작되었습니다.".formatted(reservationId, reservation.getPost().getTitle()));
+		notificationService.createNotification(reservation.getOwner().getId(), "[%d] '%s' 대여가 시작되었습니다.".formatted(reservationId, reservation.getPost().getTitle()));
 	}
 
 	// 대여 완료 (DONE 상태)
@@ -225,6 +244,10 @@ public class ReservationService {
 
 		// 대여자 크레딧 업데이트
 		userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
+
+		// 알림 전송
+		notificationService.createNotification(reservation.getRenter().getId(), "[%d] '%s' 대여가 완료되었습니다.".formatted(reservationId, reservation.getPost().getTitle()));
+		notificationService.createNotification(reservation.getOwner().getId(), "[%d] '%s' 대여가 완료되었습니다.".formatted(reservationId, reservation.getPost().getTitle()));
 	}
 
 	// 대여자 예약 취소
@@ -239,6 +262,9 @@ public class ReservationService {
 
 		// 대여자 크레딧 업데이트
 		userService.updateUserCredit(reservation.getRenter().getId(), depositHistory.getAmount());
+
+		// 소유자에게 알림 전송
+		notificationService.createNotification(reservation.getOwner().getId(), "[%d] '%s' 예약이 취소되었습니다.".formatted(reservationId, reservation.getPost().getTitle()));
 	}
 
 	// ~에 의한 대여 실패 -> 소유자의 경우 대여자에게, 대여자일 경우 소유자에게 보증금 환급
@@ -260,6 +286,10 @@ public class ReservationService {
 			// 소유자 크레딧 업데이트
 			userService.updateUserCredit(reservation.getOwner().getId(), depositHistory.getAmount());
 		}
+
+		// 알림 전송
+		notificationService.createNotification(reservation.getRenter().getId(), "[%d] '%s' 대여가 실패했습니다.".formatted(reservationId, reservation.getPost().getTitle()));
+		notificationService.createNotification(reservation.getOwner().getId(), "'%s' 대여가 실패했습니다.".formatted(reservationId, reservation.getPost().getTitle()));
 	}
 
 	// 예약 ID로 예약 조회

@@ -90,4 +90,8 @@ public class Post {
     public void incrementViewCount() {
         this.viewCount += 1;
     }
+
+    public void setPostAvailabilities(Set<PostAvailability> postAvailabilities) {
+        this.postAvailabilities = postAvailabilities;
+    }
 }
