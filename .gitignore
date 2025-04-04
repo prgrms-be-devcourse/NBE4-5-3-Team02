@@ -40,11 +40,14 @@ db_dev.mv.db
 db_dev.trace.db
 .DS_Store
 
-*.jar
-
 .idea/
 
 .env*
 
 ### ssl ###
 backend/src/main/resources/ssl/
+node_modules
+
+# DB 백업 파일
+mysql_data
+redis_data

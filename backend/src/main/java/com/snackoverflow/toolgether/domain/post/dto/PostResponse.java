@@ -32,7 +32,7 @@ public class PostResponse {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public PostResponse(Post post, Set<String> images, Set<PostAvailability> availabilities) {
-        this.id = post.getId();
+        // this.id = post.getId();
         this.userid = post.getUser().getId();
         this.nickname = post.getUser().getNickname();
         this.title = post.getTitle();

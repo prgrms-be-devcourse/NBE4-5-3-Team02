@@ -1,38 +1,18 @@
-server:
-  port: 8080
-  servlet:
-    session:
-      timeout: 15m
-jwt:
-  secret: [change]
-  expiration: 86400000 # 24시간(초 단위)
-
-cors:
-  allowed:
-    origins: http://localhost:3000, https://toolgether-delta.vercel.app
-
 spring:
+  profiles:
+    active: dev
+    include: secret
+
+  datasource:
+    url: jdbc:mysql://toolgether-mysql:3306/toolgether
+    username: ON_SECRET
+    password: ON_SECRET
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
   data:
     redis:
-      host: localhost
+      host: toolgether-redis
       port: 6379
-
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: [change]
-            client-secret: [change]
-            redirect-uri: https://toolgether-delta.vercel.app/redirect
-            scope:
-              - openid
-              - https://www.googleapis.com/auth/userinfo.profile
-              - https://www.googleapis.com/auth/userinfo.email
-            client-authentication-method: client_secret_post
-        provider:
-          google:
-            issuer-uri: https://accounts.google.com
 
   jackson:
     serialization:
@@ -41,15 +21,6 @@ spring:
   output:
     ansi:
       enabled: always
-
-  profiles:
-    active: dev
-
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/toolgether?serverTimezone=UTC
-    username: root
-    password: lldj123414
 
   jpa:
     database: mysql
@@ -65,9 +36,22 @@ spring:
         default_batch_fetch_size: 100
     open-in-view: false
 
-logging:
-  level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
-    org.hibernate.orm.jdbc.extract: TRACE
-    org.springframework.transaction.interceptor: TRACE
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ON_SECRET
+            client-secret: ON_SECRET
+            redirect-uri: https://toolgether-delta.vercel.app/redirect
+            scope:
+              - openid
+              - https://www.googleapis.com/auth/userinfo.profile
+              - https://www.googleapis.com/auth/userinfo.email
+            client-authentication-method: client_secret_post
+        provider:
+          google:
+            issuer-uri: https://accounts.google.com
+
+springdoc:
+  default-produces-media-type: application/json;charset=UTF-8

@@ -1,7 +1,16 @@
 services:
+  toolgether-spring-server:
+    build: .
+    ports:
+      - 8080:8080
+    depends_on:
+      toolgether-mysql:
+        condition: service_healthy
+      toolgether-redis:
+        condition: service_healthy
+
   toolgether-mysql:
-    image: mysql:8.4.1
-    container_name: toolgether-mysql
+    image: mysql
     restart: always
     ports:
       - "3306:3306" # MySQL 포트를 localhost와 매핑
@@ -10,25 +19,20 @@ services:
       MYSQL_DATABASE: toolgether  # 자동 생성할 DB
       TZ: Asia/Seoul
     volumes:
-      - mysql_data:/var/lib/mysql  # MySQL 데이터 유지
-    networks:
-      - toolgether-network
-  
-  redis:
-    image: redis:7.2-alpine # Redis 최신 버전 사용 (필요 시 버전 변경 가능)
-    container_name: toolgether-redis
+      - ./mysql_data:/var/lib/mysql  # MySQL 데이터 유지
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping"]
+      interval: 5s
+      retries: 10
+
+  toolgether-redis:
+    image: redis:alpine
     restart: always
     ports:
       - "6379:6379" # Redis 기본 포트 매핑
     volumes:
-      - redis_data:/data # Redis 데이터 유지
-    networks:
-      - toolgether-network
-
-networks:
-  toolgether-network:
-    driver: bridge
-
-volumes:
-  mysql_data:
-  redis_data:
+      - ./redis_data:/data # Redis 데이터 유지
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10

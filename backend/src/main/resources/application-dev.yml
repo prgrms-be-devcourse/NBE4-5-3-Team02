@@ -1,0 +1,46 @@
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 15m
+
+client:
+  port: 3000
+
+custom:
+  dev:
+    domain: localhost
+    backUrl: "http://${custom.dev.domain}:${server.port}"
+    frontUrl: "http://${custom.dev.domain}:${client.port}"
+  site:
+    backUrl: "${custom.dev.backUrl}"
+    frontUrl: "${custom.dev.frontUrl}"
+
+datasource:
+  url: jdbc:h2:./db_dev;MODE=MySQL
+  username: sa
+  password:
+  driver-class-name: org.h2.Driver
+  hikari:
+    auto-commit: false
+
+websocket:
+  endpoint:
+    uri: ws://"${custom.dev.backUrl}"/chat
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.orm.jdbc.extract: TRACE
+    org.springframework.transaction.interceptor: TRACE
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ON_SECRET
+            client-secret: ON_SECRET
+            redirect-uri: https://"${custom.dev.frontUrl}"/redirect

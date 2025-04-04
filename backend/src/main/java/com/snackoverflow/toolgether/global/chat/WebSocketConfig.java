@@ -12,7 +12,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketConfigurer {
 
-    @Value("${cors.allowed.origins}")
+    @Value("${custom.site.frontUrl}")
     private String cors;
     private final ChatWebSocketHandler chatWebSocketHandler;
 
@@ -21,6 +21,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(chatWebSocketHandler, "/chat")
                 .addInterceptors(new CustomHandshakeInterceptor())
-                .setAllowedOrigins(cors);
+                .setAllowedOrigins();
     }
 }

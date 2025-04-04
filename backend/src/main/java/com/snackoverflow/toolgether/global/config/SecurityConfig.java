@@ -29,7 +29,7 @@ class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final GoogleAccessTokenFilter googleAccessTokenFilter;
 
-    @Value("${cors.allowed.origins}")
+    @Value("${custom.site.frontUrl}")
     private String[] allowedOrigins;
 
     @Bean

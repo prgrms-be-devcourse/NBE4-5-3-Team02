@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,12 +25,11 @@ import java.util.Map;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 // 헤더 기반 OAuth2 액세스 토큰 처리를 담당
 public class GoogleAccessTokenFilter extends OncePerRequestFilter {
 
-    private final OauthService oauthService;
-    private final UserRepository userRepository;
+    @Autowired private OauthService oauthService;
+    @Autowired private UserRepository userRepository;
 
 
     @Override
