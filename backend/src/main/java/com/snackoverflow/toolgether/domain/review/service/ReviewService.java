@@ -34,14 +34,24 @@ public class ReviewService {
         User reviewee = reservation.getRenter().getId() == user.getId() ? reservation.getOwner() : reservation.getRenter();
         User reviewer = user; // 리뷰어는 항상 현재 사용자
 
-        Review review = Review.builder()
-                .reviewer(reviewer)
-                .reviewee(reviewee)
-                .reservation(reservation)
-                .productScore(reviewRequest.getProductScore())
-                .timeScore(reviewRequest.getTimeScore())
-                .kindnessScore(reviewRequest.getKindnessScore())
-                .build();
+        Review review = new Review(
+                null,
+                reviewer,
+                reviewee,
+                reservation,
+                reviewRequest.getProductScore(),
+                reviewRequest.getTimeScore(),
+                reviewRequest.getKindnessScore(),
+                null
+                );
+//        Review review = Review.builder()
+//                .reviewer(reviewer)
+//                .reviewee(reviewee)
+//                .reservation(reservation)
+//                .productScore(reviewRequest.getProductScore())
+//                .timeScore(reviewRequest.getTimeScore())
+//                .kindnessScore(reviewRequest.getKindnessScore())
+//                .build();
         reviewRepository.save(review);
     }
 
