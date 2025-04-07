@@ -70,6 +70,10 @@ public class User {
     @Column(nullable = true)
     private LocalDateTime deletedAt; // 탈퇴 일자, 탈퇴하면 null이 아님
 
+    public Long getId() {
+        return this.id;
+    }
+
     public void updateCredit(int credit) {
         this.credit += credit;
     }
