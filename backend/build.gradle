@@ -3,6 +3,8 @@ plugins {
 	id 'org.springframework.boot' version '3.4.3'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'org.asciidoctor.jvm.convert' version '3.3.2'
+	id 'org.jetbrains.kotlin.jvm' version '1.9.22' // 예시: 코틀린 버전 명시
+	id 'org.jetbrains.kotlin.plugin.spring' version '1.9.22' // Spring 플러그인 추가
 }
 
 group = 'com.snackoverflow'
@@ -80,6 +82,8 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-quartz'
 	implementation 'org.springframework.retry:spring-retry'
+	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22"
+	implementation "org.jetbrains.kotlin:kotlin-reflect:1.9.22"
 }
 
 dependencyManagement { // Spring Cloud Version 명시 (Hoxton.SR6)

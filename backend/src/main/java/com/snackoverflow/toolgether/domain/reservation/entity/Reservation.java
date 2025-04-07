@@ -55,6 +55,23 @@ public class Reservation {
     @Column(nullable = false)
     private Double amount; // 총 결제 금액
 
+    /* TODO: 코틀린 변환 전 임시 게터. 추후 제거하고 사용하는 부분 수정 */
+    public User getRenter() {
+        return this.renter;
+    }
+
+    public User getOwner() {
+        return this.owner;
+    }
+
+    public ReservationStatus getStatus() {
+        return this.status;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
     /* status 변경 함수 */
     // 요청됨 상태 변경
     public void approve() {

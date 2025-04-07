@@ -201,14 +201,24 @@ public class BaseInitData {
         reservationRepository.saveAndFlush(reservation2);
 
         // Review 데이터 생성 (reservation2에 대한 리뷰)
-        Review review1 = Review.builder()
-                .reviewer(user2) // user2가 작성
-                .reviewee(user1) // user1에게 리뷰
-                .reservation(reservation2)
-                .productScore(5)
-                .timeScore(5)
-                .kindnessScore(5)
-                .build();
+		Review review1 = new Review(
+				null,
+				user2,
+				user1,
+				reservation2,
+				5,
+				5,
+				5,
+				null
+		);
+//        Review review1 = Review.builder()
+//                .reviewer(user2) // user2가 작성
+//                .reviewee(user1) // user1에게 리뷰
+//                .reservation(reservation2)
+//                .productScore(5)
+//                .timeScore(5)
+//                .kindnessScore(5)
+//                .build();
         reviewRepository.saveAndFlush(review1);
 
         // Review 데이터 생성 (reservation2에 대한 리뷰)

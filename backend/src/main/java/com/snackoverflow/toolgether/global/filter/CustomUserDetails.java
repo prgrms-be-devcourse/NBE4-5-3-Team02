@@ -38,4 +38,9 @@ public class CustomUserDetails implements UserDetails {
     public String getPassword() {
         return "";
     }
+
+    /* TODO: 코틀린 변환 전 임시 게터. 추후 제거하고 사용하는 부분 수정 */
+    public Long getUserId() {
+        return this.userId;
+    }
 }
