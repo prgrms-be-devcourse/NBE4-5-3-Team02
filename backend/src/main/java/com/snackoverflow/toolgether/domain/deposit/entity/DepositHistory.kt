@@ -1,47 +1,38 @@
-package com.snackoverflow.toolgether.domain.deposit.entity;
+package com.snackoverflow.toolgether.domain.deposit.entity
 
-import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
-import com.snackoverflow.toolgether.domain.user.entity.User;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.snackoverflow.toolgether.domain.reservation.entity.Reservation
+import com.snackoverflow.toolgether.domain.user.entity.User
+import jakarta.persistence.*
 
 @Entity
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class DepositHistory {
-
+class DepositHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    var id: Long? = null
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id", nullable = false)
-    private Reservation reservation;
+    lateinit var reservation: Reservation
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    lateinit var user: User
 
     @Column(nullable = false)
-    private int amount; // 보증금 금액
+    var amount: Int = 0
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private DepositStatus status; // 보증금 상태 (PENDING, RETURNED)
+    lateinit var status: DepositStatus
 
     @Enumerated(EnumType.STRING)
-    private ReturnReason returnReason; // 보증금 반환 사유
+    lateinit var returnReason: ReturnReason
 
-    public void changeStatus(DepositStatus status) {
-        this.status = status;
+    fun changeStatus(status: DepositStatus) {
+        this.status = status
     }
 
-    public void changeReturnReason(ReturnReason returnReason) {
-        this.returnReason = returnReason;
+    fun changeReturnReason(reason: ReturnReason) {
+        this.returnReason = reason
     }
 }

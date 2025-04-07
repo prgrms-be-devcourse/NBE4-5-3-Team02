@@ -1,13 +1,14 @@
-package com.snackoverflow.toolgether.domain.reservation.dto;
+package com.snackoverflow.toolgether.domain.reservation.dto
 
-import java.time.LocalDateTime;
+import java.time.LocalDateTime
 
-public record ReservationRequest(
-	Long postId,
-	Long renterId,
-	Long ownerId,
-	LocalDateTime startTime,
-	LocalDateTime endTime,
-	Double deposit,
-	Double rentalFee
-) {}
+@JvmRecord
+data class ReservationRequest(
+    val postId: Long,
+    val renterId: Long,
+    val ownerId: Long,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
+    val deposit: Double,
+    val rentalFee: Double
+)

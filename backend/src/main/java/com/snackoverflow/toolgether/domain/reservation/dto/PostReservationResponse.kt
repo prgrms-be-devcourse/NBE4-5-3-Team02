@@ -1,10 +1,10 @@
-package com.snackoverflow.toolgether.domain.reservation.dto;
+package com.snackoverflow.toolgether.domain.reservation.dto
 
-public record PostReservationResponse(
-	Long id,
-	Long userId,
-	String title,
-	String priceType,
-	Integer price
-) {
-}
+@JvmRecord
+data class PostReservationResponse(
+    val id: Long,
+    val userId: Long,
+    val title: String,
+    val priceType: String,
+    val price: Int
+)

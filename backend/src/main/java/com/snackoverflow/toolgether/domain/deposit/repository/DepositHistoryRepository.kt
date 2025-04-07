@@ -1,11 +1,9 @@
-package com.snackoverflow.toolgether.domain.deposit.repository;
+package com.snackoverflow.toolgether.domain.deposit.repository
 
-import java.util.Optional;
+import com.snackoverflow.toolgether.domain.deposit.entity.DepositHistory
+import org.springframework.data.jpa.repository.JpaRepository
+import java.util.*
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.snackoverflow.toolgether.domain.deposit.entity.DepositHistory;
-
-public interface DepositHistoryRepository extends JpaRepository<DepositHistory, Long> {
-	Optional<DepositHistory> findByReservationId(Long reservationId);
+interface DepositHistoryRepository : JpaRepository<DepositHistory?, Long?> {
+    fun findByReservationId(reservationId: Long): Optional<DepositHistory>
 }
