@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.domain.Notification;
+package com.snackoverflow.toolgether.domain.Notification.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,6 +9,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.snackoverflow.toolgether.domain.Notification.NotificationCreatedEvent;
+import com.snackoverflow.toolgether.domain.Notification.dto.NotificationDto;
+import com.snackoverflow.toolgether.domain.Notification.entity.Notification;
+import com.snackoverflow.toolgether.domain.Notification.repository.NotificationRepository;
 import com.snackoverflow.toolgether.domain.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;

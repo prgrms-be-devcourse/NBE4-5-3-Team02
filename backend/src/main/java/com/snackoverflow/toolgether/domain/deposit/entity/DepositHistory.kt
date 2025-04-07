@@ -28,6 +28,14 @@ class DepositHistory {
     @Enumerated(EnumType.STRING)
     lateinit var returnReason: ReturnReason
 
+    constructor(
+        reservation: Reservation,
+        user: User,
+        amount: Int,
+        status: DepositStatus,
+        returnReason: ReturnReason,
+    )
+
     fun changeStatus(status: DepositStatus) {
         this.status = status
     }

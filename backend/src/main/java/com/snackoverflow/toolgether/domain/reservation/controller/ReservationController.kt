@@ -1,114 +1,115 @@
-package com.snackoverflow.toolgether.domain.reservation.controller;
+package com.snackoverflow.toolgether.domain.reservation.controller
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.snackoverflow.toolgether.domain.reservation.dto.PostReservationResponse;
-import com.snackoverflow.toolgether.domain.reservation.dto.ReservationRequest;
-import com.snackoverflow.toolgether.domain.reservation.dto.ReservationResponse;
-import com.snackoverflow.toolgether.domain.reservation.entity.FailDue;
-import com.snackoverflow.toolgether.domain.reservation.service.ReservationService;
-import com.snackoverflow.toolgether.global.dto.RsData;
-
-import lombok.RequiredArgsConstructor;
+import com.snackoverflow.toolgether.domain.reservation.dto.PostReservationResponse
+import com.snackoverflow.toolgether.domain.reservation.dto.ReservationRequest
+import com.snackoverflow.toolgether.domain.reservation.dto.ReservationResponse
+import com.snackoverflow.toolgether.domain.reservation.entity.FailDue
+import com.snackoverflow.toolgether.domain.reservation.service.ReservationService
+import com.snackoverflow.toolgether.global.dto.RsData
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/reservations")
-@RequiredArgsConstructor
-public class ReservationController {
+class ReservationController(
+    private val reservationService: ReservationService
+) {
+    @PostMapping("/request")
+    fun createReservation(@RequestBody reservationRequest: ReservationRequest): RsData<ReservationResponse> {
+        val response = reservationService.requestReservation(reservationRequest)
+        return RsData("201-1", "예약 요청 성공", response)
+    }
 
-	private final ReservationService reservationService;
+    // 예약 상태를 승인으로 바꾼 후 DepositHistory 생성
+    @PatchMapping("/{id}/approve")
+    fun approveReservation(@PathVariable id: Long): RsData<Void> {
+        reservationService.approveReservation(id)
+        return RsData(
+            "201-1",
+            "${id}번 예약 승인 성공"
+        )
+    }
 
-	@PostMapping("/request")
-	public RsData<ReservationResponse> createReservation(@RequestBody ReservationRequest reservationRequest) {
-		ReservationResponse response = reservationService.requestReservation(reservationRequest);
-		return new RsData<>("201-1", "예약 요청 성공", response);
-	}
+    @PatchMapping("/{id}/reject")
+    fun rejectReservation(@PathVariable id: Long, @RequestParam reason: String?): RsData<Void> {
+        reservationService.rejectReservation(id, reason)
+        return RsData(
+            "200-1",
+            "${id}번 예약 거절 성공"
+        )
+    }
 
-	// 예약 상태를 승인으로 바꾼 후 DepositHistory 생성
-	@PatchMapping("/{id}/approve")
-	public RsData<Void> approveReservation(@PathVariable Long id) {
-		reservationService.approveReservation(id);
-		return new RsData<>("201-1",
-			"%d번 예약 승인 성공".formatted(id));
-	}
+    @PatchMapping("/{id}/cancel")
+    fun cancelReservation(@PathVariable id: Long): RsData<Void> {
+        reservationService.cancelReservation(id)
+        return RsData(
+            "200-1",
+            "${id}번 예약 취소 성공"
+        )
+    }
 
-	@PatchMapping("/{id}/reject")
-	public RsData<Void> rejectReservation(@PathVariable Long id, @RequestParam String reason) {
-		reservationService.rejectReservation(id, reason);
-		return new RsData<>("200-1",
-			"%d번 예약 거절 성공".formatted(id));
-	}
+    @PatchMapping("/{id}/start")
+    fun startRental(@PathVariable id: Long): RsData<Void> {
+        reservationService.startRental(id)
+        return RsData(
+            "200-1",
+            "${id}번 예약 대여 시작 성공"
+        )
+    }
 
-	@PatchMapping("/{id}/cancel")
-	public RsData<Void> cancelReservation(@PathVariable Long id) {
-		reservationService.cancelReservation(id);
-		return new RsData<>("200-1",
-			"%d번 예약 취소 성공".formatted(id));
-	}
+    @PatchMapping("/{id}/complete")
+    fun completeRental(@PathVariable id: Long): RsData<Void> {
+        reservationService.completeRental(id)
+        return RsData(
+            "200-1",
+            "${id}번 예약 대여 종료 성공"
+        )
+    }
 
-	@PatchMapping("/{id}/start")
-	public RsData<Void> startRental(@PathVariable Long id) {
-		reservationService.startRental(id);
-		return new RsData<>("200-1",
-			"%d번 예약 대여 시작 성공".formatted(id));
-	}
+    @PatchMapping("/{id}/ownerIssue")
+    fun ownerIssue(@PathVariable id: Long, @RequestParam reason: String): RsData<Void> {
+        reservationService.failDueTo(id, reason, FailDue.OWNER_ISSUE)
+        return RsData(
+            "200-1",
+            "${id}번 예약 소유자에 의한 이슈로 환급 성공"
+        )
+    }
 
-	@PatchMapping("/{id}/complete")
-	public RsData<Void> completeRental(@PathVariable Long id) {
-		reservationService.completeRental(id);
-		return new RsData<>("200-1",
-			"%d번 예약 대여 종료 성공".formatted(id));
-	}
+    @PatchMapping("/{id}/renterIssue")
+    fun renterIssue(@PathVariable id: Long, @RequestParam reason: String): RsData<Void> {
+        reservationService.failDueTo(id, reason, FailDue.RENTER_ISSUE)
+        return RsData(
+            "200-1",
+            "${id}번 예약 대여자에 의한 이슈로 환급 성공"
+        )
+    }
 
-	@PatchMapping("/{id}/ownerIssue")
-	public RsData<Void> ownerIssue(@PathVariable Long id, @RequestParam String reason) {
-		reservationService.failDueTo(id, reason, FailDue.OWNER_ISSUE);
-		return new RsData<>("200-1",
-			"%d번 예약 소유자에 의한 이슈로 환급 성공".formatted(id));
-	}
+    @GetMapping("/{id}")
+    fun getReservationById(@PathVariable id: Long): RsData<ReservationResponse> {
+        val response = reservationService.getReservationById(id)
+        return RsData(
+            "200-1",
+            "${id}번 예약 조회 성공",
+            response
+        )
+    }
 
-	@PatchMapping("/{id}/renterIssue")
-	public RsData<Void> renterIssue(@PathVariable Long id, @RequestParam String reason) {
-		reservationService.failDueTo(id, reason, FailDue.RENTER_ISSUE);
-		return new RsData<>("200-1",
-			"%d번 예약 대여자에 의한 이슈로 환급 성공".formatted(id));
-	}
+    @GetMapping("/reservatedDates/{id}")
+    fun getReservedDates(@PathVariable id: Long): RsData<List<ReservationResponse>> {
+        val reservations = reservationService.getReservationsByPostId(id)
+        return RsData(
+            "200-1",
+            "${id}번 게시글의 예약 일정 조회 성공",
+            reservations
+        )
+    }
 
-	@GetMapping("/{id}")
-	public RsData<ReservationResponse> getReservationById(@PathVariable Long id) {
-		ReservationResponse response = reservationService.getReservationById(id);
-		return new RsData<>("200-1",
-			"%d번 예약 조회 성공".formatted(id),
-			response
-		);
-	}
-
-	@GetMapping("/reservatedDates/{id}")
-	public RsData<List<ReservationResponse>> getReservedDates(@PathVariable Long id) {
-		List<ReservationResponse> reservations = reservationService.getReservationsByPostId(id);
-		return new RsData<>(
-			"200-1",
-			"%d번 게시글의 예약 일정 조회 성공".formatted(id),
-			reservations
-		);
-	}
-
-	@GetMapping("/post/{postid}")
-	public RsData<PostReservationResponse> getPostReservation(@PathVariable Long postid) {
-		PostReservationResponse p = reservationService.getPostById(postid);
-		return new RsData<>(
-			"200-1",
-			"%d번 게시글 조회 성공".formatted(postid),
-			p
-		);
-	}
+    @GetMapping("/post/{postid}")
+    fun getPostReservation(@PathVariable postid: Long): RsData<PostReservationResponse> {
+        val p = reservationService.getPostById(postid)
+        return RsData(
+            "200-1",
+            "${postid}번 게시글 조회 성공",
+            p
+        )
+    }
 }

@@ -1,4 +1,6 @@
-package com.snackoverflow.toolgether.domain.Notification;
+package com.snackoverflow.toolgether.domain.Notification.dto;
+
+import com.snackoverflow.toolgether.domain.Notification.entity.Notification;
 
 public class NotificationDto {
 	public Long id;

@@ -88,4 +88,22 @@ class Reservation {
         check(this.status == ReservationStatus.REQUESTED) { "요청 대기 상태에서만 취소 처리가 가능합니다." }
         this.status = ReservationStatus.CANCELED
     }
+
+    constructor(post: Post,
+                renter: User,
+                owner: User,
+                startTime: LocalDateTime,
+                endTime: LocalDateTime,
+                amount: Double,
+                status: ReservationStatus,
+                createAt: LocalDateTime) {
+        this.post = post
+        this.renter = renter
+        this.owner = owner
+        this.startTime = startTime
+        this.endTime = endTime
+        this.amount = amount
+        this.status = status
+        this.createAt = createAt
+    }
 }

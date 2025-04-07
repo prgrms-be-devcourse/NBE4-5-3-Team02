@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.domain.Notification;
+package com.snackoverflow.toolgether.domain.Notification.entity;
 
 import java.time.LocalDateTime;
 
