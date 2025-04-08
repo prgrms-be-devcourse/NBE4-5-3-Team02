@@ -39,12 +39,12 @@ class DepositHistoryService(
         return depositHistoryRepository.findByReservationId(reservationId)
             .orElseThrow {
                 CustomException(
-                    ErrorResponse.builder()
-                        .title("예약 ID 기반 보증금 내역 조회 실패")
-                        .status(404)
-                        .detail("해당 예약 ID의 보증금 내역을 찾을 수 없습니다.")
-                        .instance(URI.create(ServletUriComponentsBuilder.fromCurrentRequestUri().toUriString()))
-                        .build()
+                    ErrorResponse(
+                        "예약 ID 기반 보증금 내역 조회 실패",
+                        404,
+                        "해당 예약 ID의 보증금 내역을 찾을 수 없습니다.",
+                        URI.create(ServletUriComponentsBuilder.fromCurrentRequestUri().toUriString())
+                    )
                 )
             }
     }
@@ -54,12 +54,12 @@ class DepositHistoryService(
         return depositHistoryRepository.findById(depositHistoryId)
             .orElseThrow {
                 CustomException(
-                    ErrorResponse.builder()
-                        .title("보증금 내역 조회 실패")
-                        .status(404)
-                        .detail("해당 ID의 보증금 내역을 찾을 수 없습니다.")
-                        .instance(URI.create(ServletUriComponentsBuilder.fromCurrentRequestUri().toUriString()))
-                        .build()
+                    ErrorResponse(
+                        "보증금 내역 조회 실패",
+                        404,
+                        "해당 ID의 보증금 내역을 찾을 수 없습니다.",
+                        URI.create(ServletUriComponentsBuilder.fromCurrentRequestUri().toUriString())
+                    )
                 )
             }
     }

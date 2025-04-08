@@ -1,13 +1,8 @@
-package com.snackoverflow.toolgether.domain.Notification.dto;
+package com.snackoverflow.toolgether.domain.notification.dto
 
-import com.snackoverflow.toolgether.domain.Notification.entity.Notification;
+import com.snackoverflow.toolgether.domain.notification.entity.Notification
 
-public class NotificationDto {
-	public Long id;
-	public String message;
-
-	public NotificationDto(Notification notification) {
-		this.id = notification.getId();
-		this.message = notification.getMessage();
-	}
+class NotificationDto(notification: Notification) {
+    var id: Int? = notification.id
+    var message: String = notification.message
 }

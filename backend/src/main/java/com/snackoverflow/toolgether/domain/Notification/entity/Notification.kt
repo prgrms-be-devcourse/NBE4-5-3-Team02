@@ -1,52 +1,38 @@
-package com.snackoverflow.toolgether.domain.Notification.entity;
+package com.snackoverflow.toolgether.domain.notification.entity
 
-import java.time.LocalDateTime;
-
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import com.snackoverflow.toolgether.domain.user.entity.User;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.snackoverflow.toolgether.domain.user.entity.User
+import jakarta.persistence.*
+import org.springframework.data.annotation.CreatedDate
+import java.time.LocalDateTime
 
 @Entity
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
-public class Notification {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+class Notification {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Int? = null
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
-	private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    lateinit var user: User
 
-	@Column(nullable = false)
-	private String message;
+    @Column(nullable = false)
+    lateinit var message: String
 
-	@CreatedDate
-	@Column(nullable = false, updatable = false)
-	private LocalDateTime createdAt;
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    lateinit var createdAt: LocalDateTime
 
-	@Column(nullable = false)
-	private Boolean isRead = false;
+    @Column(nullable = false)
+    private var isRead = false
 
-	public void setIsRead(Boolean isRead) {
-		this.isRead = isRead;
-	}
+    constructor(user: User, message: String, createdAt: LocalDateTime, isRead: Boolean) {
+        this.user = user
+        this.message = message
+        this.createdAt = createdAt
+        this.isRead = isRead
+    }
+
+    fun setIsRead(isRead: Boolean) {
+        this.isRead = isRead
+    }
 }

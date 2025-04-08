@@ -1,25 +1,20 @@
-package com.snackoverflow.toolgether.domain.Notification;
+package com.snackoverflow.toolgether.domain.notification
 
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
-
-import com.snackoverflow.toolgether.domain.reservation.controller.SseController;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.snackoverflow.toolgether.domain.reservation.controller.SseController
+import lombok.extern.slf4j.Slf4j
+import org.hibernate.query.sqm.tree.SqmNode.log
+import org.springframework.context.ApplicationListener
+import org.springframework.stereotype.Component
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class SseNotificationListener implements ApplicationListener<NotificationCreatedEvent> {
-
-	private final SseController sseController;
-
-	@Override
-	public void onApplicationEvent(NotificationCreatedEvent event) {
-		Long userId = event.getUserId();
-		String message = event.getMessage();
-		log.info("Received NotificationCreatedEvent. Sending SSE notification to user {}: {}", userId, message);
-		sseController.sendNotification(userId, message);
-	}
+class SseNotificationListener(
+    private val sseController: SseController
+) : ApplicationListener<NotificationCreatedEvent> {
+    override fun onApplicationEvent(event: NotificationCreatedEvent) {
+        val userId = event.userId
+        val message = event.message
+        log.info("Received NotificationCreatedEvent. Sending SSE notification to user $userId, $message")
+        sseController.sendNotification(userId, message)
+    }
 }

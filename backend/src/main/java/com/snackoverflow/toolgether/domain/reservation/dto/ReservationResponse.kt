@@ -2,7 +2,6 @@ package com.snackoverflow.toolgether.domain.reservation.dto
 
 import java.time.LocalDateTime
 
-@JvmRecord
 data class ReservationResponse(
     val id: Long,
     val status: String,

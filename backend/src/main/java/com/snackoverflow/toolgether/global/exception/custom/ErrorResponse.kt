@@ -1,16 +1,10 @@
-package com.snackoverflow.toolgether.global.exception.custom;
+package com.snackoverflow.toolgether.global.exception.custom
 
-import lombok.Builder;
-import lombok.Getter;
+import java.net.URI
 
-import java.net.URI;
-
-@Getter
-@Builder
-public class ErrorResponse {
-
-	private String title;
-	private Integer status;
-	private String detail;
-	private URI instance;
+class ErrorResponse(title: String, status: Int, detail: String, instance: URI) {
+    lateinit var title: String
+    var status: Int = 0
+    lateinit var detail: String
+    lateinit var instance: URI
 }

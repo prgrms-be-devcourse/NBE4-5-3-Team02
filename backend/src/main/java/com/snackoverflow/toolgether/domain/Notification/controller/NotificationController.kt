@@ -1,43 +1,30 @@
-package com.snackoverflow.toolgether.domain.Notification.controller;
+package com.snackoverflow.toolgether.domain.notification.controller
 
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.snackoverflow.toolgether.domain.Notification.dto.NotificationDto;
-import com.snackoverflow.toolgether.domain.Notification.service.NotificationService;
-
-import lombok.RequiredArgsConstructor;
+import com.snackoverflow.toolgether.domain.notification.dto.NotificationDto
+import com.snackoverflow.toolgether.domain.notification.service.NotificationService
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/notifications")
-@RequiredArgsConstructor
-public class NotificationController {
+class NotificationController(
+    private val notificationService: NotificationService
+) {
+    // 사용자 ID로 읽지 않은 알림 목록 조회
+    @GetMapping("/unread/{userId}")
+    fun getUnreadNotifications(@PathVariable userId: Long): ResponseEntity<List<NotificationDto>> {
+        val notifications = notificationService.getUnreadNotifications(userId)
+        return ResponseEntity.ok(notifications)
+    }
 
-	private final NotificationService notificationService;
-
-	// 사용자 ID로 읽지 않은 알림 목록 조회
-	@GetMapping("/unread/{userId}")
-	public ResponseEntity<List<NotificationDto>> getUnreadNotifications(@PathVariable Long userId) {
-		List<NotificationDto> notifications = notificationService.getUnreadNotifications(userId);
-		return ResponseEntity.ok(notifications);
-	}
-
-	// 알림 읽음 처리
-	@PutMapping("/{notificationId}")
-	public ResponseEntity<?> markNotificationAsRead(@PathVariable Long notificationId) {
-		try {
-			notificationService.markNotificationAsRead(notificationId);
-			return ResponseEntity.ok().build();
-		} catch (RuntimeException e) {
-			return ResponseEntity.notFound().build();
-		}
-	}
-
-	// ... (기존 코드)
+    // 알림 읽음 처리
+    @PutMapping("/{notificationId}")
+    fun markNotificationAsRead(@PathVariable notificationId: Long): ResponseEntity<*> {
+        try {
+            notificationService.markNotificationAsRead(notificationId)
+            return ResponseEntity.ok().build<Any>()
+        } catch (e: RuntimeException) {
+            return ResponseEntity.notFound().build<Any>()
+        }
+    }
 }

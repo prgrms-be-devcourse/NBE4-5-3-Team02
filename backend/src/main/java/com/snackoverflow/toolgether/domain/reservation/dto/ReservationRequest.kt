@@ -2,7 +2,6 @@ package com.snackoverflow.toolgether.domain.reservation.dto
 
 import java.time.LocalDateTime
 
-@JvmRecord
 data class ReservationRequest(
     val postId: Long,
     val renterId: Long,

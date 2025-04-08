@@ -1,6 +1,5 @@
 package com.snackoverflow.toolgether.domain.deposit.dto
 
-@JvmRecord
 data class DepositResponse(
     val id: Long,
     val status: String,

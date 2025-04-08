@@ -5,36 +5,37 @@ import com.snackoverflow.toolgether.domain.user.entity.User
 import jakarta.persistence.*
 
 @Entity
-class DepositHistory {
+class DepositHistory(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long? = null
+    var id: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id", nullable = false)
-    lateinit var reservation: Reservation
+    var reservation: Reservation,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    lateinit var user: User
+    var user: User,
 
     @Column(nullable = false)
-    var amount: Int = 0
+    var amount: Int = 0,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    lateinit var status: DepositStatus
+    var status: DepositStatus,
 
     @Enumerated(EnumType.STRING)
-    lateinit var returnReason: ReturnReason
-
-    constructor(
-        reservation: Reservation,
-        user: User,
-        amount: Int,
-        status: DepositStatus,
-        returnReason: ReturnReason,
-    )
+    var returnReason: ReturnReason
+) {
+    constructor() : this(null, Reservation(), User(), 0, DepositStatus.PENDING, ReturnReason.NONE)
+    constructor(reservation: Reservation, user: User, amount: Int, depositStatus: DepositStatus, returnReason: ReturnReason) : this() {
+        this.reservation = reservation
+        this.user = user
+        this.amount = amount
+        this.status = depositStatus
+        this.returnReason = returnReason
+    }
 
     fun changeStatus(status: DepositStatus) {
         this.status = status

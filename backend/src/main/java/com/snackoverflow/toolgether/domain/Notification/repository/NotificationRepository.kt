@@ -1,13 +1,10 @@
-package com.snackoverflow.toolgether.domain.Notification.repository;
+package com.snackoverflow.toolgether.domain.notification.repository
 
-import java.util.List;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-import com.snackoverflow.toolgether.domain.Notification.entity.Notification;
+import com.snackoverflow.toolgether.domain.notification.entity.Notification
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
 
 @Repository
-public interface NotificationRepository extends JpaRepository<Notification, Long> {
-	List<Notification> findByUserIdAndIsRead(Long userId, Boolean isRead);
+interface NotificationRepository : JpaRepository<Notification?, Long?> {
+    fun findByUserIdAndIsRead(userId: Long, isRead: Boolean): List<Notification>
 }

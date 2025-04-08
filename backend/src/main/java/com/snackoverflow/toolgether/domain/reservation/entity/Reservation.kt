@@ -6,43 +6,66 @@ import jakarta.persistence.*
 import java.time.LocalDateTime
 
 @Entity
-class Reservation {
+class Reservation(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long? = null
+    var id: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
-    lateinit var post: Post
+    var post: Post,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "renter_id", nullable = false)
-    lateinit var renter: User // 예약 요청자 (대여자)
+    var renter: User, // 예약 요청자 (대여자)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
-    lateinit var owner: User // 물건 소유자
+    var owner: User, // 물건 소유자
 
     @Column(nullable = false)
-    lateinit var createAt: LocalDateTime // 거래 요청 일자
+    var createAt: LocalDateTime, // 거래 요청 일자
 
     @Column(nullable = false)
-    lateinit var startTime: LocalDateTime // 대여 시작 시간
+    var startTime: LocalDateTime, // 대여 시작 시간
 
     @Column(nullable = false)
-    lateinit var endTime: LocalDateTime // 대여 종료 시간
+    var endTime: LocalDateTime, // 대여 종료 시간
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    lateinit var status: ReservationStatus // 예약 상태 (ENUM)
+    var status: ReservationStatus, // 예약 상태 (ENUM)
 
     @Column(columnDefinition = "TEXT")
-    lateinit var rejectionReason: String // 거절 사유 (status가 REJECTED인 경우)
+    var rejectionReason: String? = null, // 거절 사유 (status가 REJECTED인 경우)
 
     @Column(nullable = false)
     var amount: Double = 0.0 // 총 결제 금액
+) {
+    constructor(
+        post: Post,
+        renter: User,
+        owner: User,
+        createAt: LocalDateTime,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        status: ReservationStatus,
+        amount: Double
+    ) : this(null, post, renter, owner, createAt, startTime, endTime, status, null, amount)
 
+    constructor(
+        post: Post,
+        renter: User,
+        owner: User,
+        createAt: LocalDateTime,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        status: ReservationStatus,
+        rejectionReason: String,
+        amount: Double
+    ) : this(null, post, renter, owner, createAt, startTime, endTime, status, rejectionReason, amount)
 
+    constructor() : this(null, Post(), User(), User(), LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), ReservationStatus.REQUESTED, null, 0.0)
 
     /* status 변경 함수 */ // 요청됨 상태 변경
     fun approve() {
@@ -87,23 +110,5 @@ class Reservation {
     fun canceled() {
         check(this.status == ReservationStatus.REQUESTED) { "요청 대기 상태에서만 취소 처리가 가능합니다." }
         this.status = ReservationStatus.CANCELED
-    }
-
-    constructor(post: Post,
-                renter: User,
-                owner: User,
-                startTime: LocalDateTime,
-                endTime: LocalDateTime,
-                amount: Double,
-                status: ReservationStatus,
-                createAt: LocalDateTime) {
-        this.post = post
-        this.renter = renter
-        this.owner = owner
-        this.startTime = startTime
-        this.endTime = endTime
-        this.amount = amount
-        this.status = status
-        this.createAt = createAt
     }
 }

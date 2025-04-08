@@ -1,5 +1,9 @@
 package com.snackoverflow.toolgether.global.init;
 
+import com.snackoverflow.toolgether.domain.deposit.entity.DepositHistory;
+import com.snackoverflow.toolgether.domain.deposit.entity.DepositStatus;
+import com.snackoverflow.toolgether.domain.deposit.entity.ReturnReason;
+import com.snackoverflow.toolgether.domain.deposit.repository.DepositHistoryRepository;
 import com.snackoverflow.toolgether.domain.post.entity.Post;
 import com.snackoverflow.toolgether.domain.post.entity.enums.Category;
 import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType;
@@ -38,6 +42,7 @@ public class BaseInitData {
     private final ReservationRepository reservationRepository;
 	private final PostAvailabilityRepository postAvailabilityRepository;
     private final ReviewRepository reviewRepository;
+	private final DepositHistoryRepository depositHistoryRepository;
 
 	@Autowired
 	@Lazy
@@ -176,29 +181,49 @@ public class BaseInitData {
         postRepository.saveAndFlush(post4);
 
         // Reservation 데이터 생성
-        Reservation reservation1 = Reservation.builder()
-                .post(post3)
-                .renter(user2)
-                .owner(user1)
-                .createAt(LocalDateTime.now())
-                .startTime(LocalDateTime.now().plusDays(1))
-                .endTime(LocalDateTime.now().plusDays(3))
-                .status(ReservationStatus.APPROVED)
-                .amount(20000.0)
-                .build();
-        reservationRepository.saveAndFlush(reservation1);
+        Reservation reservation1 = new Reservation(
+			post3,
+			user2,
+			user1,
+			LocalDateTime.now(),
+			LocalDateTime.now().plusDays(1),
+			LocalDateTime.now().plusDays(3),
+			ReservationStatus.APPROVED,
+			"None",
+			20000.0
+		);
+        Reservation savedReservation1 = reservationRepository.saveAndFlush(reservation1);
 
-        Reservation reservation2 = Reservation.builder()
-                .post(post4)
-                .renter(user1)
-                .owner(user2)
-                .createAt(LocalDateTime.now())
-                .startTime(LocalDateTime.now().plusDays(2))
-                .endTime(LocalDateTime.now().plusDays(5))
-                .status(ReservationStatus.DONE)
-                .amount(15000.0)
-                .build();
-        reservationRepository.saveAndFlush(reservation2);
+		DepositHistory depositHistory1 = new DepositHistory(
+			savedReservation1,
+			user1,
+			10000,
+			DepositStatus.PENDING,
+			ReturnReason.NONE
+		);
+		depositHistoryRepository.save(depositHistory1);
+
+        Reservation reservation2 = new Reservation(
+			post4,
+			user1,
+			user2,
+			LocalDateTime.now(),
+			LocalDateTime.now().plusDays(2),
+			LocalDateTime.now().plusDays(5),
+			ReservationStatus.DONE,
+			"None",
+			15000.0
+		);
+        Reservation savedReservation2 = reservationRepository.saveAndFlush(reservation2);
+
+		DepositHistory depositHistory2 = new DepositHistory(
+			savedReservation2,
+			user2,
+			10000,
+			DepositStatus.PENDING,
+			ReturnReason.NONE
+		);
+		depositHistoryRepository.save(depositHistory2);
 
         // Review 데이터 생성 (reservation2에 대한 리뷰)
 		Review review1 = new Review(

@@ -1,6 +1,6 @@
 package com.snackoverflow.toolgether.domain.reservation.service
 
-import com.snackoverflow.toolgether.domain.Notification.service.NotificationService
+import com.snackoverflow.toolgether.domain.notification.service.NotificationService
 import com.snackoverflow.toolgether.domain.deposit.entity.DepositHistory
 import com.snackoverflow.toolgether.domain.deposit.entity.DepositStatus
 import com.snackoverflow.toolgether.domain.deposit.entity.ReturnReason
@@ -84,11 +84,12 @@ class ReservationService(
             post,
             renter,
             owner,
+            LocalDateTime.now(),
             reservationRequest.startTime,
             reservationRequest.endTime,
-            totalAmount,
             ReservationStatus.REQUESTED,
-            LocalDateTime.now())
+            totalAmount.toDouble()
+            )
 
         reservationRepository.save(reservation)
 
@@ -106,7 +107,7 @@ class ReservationService(
         // 알림 전송 (소유자에게 알림)
         notificationService.createNotification(
             reservation.owner.id,
-            "[%d] '%s' 새로운 예약 요청이 있습니다.".formatted(reservation.id, reservation.post.title)
+            "[${reservation.id}] '${reservation.post.title}' 새로운 예약 요청이 있습니다."
         )
 
         // 5. Response 반환
@@ -117,7 +118,7 @@ class ReservationService(
             reservation.startTime,
             reservation.endTime,
             reservation.amount,
-            reservation.rejectionReason,
+            reservation.rejectionReason.toString(),
             reservation.owner.id,
             reservation.renter.id
         )
@@ -133,7 +134,7 @@ class ReservationService(
             // 알림 전송 (대여자에게 알림)
             notificationService.createNotification(
                 reservation.renter.id,
-                "[%d] '%s' 예약이 승인되었습니다.".formatted(reservationId, reservation.post.title)
+                "[${reservation.id}] '${reservation.post.title}' 예약이 승인되었습니다."
             )
 
             // Quartz Job 등록 (Start Rental)
@@ -141,7 +142,7 @@ class ReservationService(
             startJobDataMap.put("reservationId", reservationId) // 확인: reservationId가 null이 아닌지
 
             // JobDetail에 JobDataMap 설정 (여기 수정)
-            val startJob = startRentalJobDetail!!.jobBuilder
+            val startJob = startRentalJobDetail.jobBuilder
                 .usingJobData(startJobDataMap) // usingJobData 사용
                 .withIdentity("startRentalJob-$reservationId", "startRentalGroup")
                 .build()
@@ -160,7 +161,7 @@ class ReservationService(
             completeJobDataMap.put("reservationId", reservationId) //확인
 
             // JobDetail에 JobDataMap 설정
-            val completeJob = completeRentalJobDetail!!.jobBuilder
+            val completeJob = completeRentalJobDetail.jobBuilder
                 .usingJobData(completeJobDataMap) // usingJobData 사용
                 .withIdentity("completeRentalJob-$reservationId", "completeRentalGroup") // 더 구체적인 이름, 그룹
                 .build()
@@ -199,7 +200,7 @@ class ReservationService(
         // 알림 전송 (대여자에게 알림)
         notificationService.createNotification(
             reservation.renter.id,
-            "[%d] '%s' 예약이 거절되었습니다.".formatted(reservationId, reservation.post.title)
+            "[${reservation.id}] '${reservation.post.title}' 예약이 거절되었습니다."
         )
     }
 
@@ -212,11 +213,11 @@ class ReservationService(
         // 알림 전송
         notificationService.createNotification(
             reservation.renter.id,
-            "[%d] '%s' 대여가 시작되었습니다.".formatted(reservationId, reservation.post.title)
+            "[${reservation.id}] '${reservation.post.title}' 대여가 시작되었습니다."
         )
         notificationService.createNotification(
             reservation.owner.id,
-            "[%d] '%s' 대여가 시작되었습니다.".formatted(reservationId, reservation.post.title)
+            "[${reservation.id}] '${reservation.post.title}' 대여가 시작되었습니다."
         )
     }
 
@@ -240,11 +241,11 @@ class ReservationService(
         // 알림 전송
         notificationService.createNotification(
             reservation.renter.id,
-            "[%d] '%s' 대여가 완료되었습니다.".formatted(reservationId, reservation.post.title)
+            "[${reservation.id}] '${reservation.post.title}' 대여가 완료되었습니다."
         )
         notificationService.createNotification(
             reservation.owner.id,
-            "[%d] '%s' 대여가 완료되었습니다.".formatted(reservationId, reservation.post.title)
+            "[${reservation.id}] '${reservation.post.title}' 대여가 완료되었습니다."
         )
     }
 
@@ -264,7 +265,7 @@ class ReservationService(
         // 소유자에게 알림 전송
         notificationService.createNotification(
             reservation.owner.id,
-            "[%d] '%s' 예약이 취소되었습니다.".formatted(reservationId, reservation.post.title)
+            "[${reservation.id}] '${reservation.post.title}' 예약이 취소되었습니다."
         )
     }
 
@@ -294,11 +295,11 @@ class ReservationService(
         // 알림 전송
         notificationService.createNotification(
             reservation.renter.id,
-            "[%d] '%s' 대여가 실패했습니다.".formatted(reservationId, reservation.post.title)
+            "[${reservation.id}] '${reservation.post.title}' 대여가 실패했습니다."
         )
         notificationService.createNotification(
             reservation.owner.id,
-            "'%s' 대여가 실패했습니다.".formatted(reservationId, reservation.post.title)
+            "[${reservation.id}] '${reservation.post.title}' 대여가 실패했습니다."
         )
     }
 
@@ -312,7 +313,7 @@ class ReservationService(
             reservation.startTime,
             reservation.endTime,
             reservation.amount,
-            reservation.rejectionReason,
+            reservation.rejectionReason.toString(),
             reservation.owner.id,
             reservation.renter.id
         )
@@ -323,16 +324,14 @@ class ReservationService(
         return reservationRepository.findById(reservationId)
             .orElseThrow {
                 CustomException(
-                    ErrorResponse.builder()
-                        .title("예약 조회 실패")
-                        .status(404)
-                        .detail("해당 ID의 예약을 찾을 수 없습니다.")
-                        .instance(
-                            URI.create(
-                                ServletUriComponentsBuilder.fromCurrentRequestUri().toUriString()
-                            )
+                    ErrorResponse(
+                        "예약 조회 실패",
+                        404,
+                        "해당 ID의 예약을 찾을 수 없습니다.",
+                        URI.create(
+                            ServletUriComponentsBuilder.fromCurrentRequestUri().toUriString()
                         )
-                        .build()
+                    )
                 )
             }!!
     }
@@ -356,7 +355,7 @@ class ReservationService(
                         reservation.startTime,
                         reservation.endTime,
                         reservation.amount,
-                        reservation.rejectionReason,
+                        reservation.rejectionReason.toString(),
                         reservation.owner.id,
                         reservation.renter.id
                     )
