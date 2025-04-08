@@ -1,5 +1,6 @@
 package com.snackoverflow.toolgether.domain.review.scheduler;
 
+import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 import com.snackoverflow.toolgether.domain.review.entity.Review;
 import com.snackoverflow.toolgether.domain.review.scheduler.lock.entity.SchedulerLock;
 import com.snackoverflow.toolgether.domain.review.scheduler.lock.repository.SchedulerLockRepository;
@@ -63,13 +64,28 @@ public class ReviewScoreSchedulerTest {
     void workingTest() {
         // 락 관련 stub
         when(schedulerLockRepository.findByLockNameWithLock(anyString())).thenReturn(Optional.empty());
+
+        // 사용자 모킹
+        User mockUser = Mockito.mock(User.class);
+        when(mockUser.getId()).thenReturn(1L);
+        when(mockUser.getScore()).thenReturn(50);
+
+        // 리뷰 객체 직접 생성
+        Review mockReview = new Review(
+                null,
+                mockUser,
+                mockUser, // reviewee도 mockUser로 설정 (테스트 목적)
+                Mockito.mock(Reservation.class), // Reservation은 일단 mock 처리
+                4,
+                5,
+                3,
+                LocalDateTime.now().minusDays(10)
+        );
+
         // 새 리뷰: 지난 1주일 내에 작성된 리뷰가 1건 존재
         when(reviewService.getReviewsCreatedAfter(any())).thenReturn(List.of(mockReview));
         // inactive 사용자: 최근 6개월 리뷰가 있는 사용자 목록은 빈 리스트로 설정 → 감쇠 로직 미실행
         when(userService.getUsersWithoutReviewsSince(any())).thenReturn(List.of());
-
-        // 사용자의 초기 점수를 50으로 stub (긍정 리뷰: determineScoreChange(평균 4.0) → +1.0)
-        when(mockUser.getScore()).thenReturn(50);
 
         reviewScoreScheduler.aggregateReviewScores();
 
@@ -87,7 +103,7 @@ public class ReviewScoreSchedulerTest {
     @DisplayName("락 획득 실패 테스트")
     void lockFailureTest() {
         when(schedulerLockRepository.findByLockNameWithLock(anyString()))
-                .thenReturn(Optional.of(new SchedulerLock()));
+                .thenReturn(Optional.of(new SchedulerLock("lock-name", LocalDateTime.now())));
 
         reviewScoreScheduler.aggregateReviewScores();
 

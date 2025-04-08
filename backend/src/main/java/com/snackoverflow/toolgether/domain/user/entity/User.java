@@ -74,6 +74,9 @@ public class User {
     public Long getId() {
         return this.id;
     }
+    public int getScore() {
+        return this.score;
+    }
 
 
     public void updateCredit(int credit) {
