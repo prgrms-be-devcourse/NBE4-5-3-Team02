@@ -6,31 +6,26 @@ import org.springframework.data.annotation.CreatedDate
 import java.time.LocalDateTime
 
 @Entity
-class Notification {
+class Notification(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Int? = null
+    var id: Int? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    lateinit var user: User
+    var user: User, @Column(nullable = false)
 
-    @Column(nullable = false)
-    lateinit var message: String
+    var message: String,
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    lateinit var createdAt: LocalDateTime
+    var createdAt: LocalDateTime,
 
     @Column(nullable = false)
-    private var isRead = false
-
-    constructor(user: User, message: String, createdAt: LocalDateTime, isRead: Boolean) {
-        this.user = user
-        this.message = message
-        this.createdAt = createdAt
-        this.isRead = isRead
-    }
+    private var isRead: Boolean
+) {
+    constructor() : this(null, User(), "", LocalDateTime.now(), false)
+    constructor(user: User, message: String, createdAt: LocalDateTime, isRead: Boolean) : this()
 
     fun setIsRead(isRead: Boolean) {
         this.isRead = isRead
