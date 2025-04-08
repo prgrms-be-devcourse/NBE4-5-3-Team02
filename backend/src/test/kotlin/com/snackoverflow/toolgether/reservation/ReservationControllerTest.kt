@@ -4,6 +4,7 @@ import com.snackoverflow.toolgether.domain.post.entity.Post
 import com.snackoverflow.toolgether.domain.post.entity.enums.Category
 import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType
 import com.snackoverflow.toolgether.domain.reservation.controller.ReservationController
+import com.snackoverflow.toolgether.domain.reservation.entity.FailDue
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation
 import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus
 import com.snackoverflow.toolgether.domain.reservation.service.ReservationService
@@ -26,7 +27,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import java.nio.charset.StandardCharsets
@@ -189,6 +190,127 @@ class ReservationControllerTest {
             .andExpect(handler().methodName("createReservation"))
             .andExpect(jsonPath("$.code").value("201-1"))
             .andExpect(jsonPath("$.msg").value("예약 요청 성공"))
+    }
+
+    @Test
+    @DisplayName("예약 승인 테스트")
+    fun approve(){
+        val resultAction = mockMvc.perform(
+            patch("/api/v1/reservations/1/approve")
+        )
+
+        resultAction.andExpect(status().isOk)
+            .andExpect(handler().handlerType(ReservationController::class.java))
+            .andExpect(handler().methodName("approveReservation"))
+            .andExpect(jsonPath("$.code").value("201-1"))
+            .andExpect(jsonPath("$.msg").value("1번 예약 승인 성공"))
+    }
+
+    @Test
+    @DisplayName("예약 거절 테스트")
+    fun reject(){
+        val resultAction = mockMvc.perform(
+            patch("/api/v1/reservations/1/reject")
+        )
+
+        resultAction.andExpect(status().isOk)
+            .andExpect(handler().handlerType(ReservationController::class.java))
+            .andExpect(handler().methodName("rejectReservation"))
+            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.msg").value("1번 예약 거절 성공"))
+    }
+
+    @Test
+    @DisplayName("예약 취소 테스트")
+    fun cancel(){
+        val resultAction = mockMvc.perform(
+            patch("/api/v1/reservations/1/cancel")
+        )
+
+        resultAction.andExpect(status().isOk)
+            .andExpect(handler().handlerType(ReservationController::class.java))
+            .andExpect(handler().methodName("cancelReservation"))
+            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.msg").value("1번 예약 취소 성공"))
+    }
+
+    @Test
+    @DisplayName("대여 시작 테스트")
+    fun start(){
+        val resultAction = mockMvc.perform(
+            patch("/api/v1/reservations/1/start")
+        )
+
+        resultAction.andExpect(status().isOk)
+            .andExpect(handler().handlerType(ReservationController::class.java))
+            .andExpect(handler().methodName("startRental"))
+            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.msg").value("1번 예약 대여 시작 성공"))
+    }
+
+    @Test
+    @DisplayName("대여 종료 테스트")
+    fun complete(){
+        val resultAction = mockMvc.perform(
+            patch("/api/v1/reservations/1/complete")
+        )
+
+        resultAction.andExpect(status().isOk)
+            .andExpect(handler().handlerType(ReservationController::class.java))
+            .andExpect(handler().methodName("completeRental"))
+            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.msg").value("1번 예약 대여 종료 성공"))
+    }
+
+    @Test
+    @DisplayName("소유자 이슈 테스트")
+    fun issue1() {
+        val resultAction = mockMvc.perform(
+            patch("/api/v1/reservations/1/ownerIssue")
+                .param("reason", "소유자 사정으로 인한 취소")
+        )
+
+        resultAction
+            .andExpect(status().isOk)
+            .andExpect(handler().handlerType(ReservationController::class.java))
+            .andExpect(handler().methodName("ownerIssue"))
+            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.msg").value("1번 예약 소유자에 의한 이슈로 환급 성공"))
+    }
+
+    @Test
+    @DisplayName("대여자 이슈 테스트")
+    fun issue2() {
+        val resultAction = mockMvc.perform(
+            patch("/api/v1/reservations/1/renterIssue")
+                .param("reason", "대여자 사정으로 인한 취소")
+        )
+
+        resultAction
+            .andExpect(status().isOk)
+            .andExpect(handler().handlerType(ReservationController::class.java))
+            .andExpect(handler().methodName("renterIssue")) // 메서드 이름 수정
+            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.msg").value("1번 예약 대여자에 의한 이슈로 환급 성공"))
+    }
+
+    @Test
+    @DisplayName("게시글 번호 조회 테스트")
+    fun getReservations() {
+        val resultAction = mockMvc.perform(
+            get("/api/v1/reservations/reservatedDates/1")
+        )
+
+        val mvcResult = resultAction.andReturn()
+        val responseBody = mvcResult.response.contentAsString
+        println("Response Body: $responseBody") // 응답 본문 출력
+
+        resultAction
+            .andExpect(status().isOk)
+            .andExpect(handler().handlerType(ReservationController::class.java))
+            .andExpect(handler().methodName("getReservedDates")) // 메서드 이름 수정
+            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.msg").value("1번 게시글의 예약 일정 조회 성공"))
     }
 
 
