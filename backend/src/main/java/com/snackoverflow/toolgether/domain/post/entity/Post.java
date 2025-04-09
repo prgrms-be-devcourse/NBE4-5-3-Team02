@@ -15,9 +15,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -93,5 +91,27 @@ public class Post {
 
     public void setPostAvailabilities(Set<PostAvailability> postAvailabilities) {
         this.postAvailabilities = postAvailabilities;
+    }
+
+    /* TODO : 마이그레이션 이후 삭제 */
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public PriceType getPriceType() {
+        return priceType;
+    }
+
+    public int getPrice() {
+        return price;
     }
 }
