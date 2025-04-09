@@ -188,7 +188,7 @@ public class BaseInitData {
 			LocalDateTime.now(),
 			LocalDateTime.now().plusDays(1),
 			LocalDateTime.now().plusDays(3),
-			ReservationStatus.APPROVED,
+			ReservationStatus.REQUESTED,
 			"None",
 			20000.0
 		);
@@ -210,7 +210,7 @@ public class BaseInitData {
 			LocalDateTime.now(),
 			LocalDateTime.now().plusDays(2),
 			LocalDateTime.now().plusDays(5),
-			ReservationStatus.DONE,
+			ReservationStatus.APPROVED,
 			"None",
 			15000.0
 		);
