@@ -31,7 +31,7 @@ class ReviewService (
 
     @Transactional
     fun create(reviewRequest: ReviewRequest, reservation: Reservation, user: User) {
-        val reviewee = if (reservation.getRenter().getId() == user.getId()) reservation.getOwner() else reservation.getRenter()
+        val reviewee = if (reservation.renter.getId() == user.getId()) reservation.owner else reservation.renter
         val reviewer = user // 리뷰어는 항상 현재 사용자
 
         val review = Review(

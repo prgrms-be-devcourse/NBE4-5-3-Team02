@@ -43,17 +43,17 @@ class ReviewController(
         }
 
         val actualReservation = reservation.get()
-        if (actualReservation.getStatus() != ReservationStatus.DONE) {
+        if (actualReservation.status != ReservationStatus.DONE) {
             return RsData(
                 "400-1",
                 "대여 완료 후 리뷰를 작성할 수 있습니다."
             )
         }
 
-        val temp = reviewService.findByUserIdAndReservationId(actualReservation.id, user.id)
+        val temp = reviewService.findByUserIdAndReservationId(actualReservation.id!!, user.id)
         if (reviewService.existsUserIdAndReservationId(
                 user.id,
-                actualReservation.getId()
+                actualReservation.id!!
             )
         ) { // 수정: existsUserIdAndReservationId 사용
             return RsData(
