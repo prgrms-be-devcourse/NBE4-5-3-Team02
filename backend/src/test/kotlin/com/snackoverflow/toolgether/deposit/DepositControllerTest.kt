@@ -28,10 +28,6 @@ class DepositControllerTest {
     @Autowired
     protected val context: WebApplicationContext? = null
 
-    private val user1 = 1L
-    private val user2 = 2L
-    private val post1 = 1L
-
     @BeforeEach
     fun setUp() {
         MockitoAnnotations.openMocks(this)

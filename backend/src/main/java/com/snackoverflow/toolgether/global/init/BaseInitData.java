@@ -9,7 +9,6 @@ import com.snackoverflow.toolgether.domain.post.entity.enums.Category;
 import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType;
 import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
 import com.snackoverflow.toolgether.domain.postavailability.entity.PostAvailability;
-import com.snackoverflow.toolgether.domain.postavailability.repository.PostAvailabilityRepository;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
 import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository;
@@ -18,8 +17,6 @@ import com.snackoverflow.toolgether.domain.review.repository.ReviewRepository;
 import com.snackoverflow.toolgether.domain.user.entity.Address;
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
@@ -40,16 +37,12 @@ public class BaseInitData {
 	private final PasswordEncoder passwordEncoder;
 
     private final ReservationRepository reservationRepository;
-	private final PostAvailabilityRepository postAvailabilityRepository;
     private final ReviewRepository reviewRepository;
 	private final DepositHistoryRepository depositHistoryRepository;
 
 	@Autowired
 	@Lazy
 	private BaseInitData self;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
 	@Bean
 	public ApplicationRunner applicationRunner() {
