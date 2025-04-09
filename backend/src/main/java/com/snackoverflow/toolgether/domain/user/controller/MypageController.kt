@@ -21,19 +21,19 @@ import java.util.stream.Collectors
 @RestController
 @RequestMapping("/api/v1/mypage")
 @RequiredArgsConstructor
-class MypageController {
-    private val userService: UserService? = null
-    private val reviewService: ReviewService? = null
-    private val reservationService: ReservationService? = null
-    private val postImageService: PostImageService? = null
-
+class MypageController(
+    private val userService: UserService,
+    private val reviewService: ReviewService,
+    private val reservationService: ReservationService,
+    private val postImageService: PostImageService,
+) {
     //내 정보 조회
     @GetMapping("/me")
     fun getMyInfo(
         @Login customUserDetails: CustomUserDetails
     ): RsData<MeInfoResponse> {
         val userId = customUserDetails.userId
-        val meInfoResponse = userService!!.getMeInfo(userId)
+        val meInfoResponse = userService.getMeInfo(userId)
 
         return RsData(
             "200-1",
@@ -50,29 +50,26 @@ class MypageController {
     ): RsData<Map<String, List<MyReservationInfoResponse>>> {
         val userId = customUserDetails.userId
 
-        val rentals = reservationService!!.getRentalReservations(userId)
+        val rentals = reservationService.getRentalReservations(userId)
         val borrows = reservationService.getBorrowReservations(userId)
 
-        val rentalResponses = rentals.stream()
-            .map { reservation: Reservation ->
-                var imageUrl: String? = null
-                val images = postImageService!!.getPostImagesByPostId(reservation.post.id) //PostImageService 호출
-                if (images != null && !images.isEmpty()) {
-                    imageUrl = images[0].imageUrl
-                }
-                val isReviewed = reviewService!!.findByUserIdAndReservationId(userId, reservation.id!!).isPresent
+        val rentalResponses = rentals.map { reservation ->
+                val imageUrl: String? = postImageService.getPostImagesByPostId(reservation.post.id)
+                    ?.takeIf { it.isNotEmpty() }
+                    ?.get(0)
+                    ?.getImageUrl()
+                val isReviewed = reviewService.findByUserIdAndReservationId(userId, reservation.id!!).isPresent
                 MyReservationInfoResponse.from(reservation, imageUrl, isReviewed)
             }
-            .collect(Collectors.toList())
 
         val borrowResponses = borrows.stream()
             .map { reservation: Reservation ->
                 var imageUrl: String? = null
-                val images = postImageService!!.getPostImagesByPostId(reservation.post.id) //PostImageService 호출
-                if (images != null && !images.isEmpty()) {
-                    imageUrl = images[0].imageUrl
+                val images = postImageService.getPostImagesByPostId(reservation.post.id) //PostImageService 호출
+                if (images != null && images.isNotEmpty()) {
+                    imageUrl = images.get(0).getImageUrl();
                 }
-                val isReviewed = reviewService!!.findByUserIdAndReservationId(userId, reservation.id!!).isPresent
+                val isReviewed = reviewService.findByUserIdAndReservationId(userId, reservation.id!!).isPresent
                 MyReservationInfoResponse.from(reservation, imageUrl, isReviewed)
             }
             .collect(Collectors.toList())
@@ -95,7 +92,7 @@ class MypageController {
         @RequestParam("profileImage") profileImage: MultipartFile?
     ): RsData<Void> {
         val userId = customUserDetails.userId
-        val user = userService!!.findUserById(userId)
+        val user = userService.findUserById(userId)
         userService.postProfileImage(user, profileImage)
         return RsData(
             "200-1",
@@ -109,7 +106,7 @@ class MypageController {
         @Login customUserDetails: CustomUserDetails
     ): RsData<Void> {
         val userId = customUserDetails.userId
-        val user = userService!!.findUserById(userId)
+        val user = userService.findUserById(userId)
         userService.deleteProfileImage(user)
         return RsData(
             "200-1",
@@ -124,7 +121,7 @@ class MypageController {
         @RequestBody @Validated request: PatchMyInfoRequest
     ): RsData<Void> {
         val userId = customUserDetails.userId
-        val user = userService!!.findUserById(userId)
+        val user = userService.findUserById(userId)
         val isGeoInfoValid = userService.checkGeoInfo(request)
         if (!isGeoInfoValid) {
             return RsData(
@@ -153,7 +150,7 @@ class MypageController {
         @Login customUserDetails: CustomUserDetails
     ): RsData<Void> {
         val userId = customUserDetails.userId
-        val user = userService!!.findUserById(userId)
+        val user = userService.findUserById(userId)
         userService.deleteUser(user)
         return RsData(
             "200-1",
