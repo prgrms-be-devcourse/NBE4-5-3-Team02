@@ -25,4 +25,8 @@ public class PostImage {
     @JoinColumn(nullable = false) // 한 장 이상 필수
     private String imageUrl; // 이미지 파일 이름, uuid로 저장 (기존 postImage -> imageUrl 변경)
 
+    /* TODO: 코틀린 변환 전 임시 게터. 추후 제거하고 사용하는 부분 수정 */
+    public String getImageUrl() {
+        return this.imageUrl;
+    }
 }
