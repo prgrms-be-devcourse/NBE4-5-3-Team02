@@ -6,15 +6,12 @@ import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
 import com.snackoverflow.toolgether.global.exception.custom.UserNotFoundException;
 import com.snackoverflow.toolgether.global.util.s3.S3Service;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * 로직 변경한 부분은 새롭게 클래스를 나누어서 작성
@@ -35,7 +32,7 @@ class UserService(
         }
     }
 
-    fun findByUserId(userId: Long): User? {
+    fun findByUserId(userId: Long?): User? {
         return userRepository.findById(userId).orElse(null)
     }
 
@@ -44,7 +41,7 @@ class UserService(
     }
 
     @Transactional
-    fun updateUserCredit(userId: Long, credit: Int) {
+    fun updateUserCredit(userId: Long?, credit: Int) {
         val user = userRepository.findById(userId).orElseThrow { UserNotFoundException() }
         user.updateCredit(credit)
     }
@@ -56,7 +53,7 @@ class UserService(
     }
 
     @Transactional
-    fun postProfileImage(user: User, profileImageFile: MultipartFile) {
+    fun postProfileImage(user: User, profileImageFile: MultipartFile?) {
         deleteProfileImage(user)
         val profileImageUrl = s3Service.upload(profileImageFile, "profile") // S3에 업로드
         user.updateProfileImage(profileImageUrl) // 프로필 이미지 URL 업데이트
@@ -82,7 +79,7 @@ class UserService(
     }
 
     @Transactional
-    fun updateUserScore(id: Long, updatedScore: Double) {
+    fun updateUserScore(id: Long?, updatedScore: Double) {
         val user = userRepository.findById(id).orElseThrow { UserNotFoundException() }
         user.updateScore(updatedScore)
     }

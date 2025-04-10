@@ -110,8 +110,8 @@ class UserServiceV2(
     }
 
     // ID로 유저 조회
-    fun getUserById(userId: Long): User? {
-        return userRepository.findByIdOrNull(userId)
+    fun getUserById(userId: Long): User {
+        return userRepository.findByUserId(userId) ?: throw UserNotFoundException()
     }
 
     // 유저 존재 여부 확인
