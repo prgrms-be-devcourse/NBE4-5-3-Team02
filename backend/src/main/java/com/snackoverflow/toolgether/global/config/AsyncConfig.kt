@@ -1,6 +1,5 @@
 package com.snackoverflow.toolgether.global.config
 
-import com.snackoverflow.toolgether.domain.user.service.VerificationService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.task.TaskDecorator
@@ -10,6 +9,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import java.util.concurrent.Executor
+
+import com.snackoverflow.toolgether.domain.user.service.VerificationService.SESSION_KEY
 
 @Configuration
 @EnableAsync
@@ -40,8 +41,8 @@ class AsyncConfig : AsyncConfigurer {
                     )
                     if (session != null) {
                         request.session.setAttribute(
-                            VerificationService.SESSION_KEY,
-                            session.getAttribute(VerificationService.SESSION_KEY)
+                            SESSION_KEY,
+                            session.getAttribute(SESSION_KEY)
                         )
                     }
                     runnable.run()
