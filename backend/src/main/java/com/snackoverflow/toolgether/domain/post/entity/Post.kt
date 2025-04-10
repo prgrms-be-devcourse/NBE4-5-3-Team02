@@ -25,6 +25,11 @@ class Post(
     var title: String, // 제목
     @Column(columnDefinition = "TEXT", nullable = false)
     var content: String, // 내용
+    @CreatedDate
+    @Column(updatable = false)
+    var createdAt: LocalDateTime? = null, // 글 작성 시간
+    @UpdateTimestamp
+    var updateAt: LocalDateTime? = null, // 글 수정 시간
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var category: Category, // 카테고리 (TOOL, ELECTRONICS)
@@ -43,12 +48,7 @@ class Post(
     val postImages: MutableSet<PostImage> = HashSet(), // 이미지
     @OneToMany(mappedBy = "post", cascade = [CascadeType.ALL], orphanRemoval = true)
     @BatchSize(size = 10)
-    var postAvailabilities: MutableSet<PostAvailability> = HashSet(), // 스케줄
-    @CreatedDate
-    @Column(updatable = false)
-    var createdAt: LocalDateTime? = null, // 글 작성 시간
-    @UpdateTimestamp
-    var updateAt: LocalDateTime? = null // 글 수정 시간
+    var postAvailabilities: MutableSet<PostAvailability> = HashSet() // 스케줄
 ) {
     /* TODO : 마이그레이션 이후 삭제 */
     // 파라미터 없는 기본 생성자 추가
@@ -57,6 +57,8 @@ class Post(
         null,
         "",
         "",
+        null,
+        null,
         Category.TOOL,
         PriceType.DAY,
         0,
@@ -64,9 +66,7 @@ class Post(
         0.0,
         0,
         HashSet(),
-        HashSet(),
-        null,
-        null
+        HashSet()
     )
 
     // 나머지 메서드 (updatePost, incrementViewCount, setPostAvailabilities 등)
@@ -136,6 +136,6 @@ class Post(
         fun createdAt(createdAt: LocalDateTime?) = apply { this.createdAt = createdAt }
         fun updateAt(updateAt: LocalDateTime?) = apply { this.updateAt = updateAt }
 
-        fun build() = Post(id, user, title, content, category, priceType, price, latitude, longitude, viewCount, postImages, postAvailabilities, createdAt, updateAt)
+        fun build() = Post(id, user, title, content, createdAt, updateAt, category, priceType, price, latitude, longitude, viewCount, postImages, postAvailabilities)
     }
 }
