@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.global.chat.service;
+package com.snackoverflow.toolgether.domain.chat.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;

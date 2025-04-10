@@ -1,11 +1,13 @@
-package com.snackoverflow.toolgether.global.chat.service;
+package com.snackoverflow.toolgether.domain.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.snackoverflow.toolgether.global.chat.dto.ChatMessage;
+import com.snackoverflow.toolgether.domain.chat.dto.ChatMessageDto;
+import com.snackoverflow.toolgether.domain.chat.entity.ChatMessage;
+import com.snackoverflow.toolgether.domain.chat.repository.ChatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -19,33 +21,63 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import static com.snackoverflow.toolgether.global.constants.AppConstants.PERSONAL_CHAT_PREFIX;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ChatService {
 
+    private final ChatRepository chatRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
 
-    public void saveMessage(String channelName, ChatMessage chatMessage) {
-        Map<String, Object> messageData = new ConcurrentHashMap<>();
-        messageData.put("sender", chatMessage.getSender());
-        messageData.put("receiver", chatMessage.getReceiver());
-        messageData.put("content", chatMessage.getContent());
-        messageData.put("senderName", chatMessage.getSenderName());
-        messageData.put("receiverName", chatMessage.getReceiverName());
-        messageData.put("deletedSender", chatMessage.isDeletedSender());
-        messageData.put("deletedReceiver", chatMessage.isDeletedReceiver());
+    // Redis 에는 채널당 100개의 메시지만 저장, 나머지는 DB에 저장한 후 영속적으로 관리 (삭제 전까지)
+    public void saveMessage(String channelName, ChatMessageDto chatMessageDto) {
+        // DB에 저장
+        String senderId = chatMessageDto.getSender();
+        String senderName = chatMessageDto.getSenderName();
+        String receiverId = chatMessageDto.getReceiver();
+        String receiverName = chatMessageDto.getReceiverName();
+        String content = chatMessageDto.getContent();
+
+        ChatMessage chatMessage = ChatMessage
+                .create(channelName, senderId, senderName, receiverId, receiverName, content);
+
+        chatRepository.save(chatMessage);
 
         try {
+            Map<String, Object> messageData = saveMessage(chatMessageDto);
             String jsonMessage = new ObjectMapper().writeValueAsString(messageData);
-            redisTemplate.opsForZSet().add("chat:" + channelName, jsonMessage, timestampConvert(chatMessage.getTimeStamp()));
+            redisTemplate.opsForZSet().add(
+                    PERSONAL_CHAT_PREFIX +
+                    channelName,
+                    jsonMessage,
+                    timestampConvert(chatMessageDto.getTimeStamp()));
             log.info("Redis Sorted Set 저장 = 채널:{}, 내용:{}, 시간:{}", channelName,
-                    jsonMessage, timestampConvert(chatMessage.getTimeStamp()));
+                    jsonMessage, timestampConvert(chatMessageDto.getTimeStamp()));
+
+            // 최신 100개까지만 유지하도록 변경
+            redisTemplate.opsForZSet().removeRange(
+                    PERSONAL_CHAT_PREFIX + channelName,
+                    0, -101); // 100개 초과시 오래된 항목 제거
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @NotNull
+    private Map<String, Object> saveMessage(ChatMessageDto chatMessageDto) {
+        Map<String, Object> messageData = new ConcurrentHashMap<>();
+        messageData.put("sender", chatMessageDto.getSender());
+        messageData.put("receiver", chatMessageDto.getReceiver());
+        messageData.put("content", chatMessageDto.getContent());
+        messageData.put("senderName", chatMessageDto.getSenderName());
+        messageData.put("receiverName", chatMessageDto.getReceiverName());
+        messageData.put("deletedSender", chatMessageDto.isDeletedSender());
+        messageData.put("deletedReceiver", chatMessageDto.isDeletedReceiver());
+        return messageData;
     }
 
     // 특정 사용자의 전체 채팅 내역을 반환
@@ -69,7 +101,7 @@ public class ChatService {
     }
 
     // 특정 채널에 대한 모든 내역을 반환
-    public List<ChatMessage> getChatHistory(String channelName, String userId) {
+    public List<ChatMessageDto> getChatHistory(String channelName, String userId) {
         log.info("Redis 에서 가져올 채팅:{}", channelName);
 
         // ZSet의 값과 score를 함께 가져옴
@@ -82,7 +114,7 @@ public class ChatService {
         }
 
         // JSON 데이터와 score를 ChatMessage 매핑
-        List<ChatMessage> chatHistory = messagesWithScores.stream()
+        List<ChatMessageDto> chatHistory = messagesWithScores.stream()
                 .map(tuple ->
                 {
                     String json = tuple.getValue();
@@ -91,7 +123,7 @@ public class ChatService {
                     String timestamp = convertUnixTimestampToString(score);
 
                     try {
-                        ChatMessage response = objectMapper.readValue(json, ChatMessage.class);
+                        ChatMessageDto response = objectMapper.readValue(json, ChatMessageDto.class);
                         if (timestamp != null) {
                             response.setTimeStamp(timestamp); // score를 timeStamp로 설정
                         }
@@ -112,7 +144,7 @@ public class ChatService {
                     return true; // 그 외의 경우 필터링하지 않음
                 })
                 .toList();
-        for (ChatMessage response : chatHistory) {
+        for (ChatMessageDto response : chatHistory) {
             log.info("불러온 채팅 내역 -> 변환: {}", response);
         }
         return chatHistory;
@@ -123,14 +155,14 @@ public class ChatService {
         String redisKey = "chat:" + channelName;
 
         // 특정 채널의 채팅 내역 가져오기
-        List<ChatMessage> chatHistory = getChatHistory(channelName, userId);
+        List<ChatMessageDto> chatHistory = getChatHistory(channelName, userId);
 
         if (chatHistory.isEmpty()) {
             log.info("채널 {}에 저장된 메시지가 없습니다.", channelName);
             return;
         }
 
-        for (ChatMessage message : chatHistory) {
+        for (ChatMessageDto message : chatHistory) {
                 // Redis에서 기존 점수(timeStamp)를 가져오기
                 double score = timestampConvert(message.getTimeStamp());
 

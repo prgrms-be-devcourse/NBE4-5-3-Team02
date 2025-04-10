@@ -1,7 +1,7 @@
-package com.snackoverflow.toolgether.global.chat.service;
+package com.snackoverflow.toolgether.domain.chat.service;
 
-import com.snackoverflow.toolgether.global.chat.redis.RedisSubscriber;
-import com.snackoverflow.toolgether.global.chat.redis.TopicFactory;
+import com.snackoverflow.toolgether.domain.chat.redis.RedisSubscriber;
+import com.snackoverflow.toolgether.domain.chat.redis.TopicFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.listener.ChannelTopic;

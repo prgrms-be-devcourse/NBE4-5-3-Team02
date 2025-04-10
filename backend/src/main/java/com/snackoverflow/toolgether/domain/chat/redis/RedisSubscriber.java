@@ -1,11 +1,11 @@
-package com.snackoverflow.toolgether.global.chat.redis;
+package com.snackoverflow.toolgether.domain.chat.redis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.snackoverflow.toolgether.global.chat.dto.ChatMessage;
-import com.snackoverflow.toolgether.global.chat.dto.CommunityMessage;
-import com.snackoverflow.toolgether.global.chat.service.ChannelSessionService;
+import com.snackoverflow.toolgether.domain.chat.dto.ChatMessageDto;
+import com.snackoverflow.toolgether.domain.chat.dto.CommunityMessage;
+import com.snackoverflow.toolgether.domain.chat.service.ChannelSessionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
@@ -60,19 +60,19 @@ public class RedisSubscriber implements MessageListener {
             }
 
             // 해당 채널에 연결된 사용자들에게만 메시지 전달
-            ChatMessage chatMessage = objectMapper.readValue(msg, ChatMessage.class);
+            ChatMessageDto chatMessageDto = objectMapper.readValue(msg, ChatMessageDto.class);
             Set<WebSocketSession> sessions = channelSessionService.getSessions(channel);
 
             for (WebSocketSession session : sessions) {
                 log.info("채널에 있는 세션: {}", session.getId());
                 if (session.isOpen()) {
-                    session.sendMessage(new TextMessage(objectMapper.writeValueAsString(chatMessage)));
-                    log.info("메시지 전송 완료: 세션ID={}, 메시지={}", session.getId(), objectMapper.writeValueAsString(chatMessage));
+                    session.sendMessage(new TextMessage(objectMapper.writeValueAsString(chatMessageDto)));
+                    log.info("메시지 전송 완료: 세션ID={}, 메시지={}", session.getId(), objectMapper.writeValueAsString(chatMessageDto));
                     isDelivered = true;
                 }
                 // 세션이 없거나 모두 닫혀 있으면 읽지 않은 메시지 카운트 증가
                 if (isDelivered) {
-                    incrementUnreadCount(chatMessage.getReceiver());
+                    incrementUnreadCount(chatMessageDto.getReceiver());
                 }
             }
 

@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.global.chat.dto;
+package com.snackoverflow.toolgether.domain.chat.dto;
 
 import lombok.Data;
 import lombok.Setter;
@@ -12,6 +12,7 @@ public class CommunityMessage {
     private String timestamp;
     private String senderName;
     private String region;
+
     @Setter
     private long openSessionCount;
 

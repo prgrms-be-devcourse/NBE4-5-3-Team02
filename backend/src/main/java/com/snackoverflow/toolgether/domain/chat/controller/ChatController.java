@@ -1,7 +1,7 @@
-package com.snackoverflow.toolgether.global.chat.controller;
+package com.snackoverflow.toolgether.domain.chat.controller;
 
-import com.snackoverflow.toolgether.global.chat.dto.ChatMessage;
-import com.snackoverflow.toolgether.global.chat.service.ChatService;
+import com.snackoverflow.toolgether.domain.chat.dto.ChatMessageDto;
+import com.snackoverflow.toolgether.domain.chat.service.ChatService;
 import com.snackoverflow.toolgether.global.dto.RsData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +45,7 @@ public class ChatController {
     @GetMapping("/history")
     public RsData<?> getChatHistory(@RequestParam("channelName") String channelName,
                                     @RequestParam("userId") String userId) {
-        List<ChatMessage> chatHistory = chatService.getChatHistory(channelName, userId);
+        List<ChatMessageDto> chatHistory = chatService.getChatHistory(channelName, userId);
         log.info("저장한 채팅 - 채널:{}, 내역:{}", channelName, chatHistory);
         return new RsData<>(
                 "200-1",

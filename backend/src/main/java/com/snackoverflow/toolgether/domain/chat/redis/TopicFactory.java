@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.global.chat.redis;
+package com.snackoverflow.toolgether.domain.chat.redis;
 
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Component;

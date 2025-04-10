@@ -1,13 +1,13 @@
-package com.snackoverflow.toolgether.global.chat;
+package com.snackoverflow.toolgether.domain.chat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.snackoverflow.toolgether.global.chat.dto.ChatMessage;
-import com.snackoverflow.toolgether.global.chat.dto.CommunityMessage;
-import com.snackoverflow.toolgether.global.chat.redis.RedisPublisher;
-import com.snackoverflow.toolgether.global.chat.redis.TopicFactory;
-import com.snackoverflow.toolgether.global.chat.service.ChannelSessionService;
-import com.snackoverflow.toolgether.global.chat.service.TopicSubscriptionService;
+import com.snackoverflow.toolgether.domain.chat.dto.ChatMessageDto;
+import com.snackoverflow.toolgether.domain.chat.dto.CommunityMessage;
+import com.snackoverflow.toolgether.domain.chat.redis.RedisPublisher;
+import com.snackoverflow.toolgether.domain.chat.redis.TopicFactory;
+import com.snackoverflow.toolgether.domain.chat.service.ChannelSessionService;
+import com.snackoverflow.toolgether.domain.chat.service.TopicSubscriptionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -79,20 +79,20 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             redisPublisher.publishToCommunity(channelTopic.getTopic(), communityMessage);
             log.info("Redis에 메시지 발행: {}", communityMessage);
         } else {
-            ChatMessage chatMessage = objectMapper.readValue(message.getPayload(), ChatMessage.class);
-            log.info("message json에서 변환:{}", chatMessage);
+            ChatMessageDto chatMessageDto = objectMapper.readValue(message.getPayload(), ChatMessageDto.class);
+            log.info("message json에서 변환:{}", chatMessageDto);
 
             // 토픽 생성 후 구독 설정
-            ChannelTopic channelTopic = topicFactory.create(chatMessage.getSender(), chatMessage.getReceiver());
-            topicSubscriptionService.subscribeToChatTopic(chatMessage.getSender(), chatMessage.getReceiver());
+            ChannelTopic channelTopic = topicFactory.create(chatMessageDto.getSender(), chatMessageDto.getReceiver());
+            topicSubscriptionService.subscribeToChatTopic(chatMessageDto.getSender(), chatMessageDto.getReceiver());
 
             // WebSocket 세션을 해당 채널에 등록
             channelSessionService.addSession(channelTopic.getTopic(), session);
             log.info("채널명:{}, 등록된 세션:{}", channelTopic.getTopic(), session);
 
             // Redis로 메시지 발행
-            redisPublisher.publish(channelTopic.getTopic(), chatMessage); // Redis로 메시지 발행
-            log.info("Redis에 메시지 발행: {}", chatMessage);
+            redisPublisher.publish(channelTopic.getTopic(), chatMessageDto); // Redis로 메시지 발행
+            log.info("Redis에 메시지 발행: {}", chatMessageDto);
         }
     }
 

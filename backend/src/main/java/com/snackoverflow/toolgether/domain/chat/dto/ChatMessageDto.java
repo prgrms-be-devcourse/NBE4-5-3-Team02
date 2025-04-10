@@ -1,5 +1,4 @@
-package com.snackoverflow.toolgether.global.chat.dto;
-import com.fasterxml.jackson.annotation.JsonProperty;
+package com.snackoverflow.toolgether.domain.chat.dto;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -7,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 
 
 @Data
-public class ChatMessage {
+public class ChatMessageDto {
     private String sender;   // 보낸 사람의 ID
     private String receiver; // 받는 사람의 ID
     private String content;  // 메시지 내용
@@ -18,7 +17,7 @@ public class ChatMessage {
     private boolean deletedSender;   // 보낸 사람 기준 삭제 여부
     private boolean deletedReceiver; // 받는 사람 기준 삭제 여부
 
-    public ChatMessage() {
+    public ChatMessageDto() {
         this.timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         this.deletedSender = false;
         this.deletedReceiver = false;
