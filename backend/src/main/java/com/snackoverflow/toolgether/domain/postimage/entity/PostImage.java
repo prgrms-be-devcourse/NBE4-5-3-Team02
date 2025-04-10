@@ -29,4 +29,5 @@ public class PostImage {
     public String getImageUrl() {
         return this.imageUrl;
     }
+    public Long getId() {return id;}
 }
