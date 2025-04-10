@@ -64,12 +64,12 @@ class BaseInitData(
 //        entityManager.createNativeQuery("ALTER TABLE post AUTO_INCREMENT = 1").executeUpdate();
 //        entityManager.createNativeQuery("ALTER TABLE users AUTO_INCREMENT = 1").executeUpdate();
 
-		if (userRepository!!.count() > 0) {
+		if (userRepository.count() > 0) {
 			return
 		}
 		// 비밀번호 암호화
 		var password1: String? = "password123"
-		password1 = passwordEncoder!!.encode(password1)
+		password1 = passwordEncoder.encode(password1)
 		val user1 = User(
 			"human123",
 			password1!!,
@@ -101,7 +101,7 @@ class BaseInitData(
 			0,
 		)
 
-		val savedPost = postRepository!!.save(post) // post 를 먼저 저장하고 저장된 post를 받음
+		val savedPost = postRepository.save(post) // post 를 먼저 저장하고 저장된 post를 받음
 
 		val sp1 = PostAvailability(
 			savedPost,
@@ -208,7 +208,7 @@ class BaseInitData(
 			"None",
 			20000.0
 		)
-		val savedReservation1 = reservationRepository!!.saveAndFlush(reservation1)
+		val savedReservation1 = reservationRepository.saveAndFlush(reservation1)
 
 		val depositHistory1 = DepositHistory(
 			savedReservation1,
@@ -217,7 +217,7 @@ class BaseInitData(
 			DepositStatus.PENDING,
 			ReturnReason.NONE
 		)
-		depositHistoryRepository!!.save(depositHistory1)
+		depositHistoryRepository.save(depositHistory1)
 
 		val reservation2 = Reservation(
 			post4,
@@ -260,7 +260,7 @@ class BaseInitData(
 //                .timeScore(5)
 //                .kindnessScore(5)
 //                .build();
-		reviewRepository!!.saveAndFlush(review1)
+		reviewRepository.saveAndFlush(review1)
 
 		// Review 데이터 생성 (reservation2에 대한 리뷰)
 //        Review review2 = Review.builder()

@@ -1,6 +1,5 @@
 package com.snackoverflow.toolgether.domain.reservation.dto
 
-@JvmRecord
 data class PostReservationResponse(
     val id: Long,
     val userId: Long,

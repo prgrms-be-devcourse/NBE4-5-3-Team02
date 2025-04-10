@@ -1,28 +1,25 @@
-package com.snackoverflow.toolgether.global.config;
+package com.snackoverflow.toolgether.global.config
 
-import com.snackoverflow.toolgether.global.filter.LoginUserArgumentResolver;
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.util.List;
+import com.snackoverflow.toolgether.global.filter.LoginUserArgumentResolver
+import lombok.RequiredArgsConstructor
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.web.method.support.HandlerMethodArgumentResolver
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 @RequiredArgsConstructor
-public class WebConfig implements WebMvcConfigurer{
+class WebConfig(
+    private val loginUserArgumentResolver: LoginUserArgumentResolver
+) : WebMvcConfigurer {
 
-    private final LoginUserArgumentResolver loginUserArgumentResolver;
-
-    @Override
-    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(loginUserArgumentResolver);
+    override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
+        resolvers.add(loginUserArgumentResolver)
     }
 
     @Bean
-    public WebClient webClient(WebClient.Builder builder) {
-        return builder.build();
+    fun webClient(builder: WebClient.Builder): WebClient {
+        return builder.build()
     }
 }
