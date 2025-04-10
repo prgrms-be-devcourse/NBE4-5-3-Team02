@@ -3,33 +3,27 @@ package com.snackoverflow.toolgether.domain.user.repository;
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
-public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByUsername(String username);
-    Optional<User> findByEmail(String email);
+interface UserRepository : JpaRepository<User, Long> {
 
-    boolean existsByUsername(String username);
+    fun findByEmail(email: String): Optional<User>
 
-    boolean existsByEmail(String email);
+    fun existsByEmail(email: String): Boolean
 
-    boolean existsByNickname(String nickname);
+    fun existsByNickname(nickname: String): Boolean
 
-    Optional<User> findById(long id);
-
-    User findByNickname(String nickname);
-
-    User findByPhoneNumber(String phoneNumber);
+    fun findByNickname(nickname: String): User?
 
     @Query("SELECT u FROM User u LEFT JOIN Review r ON r.reviewee = u AND r.createdAt >= :date WHERE r.reviewee IS NULL")
-    List<User> findUsersWithoutReviewsSince(LocalDateTime date);
+    fun findUsersWithoutReviewsSince(date: LocalDateTime): List<User>
 
     @Query("SELECT u.profileImage FROM User u WHERE u.profileImage IS NOT NULL")
-    List<String> findAllProfileImageUrl();
+    fun findAllProfileImageUrl(): List<String>
+
+    fun findByphoneNumber(phoneNumber: String): Optional<User>
 }
