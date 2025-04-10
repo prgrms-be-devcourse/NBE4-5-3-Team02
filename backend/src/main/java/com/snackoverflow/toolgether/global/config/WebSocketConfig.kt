@@ -11,11 +11,9 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @Configuration
 @EnableWebSocket
 class WebSocketConfig(
-        private val chatWebSocketHandler: ChatWebSocketHandler
+        private val chatWebSocketHandler: ChatWebSocketHandler,
+        @Value("\${custom.dev.frontUrl}") private val cors: String
 ) : WebSocketConfigurer {
-
-    @Value("\${custom.dev.frontUrl}")
-    private lateinit var cors: String
 
     // 웹소켓의 엔드포인트 정의 및 핸들러 등록
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
