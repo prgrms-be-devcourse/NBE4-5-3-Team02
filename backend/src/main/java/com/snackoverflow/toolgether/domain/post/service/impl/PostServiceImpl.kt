@@ -187,7 +187,7 @@ class PostServiceImpl(
     @Transactional
     override fun searchPosts(request: PostSearchRequest, pageable: Pageable): Page<PostResponse> {
 //        Page<Post> posts = postQueryRepository.searchPosts(request, pageable);
-        return null;
+        return null
     }
 
     // 예약에 필요한 메서드

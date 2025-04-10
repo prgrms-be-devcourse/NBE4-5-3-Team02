@@ -8,6 +8,7 @@ import com.snackoverflow.toolgether.domain.post.dto.PostResponse
 import com.snackoverflow.toolgether.domain.post.dto.PostSearchRequest
 import com.snackoverflow.toolgether.domain.post.entity.Post
 import com.snackoverflow.toolgether.domain.post.entity.QPost
+import com.snackoverflow.toolgether.domain.post.entity.QPost.post
 import com.snackoverflow.toolgether.domain.post.repository.PostRepositoryCustom
 import com.snackoverflow.toolgether.domain.postavailability.entity.PostAvailability
 import com.snackoverflow.toolgether.domain.postavailability.entity.QPostAvailability
@@ -34,7 +35,7 @@ class PostRepositoryImpl(
         private val log = LoggerFactory.getLogger(PostRepositoryImpl::class.java)
     }
 
-    override fun searchPosts(request: PostSearchRequest, pageable: Pageable): Page<PostResponse> {
+    override fun searchPosts(request: PostSearchRequest, latitude: Double, longitude: Double, pageable: Pageable): Page<PostResponse> {
         val builder = BooleanBuilder()
 
         log.info("검색 키워드: ${request.keyword}")
@@ -62,29 +63,30 @@ class PostRepositoryImpl(
             builder.and(post.price.loe(request.maxPrice))
         }
 
-        if (request.latitude != null && request.longitude != null && request.distance != null) {
-            val latitude = request.latitude
-            val longitude = request.longitude
+        if (latitude != null && longitude != null && request.distance != null) {
+//        if (request.latitude != null && request.longitude != null && request.distance != null) {
+//            val latitude = request.latitude
+//            val longitude = request.longitude
             val distanceInKm = request.distance
 
             log.info("lat = $latitude, lon = $longitude, distance = $distanceInKm")
 
-            checkDistance(latitude, longitude, builder, distanceInKm)
-        } else {
-            // 사용자 ID를 기반으로 데이터베이스에서 사용자 정보를 조회
-            val user = userRepository!!.findById(
-                request.userId!!.toLong()
-            )
-                .orElseThrow { IllegalArgumentException("사용자 정보를 찾을 수 없습니다.") }
-
-            // 사용자 정보에서 위도와 경도를 가져옴
-            val latitude = user.getLatitude()
-            val longitude = user.getLongitude()
-            val distanceInKm = request.distance
-
-            log.info(
-                "Request에서 lat/lon이 없으므로 사용자 데이터베이스에서 가져옵니다: lat = $latitude, lon = $longitude"
-            )
+//            checkDistance(latitude, longitude, builder, distanceInKm)
+//        } else {
+//            // 사용자 ID를 기반으로 데이터베이스에서 사용자 정보를 조회
+//            val user = userRepository!!.findById(
+//                request.userId!!.toLong()
+//            )
+//                .orElseThrow { IllegalArgumentException("사용자 정보를 찾을 수 없습니다.") }
+//
+//            // 사용자 정보에서 위도와 경도를 가져옴
+//            val latitude = user.getLatitude()
+//            val longitude = user.getLongitude()
+//            val distanceInKm = request.distance
+//
+//            log.info(
+//                "Request에서 lat/lon이 없으므로 사용자 데이터베이스에서 가져옵니다: lat = $latitude, lon = $longitude"
+//            )
 
             checkDistance(latitude, longitude, builder, distanceInKm)
         }

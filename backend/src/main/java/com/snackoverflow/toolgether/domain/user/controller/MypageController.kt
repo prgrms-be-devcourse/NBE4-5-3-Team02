@@ -54,8 +54,8 @@ class MypageController(
         val borrows = reservationService.getBorrowReservations(userId)
 
         val rentalResponses = rentals.map { reservation ->
-                val imageUrl: String? = postImageService.getPostImagesByPostId(reservation.post.id)
-                    ?.takeIf { it.isNotEmpty() }
+                val imageUrl: String? = postImageService.getPostImagesByPostId(reservation.post.id!!)
+                    .takeIf { it.isNotEmpty() }
                     ?.get(0)
                     ?.imageUrl
                 val isReviewed = reviewService.findByUserIdAndReservationId(userId, reservation.id!!).isPresent
@@ -65,7 +65,7 @@ class MypageController(
         val borrowResponses = borrows.stream()
             .map { reservation: Reservation ->
                 var imageUrl: String? = null
-                val images = postImageService.getPostImagesByPostId(reservation.post.id) //PostImageService 호출
+                val images = postImageService.getPostImagesByPostId(reservation.post.id!!) //PostImageService 호출
                 if (images != null && images.isNotEmpty()) {
                     imageUrl = images.get(0).imageUrl
                 }

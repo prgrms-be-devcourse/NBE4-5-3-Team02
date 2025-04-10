@@ -103,6 +103,34 @@ class Post(
 
     companion object {
         fun builder(): Builder = Builder()
+
+        fun createPost(
+            user: User?, // 코틀린에서는 User가 nullable이므로 ?를 붙여줍니다.
+            title: String,
+            content: String,
+            category: Category,
+            priceType: PriceType,
+            price: Int,
+            latitude: Double,
+            longitude: Double
+        ): Post {
+            return Post(
+                user = user,
+                title = title,
+                content = content,
+                category = category,
+                priceType = priceType,
+                price = price,
+                latitude = latitude,
+                longitude = longitude,
+                createdAt = null,
+                updateAt = null,
+                viewCount = 0,
+                postImages = mutableSetOf(),
+                postAvailabilities = mutableSetOf(),
+                id = null
+            )
+        }
     }
 
     class Builder {

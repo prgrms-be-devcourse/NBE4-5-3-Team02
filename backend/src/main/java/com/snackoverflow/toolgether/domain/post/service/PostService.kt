@@ -22,5 +22,5 @@ interface PostService {
 
     fun findPostById(postId: Long): Post // 예약에 필요한 메서드
 
-    fun searchPosts(request: PostSearchRequest, pageable: Pageable): Page<PostResponse>
+    fun searchPosts(request: PostSearchRequest, pageable: Pageable): Page<PostResponse>?
 }
