@@ -1,155 +1,143 @@
 package com.snackoverflow.toolgether.domain.user.entity;
 
-import com.snackoverflow.toolgether.global.util.Util;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import java.time.LocalDateTime;
+import com.snackoverflow.toolgether.global.util.UUIDUtil
+import jakarta.persistence.*
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.LocalDateTime
+import kotlin.math.roundToInt
 
 @Entity
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners(AuditingEntityListener::class)
 @Table(name = "users") // 예약어 변경
-public class User {
+class User(
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = true, unique = true)
-    private String username; // 사용자 ID (일반 사용자)
-
-    @Column(nullable = true)
-    private String password; // 암호화된 비밀번호 (일반 사용자)
-
-    @Column(nullable = true, unique = true)
-    private String email; // 사용자 email (인증 용도)
-
-    @Column(nullable = true)
-    private String providerId; // 소셜 로그인 사용자 ID
-
-    @Column(nullable = true)
-    private String provider; // 소셜 로그인 제공자
+    var password: String? = null, // 암호화된 비밀번호 (일반 사용자)
 
     @Column(unique = true)
-    private String phoneNumber; // 전화번호
+    var email: String? = null, // 사용자 email
+
+    var providerId: String? = null, // 소셜 로그인 사용자 ID
+
+    var provider: String? = null, // 소셜 로그인 제공자
 
     @Column(unique = true)
-    private String nickname; // 사용자 별명
+    var phoneNumber: String? = null, // 전화번호
 
-    @Embedded
-    private Address address; // 주소
+    @Column(unique = true)
+    var nickname: String? = null, // 사용자 별명
 
     @CreatedDate
-    private LocalDateTime createdAt; // 가입 일자
+    var createdAt: LocalDateTime? = null, // 가입 일자
 
-    @Column(nullable = true)
-    private Double latitude; // 위도
+    var additionalInfoRequired: Boolean = false, // 추가 정보 필요 플래그
 
-    @Column(nullable = true)
-    private Double longitude; // 경도
+    var profileImage: String? = null, // 사용자 프로필 이미지 링크 저장
 
-    @Column(nullable = true)
-    private boolean additionalInfoRequired = true; // 추가 정보 필요 플래그
+    var score: Int = 30, // 유저 평가 정보: 기본값 30점
 
-    @Column(nullable = true)
-    private String profileImage; // 사용자 프로필 이미지 링크 저장
+    var credit: Int = 0, // 보증금 환불 필드
 
-    @Builder.Default
-    private int score = 30; // 유저 평가 정보: 기본값 30점
+    var deletedAt: LocalDateTime? = null, // 탈퇴 일자, 탈퇴하면 null이 아님
 
-    @Builder.Default
-    private int credit = 0; // 보증금 환불 필드
+    var baseAddress: String? = null // 기본 주소
+) {
+    companion object {
+        // 일반 회원 가입
+        @JvmStatic
+        fun createGeneralUser(
+            email: String,
+            password: String,
+            phoneNumber: String,
+            nickname: String,
+            baseAddress: String
+        ) = User(
+            email = email,
+            password = password,
+            phoneNumber = phoneNumber,
+            nickname = nickname,
+            baseAddress = baseAddress
+        )
 
-    @Column(nullable = true)
-    private LocalDateTime deletedAt; // 탈퇴 일자, 탈퇴하면 null이 아님
-
-    /* TODO: 코틀린 변환 전 임시 게터. 추후 제거하고 사용하는 부분 수정 */
-    public Long getId() {
-        return this.id;
-    }
-    public int getScore() {
-        return this.score;
-    }
-
-
-    public void updateCredit(int credit) {
-        this.credit += credit;
-    }
-
-    public void updatePhoneNumber(String phoneNumber) {
-        if (phoneNumber != null) {
-            this.phoneNumber = phoneNumber;
-        }
-    }
-
-    public void updateLocation(Double latitude, Double longitude) {
-        if (latitude != null && longitude != null) {
-            this.latitude = latitude;
-            this.longitude = longitude;
-        }
-    }
-
-    public void updateAdditionalInfoRequired(boolean additionalInfoRequired) {
-        this.additionalInfoRequired = additionalInfoRequired;
+        // 소셜 로그인 회원 가입
+        @JvmStatic
+        fun createSocialUser(
+            providerId: String,
+            provider: String,
+            phoneNumber: String,
+            email: String,
+            nickname: String,
+            baseAddress: String
+        ) = User(
+            providerId = providerId,
+            provider = provider,
+            email = email,
+            phoneNumber = phoneNumber,
+            nickname = nickname,
+            baseAddress = baseAddress,
+            additionalInfoRequired = true
+        )
     }
 
-    public void updateAddress(String zipcode, String mainAddress, String detailAddress) {
-        this.address = Address.builder()
-                .zipcode(zipcode)
-                .mainAddress(mainAddress)
-                .detailAddress(detailAddress)
-                .build();
+    // 업데이트 로직
+    fun updateCredit(credit: Int) {
+        this.credit += credit
     }
 
-    public void updateNickname(String nickname) {
-        this.nickname = nickname;
+    fun updatePhoneNumber(phoneNumber: String) {
+        this.phoneNumber = phoneNumber
     }
 
-    public void updateProfileImage(String uuid) {
-        this.profileImage = uuid;
+    fun updateAdditionalInfoRequired(additionalInfoRequired: Boolean) {
+        this.additionalInfoRequired = additionalInfoRequired
     }
 
-    public void deleteProfileImage() {
-        this.profileImage = null;
+    fun updateNickname(nickname: String) {
+        this.nickname = nickname
     }
 
-    //탈퇴시 호출, 삭제 시간을 기록하고 익명화 진행
+    fun updateProfileImage(uuid: String) {
+        this.profileImage = uuid
+    }
+
+    fun deleteProfileImage() {
+        this.profileImage = null
+    }
+
+    // 탈퇴 시 호출, 삭제 시간을 기록하고 익명화 진행
     @PreUpdate
-    public void preUpdate() {
+    fun preUpdate() {
         if (this.deletedAt != null) {
-            anonymize();
+            anonymize()
         }
     }
 
-    public void delete() {
-        this.deletedAt = LocalDateTime.now();
+    fun delete() {
+        this.deletedAt = LocalDateTime.now()
     }
 
     // 개인 정보 익명화
-    public void anonymize() {
-        this.username = "deletedUser-" + Util.generateUUIDMasking();
-        this.password = Util.generateUUIDMasking();
-        this.email = Util.generateUUIDMasking() + "@deleted.com";
-        this.phoneNumber = Util.generateUUIDMasking();
-        this.nickname = "삭제된유저-" + Util.generateUUIDMasking();
-        this.address = new Address(
-                "삭제된 주소",
-                "삭제된 상세 주소",
-                "00000"
-        );
-        this.latitude = 0.0;
-        this.longitude = 0.0;
-        this.profileImage = null;
+    fun anonymize() {
+        this.password = UUIDUtil.generateUUIDMasking()
+        this.email = "${UUIDUtil.generateUUIDMasking()}@deleted.com"
+        this.phoneNumber = UUIDUtil.generateUUIDMasking()
+        this.nickname = "삭제된유저-${UUIDUtil.generateUUIDMasking()}"
+        this.baseAddress = "삭제된 주소"
+        this.profileImage = null
     }
 
-    public void updateScore(double updatedScore) {
-        this.score = (int)Math.round(updatedScore);
+    fun updateScore(updatedScore: Double) {
+        this.score = updatedScore.roundToInt()
+    }
+
+    fun updateBaseAddress(baseAddress: String) {
+        this.baseAddress = baseAddress
+    }
+
+    fun updatePassword(password: String) {
+        this.password = password
     }
 }
