@@ -9,18 +9,17 @@ import com.snackoverflow.toolgether.domain.post.entity.enums.Category;
 import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType;
 import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
 import com.snackoverflow.toolgether.domain.postavailability.entity.PostAvailability;
-import com.snackoverflow.toolgether.domain.postavailability.repository.PostAvailabilityRepository;
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
 import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
 import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository;
 import com.snackoverflow.toolgether.domain.review.entity.Review;
 import com.snackoverflow.toolgether.domain.review.repository.ReviewRepository;
-import com.snackoverflow.toolgether.domain.user.entity.Address;
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
@@ -40,7 +39,6 @@ public class BaseInitData {
 	private final PasswordEncoder passwordEncoder;
 
     private final ReservationRepository reservationRepository;
-	private final PostAvailabilityRepository postAvailabilityRepository;
     private final ReviewRepository reviewRepository;
 	private final DepositHistoryRepository depositHistoryRepository;
 
@@ -77,31 +75,59 @@ public class BaseInitData {
 			return;
 		}
 		// 비밀번호 암호화
-		String password1 = "password123";
-		password1 = passwordEncoder.encode(password1);
-		User user1 = User.builder()
-			.address(new Address("서울", "강남구", "12345")) // Address 객체 생성 및 설정
-			.username("human123")
-			.nickname("사람이")
-			.email("human123@gmail.com")
-			.password(password1)
-			.score(30)
-			.phoneNumber("01012345678")
-			.latitude(37.5665)
-			.longitude(126.9780)
-			.build();
+		String password = passwordEncoder.encode("password123");
+
+		val user1 = User.createGeneralUser(
+				"user1@example.com",
+				password,
+				"01012345678",
+				"UserOne",
+				"서울시 서초구");
+
 		userRepository.save(user1);
+
+		val user2 = User.createGeneralUser(
+				"user2@example.com",
+				password,
+				"01098765432",
+				"UserTwo",
+				"서울시 성동구");
+
+		userRepository.save(user2);
+
+		val user3 = User.createSocialUser(
+				"12345",
+				"Google",
+				"01011112222",
+				"socialuser1@example.com",
+				"SocialUserOne",
+				"서울 관악구");
+
+		userRepository.save(user3);
+
+		val user4 = User.createSocialUser(
+				"67890",
+				"Google",
+				"01033334444",
+				"socialuser2@example.com",
+				"SocialUserTwo",
+				"서울 마포구"
+		);
+
+		userRepository.save(user4);
+
 		Set<PostAvailability> sp = new HashSet<>();
-		Post post = Post.builder() // Post 객체를 먼저 생성
-			.user(user1)
-			.title("제목입니다.")
-			.content("내용입니다.")
-			.category(Category.TOOL)
-			.priceType(PriceType.DAY)
-			.price(10000)
-			.latitude(37.5665)
-			.longitude(126.9780)
-			.build();
+		Post post = Post.createPost(
+				user1,
+				"제목입니다.",
+				"내용입니다.",
+				Category.TOOL,
+				PriceType.DAY,
+				10000,
+				37.5665,
+				126.9780
+		);
+
 		Post savedPost = postRepository.save(post); // post 를 먼저 저장하고 저장된 post를 받음
 
 		PostAvailability sp1 = PostAvailability.builder()
@@ -113,71 +139,44 @@ public class BaseInitData {
 			.post(savedPost) // Post 객체 할당
 			.build();
 		sp.add(sp1);
-		savedPost.setPostAvailabilities(sp); // post에 postAvailability 설정
+
+		savedPost.updatePostAvailability(sp); // post에 postAvailability 설정
 		postRepository.save(savedPost); // post를 다시 저장.
 
-		String password2 = "password123";
-		password2 = passwordEncoder.encode(password2);
-
-		User user2 = User.builder()
-			.address(new Address("부산", "해운대구", "67890"))
-			.username("seaman222")
-			.nickname("바다사람")
-			.email("seaman222@gmail.com")
-			.password(password2)
-			.score(50)
-			.phoneNumber("01098765432")
-			.latitude(35.1587)
-			.longitude(129.1600)
-			.build();
-		userRepository.save(user2);
-		Post post2 = Post.builder()
-			.user(user2)
-			.title("부산에서 빌려드려요.")
-			.content("해운대 근처에서 사용할 수 있는 드릴입니다.")
-			.category(Category.TOOL)
-			.priceType(PriceType.HOUR)
-			.price(5000)
-			.latitude(35.1587)
-			.longitude(129.1600)
-			.build();
+		Post post2 = Post.createPost(
+				user2,
+				"부산에서 빌려드려요.",
+				"해운대 근처에서 사용할 수 있는 드릴입니다.",
+				Category.TOOL,
+				PriceType.HOUR,
+				5000,
+				35.1587,
+				129.1600
+		);
 		postRepository.save(post2);
 
-        User googleUser = User.builder()
-                .username(null)
-                .password(null)
-                .nickname("googleUser")
-                .email("googleuser@gmail.com")
-                .phoneNumber("000-0000-0004")
-                .address(new Address("서울시 종로구", "청진동 101-11", "10111"))
-                .latitude(37.123)
-                .longitude(127.123)
-                .provider("google")
-                .providerId("google123456789")
-                .build();
-        userRepository.saveAndFlush(googleUser);
-        Post post3 = Post.builder()
-                .user(user1)
-                .title("전동 드릴 대여")
-                .content("상태 좋은 전동 드릴 빌려드립니다.")
-                .category(Category.TOOL)
-                .priceType(PriceType.DAY)
-                .price(10000)
-                .latitude(37.123)
-                .longitude(127.123)
-                .build();
+		Post post3 = Post.createPost(
+				user1,
+				"전동 드릴 대여",
+				"상태 좋은 전동 드릴 빌려드립니다.",
+				Category.TOOL,
+				PriceType.DAY,
+				10000,
+				37.123,
+				127.123
+		);
         postRepository.saveAndFlush(post3);
 
-        Post post4 = Post.builder()
-                .user(user2)
-                .title("캠핑 의자 세트 대여")
-                .content("편안한 캠핑 의자 세트 저렴하게 빌려가세요.")
-                .category(Category.TOOL)
-                .priceType(PriceType.DAY)
-                .price(5000)
-                .latitude(37.456)
-                .longitude(127.456)
-                .build();
+		Post post4 = Post.createPost(
+				user2,
+				"캠핑 의자 세트 대여",
+				"편안한 캠핑 의자 세트 저렴하게 빌려가세요.",
+				Category.TOOL,
+				PriceType.DAY,
+				5000,
+				37.456,
+				127.456
+		);
         postRepository.saveAndFlush(post4);
 
         // Reservation 데이터 생성
