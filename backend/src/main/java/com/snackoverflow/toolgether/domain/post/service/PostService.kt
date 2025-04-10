@@ -12,15 +12,15 @@ import org.springframework.data.domain.Pageable
 import org.springframework.web.multipart.MultipartFile
 
 interface PostService {
-    fun createPost(user: User?, request: PostCreateRequest?, images: List<MultipartFile?>?): PostResponse?
+    fun createPost(user: User, request: PostCreateRequest, images: List<MultipartFile>): PostResponse
 
-    fun getPostById(postId: Long?): PostResponse?
+    fun getPostById(postId: Long): PostResponse
 
-    fun deletePost(postId: Long?)
+    fun deletePost(postId: Long)
 
-    fun updatePost(postId: Long?, request: @Valid PostUpdateRequest?): PostResponse?
+    fun updatePost(postId: Long, request: @Valid PostUpdateRequest): PostResponse?
 
-    fun findPostById(aLong: Long?): Post? // 예약에 필요한 메서드
+    fun findPostById(postId: Long): Post // 예약에 필요한 메서드
 
-    fun searchPosts(request: PostSearchRequest?, pageable: Pageable?): Page<PostResponse?>?
+    fun searchPosts(request: PostSearchRequest, pageable: Pageable): Page<PostResponse>
 }
