@@ -24,31 +24,31 @@ class Post(
     @Column(nullable = false)
     var title: String, // 제목
     @Column(columnDefinition = "TEXT", nullable = false)
-    private var content: String, // 내용
+    var content: String, // 내용
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private var category: Category, // 카테고리 (TOOL, ELECTRONICS)
+    var category: Category, // 카테고리 (TOOL, ELECTRONICS)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var priceType: PriceType, // 가격 유형 (일 / 시간)
     @Column(nullable = false)
     var price: Int = 0, // 총 가격
     @Column(nullable = false)
-    private var latitude: Double, // 위도
+    var latitude: Double, // 위도
     @Column(nullable = false)
-    private var longitude: Double, // 경도
-    private var viewCount: Int = 0, // 조회수 (기본 0)
+    var longitude: Double, // 경도
+    var viewCount: Int = 0, // 조회수 (기본 0)
     @OneToMany(mappedBy = "post", cascade = [CascadeType.ALL], orphanRemoval = true)
     @BatchSize(size = 10)
-    private val postImages: MutableSet<PostImage> = HashSet(), // 이미지
+    val postImages: MutableSet<PostImage> = HashSet(), // 이미지
     @OneToMany(mappedBy = "post", cascade = [CascadeType.ALL], orphanRemoval = true)
     @BatchSize(size = 10)
-    private var postAvailabilities: MutableSet<PostAvailability> = HashSet(), // 스케줄
+    var postAvailabilities: MutableSet<PostAvailability> = HashSet(), // 스케줄
     @CreatedDate
     @Column(updatable = false)
-    private var createdAt: LocalDateTime? = null, // 글 작성 시간
+    var createdAt: LocalDateTime? = null, // 글 작성 시간
     @UpdateTimestamp
-    private var updateAt: LocalDateTime? = null // 글 수정 시간
+    var updateAt: LocalDateTime? = null // 글 수정 시간
 ) {
     /* TODO : 마이그레이션 이후 삭제 */
     // 파라미터 없는 기본 생성자 추가
@@ -69,22 +69,37 @@ class Post(
         null
     )
 
-
-//    fun getId(): Long? = id
-//    fun getUser(): User? = user
-//    fun getTitle(): String = title
-//    fun getContent(): String = content
-//    fun getCategory(): Category = category
-//    fun getPriceType(): PriceType = priceType
-//    fun getPrice(): Int = price
-//    fun getLatitude(): Double = latitude
-//    fun getLongitude(): Double = longitude
-//    fun getCreatedAt(): LocalDateTime? = createdAt
-//    fun getUpdateAt(): LocalDateTime? = updateAt
-//    fun getPostImages(): Set<PostImage> = postImages
-//    fun getPostAvailabilities(): MutableSet<PostAvailability> = postAvailabilities
-
     // 나머지 메서드 (updatePost, incrementViewCount, setPostAvailabilities 등)
+
+    fun updatePost(
+        title: String,
+        content: String,
+        category: Category,
+        priceType: PriceType,
+        price: Int,
+        latitude: Double,
+        longitude: Double,
+        viewCount: Int
+    ) {
+        this.title = title
+        this.content = content
+        this.category = category
+        this.priceType = priceType
+        this.price = price
+        this.latitude = latitude
+        this.longitude = longitude
+        this.viewCount = viewCount
+    }
+
+    fun incrementViewCount() {
+        this.viewCount++
+    }
+
+//    fun setPostAvailabilities(
+//        postAvailabilities: MutableSet<PostAvailability>
+//    ) {
+//        this.postAvailabilities = postAvailabilities
+//    }
 
     companion object {
         fun builder(): Builder = Builder()

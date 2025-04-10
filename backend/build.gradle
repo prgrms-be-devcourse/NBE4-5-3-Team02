@@ -31,14 +31,6 @@ ext {
 	set('snippetsDir', file("build/generated-snippets"))
 }
 
-sourceSets {
-	main {
-		java {
-			srcDirs += 'src/main/kotlin'
-		}
-	}
-}
-
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
@@ -71,6 +63,7 @@ dependencies {
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	implementation 'com.querydsl:querydsl-core:5.0.0'
 
+	//annotationProcessor 대신 kapt를 이용해 코틀린에서 자바 롬복이 작동하도록 수정
 	kapt 'com.querydsl:querydsl-apt:5.1.0:jakarta'
 
 	implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
