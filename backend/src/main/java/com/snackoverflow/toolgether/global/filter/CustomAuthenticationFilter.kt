@@ -52,8 +52,8 @@ class CustomAuthenticationFilter(
             val testAuthHeader = request.getHeader("X-Test-Auth")
             if (!testAuthHeader.isNullOrBlank()) {
                 // 테스트용 사용자 정보 생성
-                val testUser: User = userRepository.findByEmail(testAuthHeader).orElseThrow { UserNotFoundException() }
-                testUser.id?.let { setAuthentication(testUser.email.toString(), it.toLong()) }
+                val testUser = userRepository.findByEmail(testAuthHeader)
+                testUser?.id?.let { setAuthentication(testUser.email.toString(), it.toLong()) }
                 filterChain.doFilter(request, response) // 필터 체인 계속 진행
                 return
             }
@@ -89,7 +89,6 @@ class CustomAuthenticationFilter(
 
             }
 
-
             // Remember-Me 토큰 처리
             jwtService.getTokenByCookieName(request, REMEMBER_ME_TOKEN)?.let { rememberMeToken ->
                 checkBlackList(rememberMeToken.toString())
@@ -103,9 +102,9 @@ class CustomAuthenticationFilter(
                 saveNewTokens(response, userId, email)
 
                 // 자동 로그인 응답 작성
-                val user = userRepository.findByEmail(email).orElseThrow { UserNotFoundException() }
+                val user = userRepository.findByEmail(email)
                 response.status = HttpServletResponse.SC_OK // 200 OK
-                response.writer.write(getResponse(response, user))
+                response.writer.write(getResponse(response, user!!))
                 filterChain.doFilter(request, response)
                 return // 여기서 체인 종료
             }
