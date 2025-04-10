@@ -6,7 +6,7 @@ import kotlin.jvm.JvmStatic;
 import java.time.LocalDateTime;
 
 data class MyReservationInfoResponse(
-    val id: Long?,
+    val id: Long,
     val title: String,
     val image: String?,
     val amount: Double,
@@ -19,7 +19,7 @@ data class MyReservationInfoResponse(
         @JvmStatic
         fun from(reservation: Reservation, imageUrl: String?, isReviewed: Boolean): MyReservationInfoResponse {
             return MyReservationInfoResponse(
-                    id = reservation.id,
+                    id = reservation.id!!,
                     title = reservation.post.title,
                     image = imageUrl,
                     amount = reservation.amount,

@@ -24,8 +24,18 @@ data class SignupRequestV2(
     )
     val checkPassword: String,
 
-    @field:NotBlank(message = "닉네임을 입력해주세요") val nickname: String,
-    @field:NotBlank val phoneNumber: String,
+    @field:NotBlank(message = "닉네임을 입력해주세요")
+    @field:Pattern(
+        regexp = "^[가-힣a-zA-Z0-9]{2,10}$",
+        message = "닉네임은 최소 2글자 이상, 최대 10글자 이하로 입력해주세요 (특수문자 제외)"
+    )
+    val nickname: String,
+
+    @field:NotBlank @field:Pattern(
+        regexp = "^[0-9]+$",
+        message = "전화번호는 숫자만 입력해주세요 (하이픈 제외)"
+    )
+    val phoneNumber: String,
     @field:NotNull val latitude: Double,
     @field:NotNull val longitude: Double
 )

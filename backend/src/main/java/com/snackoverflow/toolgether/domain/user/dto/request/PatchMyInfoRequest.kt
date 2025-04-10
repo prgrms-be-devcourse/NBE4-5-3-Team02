@@ -1,25 +1,32 @@
 package com.snackoverflow.toolgether.domain.user.dto.request;
 
-import com.snackoverflow.toolgether.domain.user.entity.Address;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
-@Data
-public class PatchMyInfoRequest {
-    @NotBlank(message = "전화번호를 입력해주세요 [하이픈 제외]")
-    private String phoneNumber;
+data class PatchMyInfoRequest(
+    @field:NotBlank
+    @field:Pattern(
+        regexp = "^[0-9]+$",
+        message = "전화번호는 숫자만 입력해주세요 (하이픈 제외)"
+    )
+    val phoneNumber: String,
 
-    @NotBlank(message = "닉네임을 입력해주세요")
-    @Pattern(regexp = "^[가-힣]{4,10}$", message = "닉네임은 한글 4~10자로 입력해주세요")
-    private String nickname;
+    @field:NotBlank(message = "닉네임을 입력해주세요")
+    @field:Pattern(
+        regexp = "^[가-힣a-zA-Z0-9]{2,10}$",
+        message = "닉네임은 최소 2글자 이상, 최대 10글자 이하로 입력해주세요 (특수문자 제외)"
+    )
+    val nickname: String,
 
-    @Valid
-    private Address address;
+    @field:Valid
+    val baseAddress: String?,
 
-    @NotNull
-    private Double latitude; // 위도
+    @field:NotNull(message = "위도를 입력해주세요")
+    val latitude: Double,
 
-    @NotNull
-    private Double longitude; // 경도
-}
+    @field:NotNull(message = "경도를 입력해주세요")
+    val longitude: Double
+)
