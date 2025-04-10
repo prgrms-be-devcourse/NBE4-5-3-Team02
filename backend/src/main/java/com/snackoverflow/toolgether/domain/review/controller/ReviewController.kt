@@ -32,7 +32,7 @@ class ReviewController(
         @Login customUserDetails: CustomUserDetails,
         @RequestBody @Validated reviewRequest: ReviewRequest
     ): RsData<Void> {
-        val userId = customUserDetails.getUserId()
+        val userId = customUserDetails.userId
         val user = userService.findUserById(userId)
         val reservation = reservationService.getReservationByIdForReview(reviewRequest.reservationId)
         if (reservation.isEmpty) {
@@ -50,7 +50,7 @@ class ReviewController(
             )
         }
 
-        val temp = reviewService.findByUserIdAndReservationId(actualReservation.id!!, user.id)
+        val temp = reviewService.findByUserIdAndReservationId(actualReservation.id!!, user.id!!)
         if (reviewService.existsUserIdAndReservationId(
                 user.id,
                 actualReservation.id!!

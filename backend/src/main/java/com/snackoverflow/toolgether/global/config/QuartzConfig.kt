@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.global.config
+package com.snackoverflow.toolgether.global.config;
 
 import com.snackoverflow.toolgether.domain.job.CompleteRentalJob
 import com.snackoverflow.toolgether.domain.job.StartRentalJob

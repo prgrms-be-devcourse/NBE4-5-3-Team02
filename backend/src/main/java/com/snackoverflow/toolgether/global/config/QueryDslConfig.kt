@@ -1,18 +1,14 @@
-package com.snackoverflow.toolgether.global.config
+package com.snackoverflow.toolgether.global.config;
 
-import com.querydsl.jpa.impl.JPAQueryFactory
-import jakarta.persistence.EntityManager
-import jakarta.persistence.PersistenceContext
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 @Configuration
-class QueryDslConfig {
-    @PersistenceContext
-    private val entityManager: EntityManager? = null
-
+class QueryDslConfig(
+    private val em: EntityManager
+) {
     @Bean
-    fun jpaQueryFactory(): JPAQueryFactory {
-        return JPAQueryFactory(this.entityManager)
-    }
+    fun jpaQueryFactory(): JPAQueryFactory = JPAQueryFactory(em)
 }

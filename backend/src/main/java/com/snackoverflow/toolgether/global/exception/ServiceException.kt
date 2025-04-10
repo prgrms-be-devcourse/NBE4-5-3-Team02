@@ -1,16 +1,22 @@
 package com.snackoverflow.toolgether.global.exception
 
-import com.snackoverflow.toolgether.global.dto.RsData
+import org.springframework.http.HttpStatus
 
-class ServiceException(code: String, message: String) : RuntimeException(message) {
-    private val rsData: RsData<*> = RsData<Any>(code, message)
+/**
+ * TODO 변환 이후 @JvmOverloads constructor 제거할 것
+ */
+
+class ServiceException @JvmOverloads constructor (
+    val errorCode: ErrorCode, // ErrorCode 객체를 저장
+    cause: Throwable? = null // 기본값을 null로 설정하여 선택적으로 예외를 전달 (상위 예외가 있을 경우)
+) : RuntimeException(errorCode.message, cause) {
 
     val code: String
-        get() = rsData.code
+        get() = errorCode.code
 
-    val msg: String
-        get() = rsData.msg
+    override val message: String
+        get() = errorCode.message
 
-    val statusCode: Int
-        get() = rsData.statusCode
+    val status: HttpStatus
+        get() = errorCode.status
 }

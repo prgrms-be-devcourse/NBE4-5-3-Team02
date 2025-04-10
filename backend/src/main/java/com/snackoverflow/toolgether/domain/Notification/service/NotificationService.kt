@@ -20,17 +20,17 @@ class NotificationService(
 ) {
     // 알림 생성 및 저장
     @Transactional
-    fun createNotification(userId: Long, message: String): Notification {
+    fun createNotification(userId: Long?, message: String): Notification {
         val notification: Notification = Notification(
             userService.findUserById(userId),
             message,
             LocalDateTime.now(),
             false
         )
-        val savedNotification: Notification = notificationRepository!!.save(notification)
+        val savedNotification: Notification = notificationRepository.save(notification)
 
         // 이벤트 발행
-        publisher.publishEvent(NotificationCreatedEvent(this, userId, message))
+        publisher.publishEvent(NotificationCreatedEvent(this,  userId ?: -1L, message))
         return savedNotification
     }
 

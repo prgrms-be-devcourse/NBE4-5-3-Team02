@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.global.config
+package com.snackoverflow.toolgether.global.config;
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -15,6 +15,7 @@ import com.snackoverflow.toolgether.domain.user.service.VerificationService.SESS
 @Configuration
 @EnableAsync
 class AsyncConfig : AsyncConfigurer {
+
     @Bean
     override fun getAsyncExecutor(): Executor {
         val executor = ThreadPoolTaskExecutor()

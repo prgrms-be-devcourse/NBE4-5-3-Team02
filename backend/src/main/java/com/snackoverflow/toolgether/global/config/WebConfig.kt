@@ -1,4 +1,4 @@
-package com.snackoverflow.toolgether.global.config
+package com.snackoverflow.toolgether.global.config;
 
 import com.snackoverflow.toolgether.global.filter.LoginUserArgumentResolver
 import lombok.RequiredArgsConstructor
@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @Configuration
 @RequiredArgsConstructor
 class WebConfig(
-    private val loginUserArgumentResolver: LoginUserArgumentResolver
+        private val loginUserArgumentResolver: LoginUserArgumentResolver
 ) : WebMvcConfigurer {
 
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {

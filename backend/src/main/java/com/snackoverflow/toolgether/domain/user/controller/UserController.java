@@ -5,19 +5,13 @@ import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.service.UserService;
 import com.snackoverflow.toolgether.domain.user.service.VerificationService;
 import com.snackoverflow.toolgether.global.dto.RsData;
-import com.snackoverflow.toolgether.global.filter.CustomUserDetails;
-import com.snackoverflow.toolgether.global.filter.Login;
-import com.snackoverflow.toolgether.global.util.JwtUtil;
-import jakarta.servlet.http.HttpServletResponse;
+import com.snackoverflow.toolgether.global.token.JwtService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
-import static com.snackoverflow.toolgether.domain.user.service.UserService.*;
 import static com.snackoverflow.toolgether.domain.user.service.VerificationService.*;
 
 @Slf4j
@@ -28,7 +22,7 @@ public class UserController {
 
     private final UserService userService;
     private final VerificationService verificationService;
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtService;
 
     // 이메일 인증 코드
     @PostMapping("/send-verification-code")
@@ -45,7 +39,7 @@ public class UserController {
 
     // 이메일 인증 확인
     @PostMapping("/verified-email")
-    public RsData<String> verifiedEmail(@RequestBody @Validated VerificationRequest request) {
+    public RsData<String> verifiedEmail(@RequestBody @Validated VerificationData request) {
         verificationService.verifyEmail(request.getEmail(), request.getCode());
         return new RsData<>(
                 "201-1",
@@ -84,16 +78,16 @@ public class UserController {
     public RsData<?> getVerificationStatus(HttpSession session) {
         VerificationData data = (VerificationData) session.getAttribute(SESSION_KEY);
 
-        if (data != null && data.isVerified()) {
+        if (data != null && data.getVerified()) {
             return new RsData<>("200-1", "인증 완료", true);
         }
 
         return new RsData<>("400-1", "인증되지 않았습니다.", false);
     }
 
-    // 회원 가입
+/*    // 회원 가입
     @PostMapping("/signup")
-    public RsData<?> signup(@RequestBody @Validated SignupRequest request) {
+    public RsData<?> signup(@RequestBody @Validated SignupRequestV2 request) {
 
         try {
             // 중복 확인 및 패스워드가 일치하는지 확인
@@ -116,9 +110,9 @@ public class UserController {
             // 기타 서버 오류 처리
             return new RsData<>("500-1", "서버 오류", null);
         }
-    }
+    }*/
 
-    // 일반 사용자 로그인
+   /* // 일반 사용자 로그인
     @PostMapping("/login")
     public RsData<?> loginUser(@RequestBody @Validated LoginRequest request,
                                     HttpServletResponse response) {
@@ -150,7 +144,7 @@ public class UserController {
                 "프로필 조회 성공",
                 profile
         );
-    }
+    }*/
 
     @GetMapping("/{id}")
     public RsData<User> getUser(@PathVariable Long id) {

@@ -42,13 +42,13 @@ public class PostAvailability {
 
     /* TODO : 임시 */
     public PostAvailability(
-        Post post,
-        LocalDateTime date,
-        int recurrence_days,
-        LocalDateTime startTime,
-        LocalDateTime endTime,
-        boolean isRecurring
-        ) {
+            Post post,
+            LocalDateTime date,
+            int recurrence_days,
+            LocalDateTime startTime,
+            LocalDateTime endTime,
+            boolean isRecurring
+    ) {
         this.post = post;
         this.date = date;
         this.recurrence_days = recurrence_days;

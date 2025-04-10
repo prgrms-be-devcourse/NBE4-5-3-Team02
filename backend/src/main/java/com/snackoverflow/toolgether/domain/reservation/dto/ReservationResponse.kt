@@ -10,6 +10,6 @@ data class ReservationResponse(
     val endTime: LocalDateTime,
     val amount: Double,
     val rejectionReason: String,
-    val ownerId: Long,
-    val renterId: Long
+    val ownerId: Long?,
+    val renterId: Long?
 )

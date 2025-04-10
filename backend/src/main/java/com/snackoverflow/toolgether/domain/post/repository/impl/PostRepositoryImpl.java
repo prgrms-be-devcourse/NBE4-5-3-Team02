@@ -12,13 +12,12 @@ import com.snackoverflow.toolgether.domain.post.repository.PostRepositoryCustom;
 import com.snackoverflow.toolgether.domain.postavailability.entity.PostAvailability;
 import com.snackoverflow.toolgether.domain.postavailability.entity.QPostAvailability;
 import com.snackoverflow.toolgether.domain.postimage.entity.QPostImage;
-import com.snackoverflow.toolgether.domain.user.entity.User;
-import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.stereotype.Repository;
 
 import java.util.HashSet;
 import java.util.List;
@@ -27,16 +26,19 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
+@Repository
 public class PostRepositoryImpl implements PostRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
-    private final UserRepository userRepository;
     private final QPost post = QPost.post;
     private final QPostImage postImage = QPostImage.postImage;
     private final QPostAvailability postAvailability = QPostAvailability.postAvailability;
 
+    /**
+     * 페이지에서 바로 사용자의 위도, 경도 값을 받아올 수 있도록 변경
+     */
     @Override
-    public Page<PostResponse> searchPosts(PostSearchRequest request, Pageable pageable) {
+    public Page<PostResponse> searchPosts(PostSearchRequest request, Double latitude, Double longitude, Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
 
         log.info("검색 키워드: {}", request.getKeyword());
@@ -64,25 +66,10 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
             builder.and(post.price.loe(request.getMaxPrice()));
         }
 
-        if (request.getLatitude() != null && request.getLongitude() != null && request.getDistance() != null) {
-            double latitude = request.getLatitude();
-            double longitude = request.getLongitude();
+        if (latitude != null && longitude != null && request.getDistance() != null) {
             double distanceInKm = request.getDistance();
 
             log.info("lat = {}, lon = {}, distance = {}", latitude, longitude, distanceInKm);
-
-            checkDistance(latitude, longitude, builder, distanceInKm);
-        } else {
-            // 사용자 ID를 기반으로 데이터베이스에서 사용자 정보를 조회
-            User user = userRepository.findById(Long.valueOf(request.getUserId()))
-                    .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
-
-            // 사용자 정보에서 위도와 경도를 가져옴
-            double latitude = user.getLatitude();
-            double longitude = user.getLongitude();
-            double distanceInKm = request.getDistance();
-
-            log.info("Request에서 lat/lon이 없으므로 사용자 데이터베이스에서 가져옵니다: lat = {}, lon = {}", latitude, longitude);
 
             checkDistance(latitude, longitude, builder, distanceInKm);
         }
@@ -96,7 +83,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-
 
         List<PostResponse> postResponses = results.stream()
                 .map(p -> {

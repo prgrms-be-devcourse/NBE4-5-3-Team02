@@ -6,5 +6,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface PostRepositoryCustom {
-    Page<PostResponse> searchPosts(PostSearchRequest request, Pageable pageable);
+    Page<PostResponse> searchPosts(PostSearchRequest request, Double latitude, Double longitude, Pageable pageable);
 }
