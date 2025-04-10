@@ -57,7 +57,7 @@ class MypageController(
                 val imageUrl: String? = postImageService.getPostImagesByPostId(reservation.post.id)
                     ?.takeIf { it.isNotEmpty() }
                     ?.get(0)
-                    ?.getImageUrl()
+                    ?.imageUrl
                 val isReviewed = reviewService.findByUserIdAndReservationId(userId, reservation.id!!).isPresent
                 MyReservationInfoResponse.from(reservation, imageUrl, isReviewed)
             }
@@ -67,7 +67,7 @@ class MypageController(
                 var imageUrl: String? = null
                 val images = postImageService.getPostImagesByPostId(reservation.post.id) //PostImageService 호출
                 if (images != null && images.isNotEmpty()) {
-                    imageUrl = images.get(0).getImageUrl();
+                    imageUrl = images.get(0).imageUrl
                 }
                 val isReviewed = reviewService.findByUserIdAndReservationId(userId, reservation.id!!).isPresent
                 MyReservationInfoResponse.from(reservation, imageUrl, isReviewed)
