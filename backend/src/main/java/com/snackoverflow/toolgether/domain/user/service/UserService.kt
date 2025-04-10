@@ -1,6 +1,7 @@
 package com.snackoverflow.toolgether.domain.user.service;
 
 import com.snackoverflow.toolgether.domain.user.dto.request.PatchMyInfoRequest;
+import com.snackoverflow.toolgether.domain.user.dto.response.MeInfoResponse;
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
 import com.snackoverflow.toolgether.global.exception.custom.UserNotFoundException;
@@ -15,82 +16,78 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
+/**
+ * 로직 변경한 부분은 새롭게 클래스를 나누어서 작성
+ */
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class UserService {
+class UserService(
+    private val userRepository: UserRepository,
+    private val s3Service: S3Service
+) {
 
-    private final UserRepository userRepository;
-    private final S3Service s3Service;
-
-    public String checkMyInfoDuplicates(User user, PatchMyInfoRequest request) {
-        User existingUserByNickname = userRepository.findByNickname(request.getNickname());
-        if (existingUserByNickname != null && !existingUserByNickname.getId().equals(user.getId())) {
-            return "닉네임";
+    fun checkMyInfoDuplicates(user: User, request: PatchMyInfoRequest): String {
+        val existingUserByNickname = userRepository.findByNickname(request.nickname)
+        return if (existingUserByNickname != null && existingUserByNickname.id != user.id) {
+            "닉네임"
+        } else {
+            ""
         }
-        return "";
     }
 
-    public Optional<User> findByUserId(Long userId) {
-        return userRepository.findById(userId);
+    fun findByUserId(userId: Long): User? {
+        return userRepository.findById(userId).orElse(null)
     }
 
-    public User findUserById(Long userId) {
-        return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+    fun findUserById(userId: Long): User {
+        return userRepository.findById(userId).orElseThrow { UserNotFoundException() }
     }
 
     @Transactional
-    public void updateUserCredit(Long userId, int credit) {
-        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        user.updateCredit(credit); // updateCredit() 메서드 호출
+    fun updateUserCredit(userId: Long, credit: Int) {
+        val user = userRepository.findById(userId).orElseThrow { UserNotFoundException() }
+        user.updateCredit(credit)
     }
 
     @Transactional(readOnly = true)
-    public com.snackoverflow.toolgether.domain.user.dto.response.MeInfoResponse getMeInfo(long id) {
-        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
-        return com.snackoverflow.toolgether.domain.user.dto.response.MeInfoResponse.from(user);
+    fun getMeInfo(id: Long): MeInfoResponse {
+        val user = userRepository.findById(id).orElseThrow { UserNotFoundException() }
+        return MeInfoResponse.from(user)
     }
 
-    //프로필 이미지 업로드
     @Transactional
-    public void postProfileImage(User user, MultipartFile profileImageFile) {
-        deleteProfileImage(user);
-        //S3Service 의 upload 메소드 호출, "profile" 폴더에 저장
-        String profileImageUrl = s3Service.upload(profileImageFile, "profile");
-        //S3 URL로 프로필 이미지 정보 업데이트
-        user.updateProfileImage(profileImageUrl);
+    fun postProfileImage(user: User, profileImageFile: MultipartFile) {
+        deleteProfileImage(user)
+        val profileImageUrl = s3Service.upload(profileImageFile, "profile") // S3에 업로드
+        user.updateProfileImage(profileImageUrl) // 프로필 이미지 URL 업데이트
     }
 
-    //프로필 이미지 삭제
     @Transactional
-    public void deleteProfileImage(User user) {
-        String profileImage = user.getProfileImage();
-
-        if (profileImage != null) {
-            s3Service.delete(profileImage);
-            user.deleteProfileImage();
+    fun deleteProfileImage(user: User) {
+        user.profileImage?.let { profileImage ->
+            s3Service.delete(profileImage) // S3에서 이미지 삭제
+            user.deleteProfileImage() // 사용자 프로필 이미지 정보 삭제
         }
     }
 
     @Transactional
-    public void updateMyInfo(User user, PatchMyInfoRequest request) {
-        user.updatePhoneNumber(request.getPhoneNumber());
-        user.updateNickname(request.getNickname());
+    fun updateMyInfo(user: User, request: PatchMyInfoRequest) {
+        user.updatePhoneNumber(request.phoneNumber)
+        user.updateNickname(request.nickname)
     }
 
     @Transactional
-    public void deleteUser(User user) {
-        user.delete();
+    fun deleteUser(user: User) {
+        user.delete()
     }
 
     @Transactional
-    public void updateUserScore(Long id, double updatedScore) {
-        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
-        user.updateScore(updatedScore);
+    fun updateUserScore(id: Long, updatedScore: Double) {
+        val user = userRepository.findById(id).orElseThrow { UserNotFoundException() }
+        user.updateScore(updatedScore)
     }
 
-    public List<User> getUsersWithoutReviewsSince(LocalDateTime date) {
-        return userRepository.findUsersWithoutReviewsSince(date);
+    fun getUsersWithoutReviewsSince(date: LocalDateTime): List<User> {
+        return userRepository.findUsersWithoutReviewsSince(date)
     }
 }

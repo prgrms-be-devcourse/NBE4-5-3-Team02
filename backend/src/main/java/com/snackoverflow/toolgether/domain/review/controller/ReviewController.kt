@@ -52,7 +52,7 @@ class ReviewController(
 
         val temp = reviewService.findByUserIdAndReservationId(actualReservation.id!!, user.id!!)
         if (reviewService.existsUserIdAndReservationId(
-                user.id,
+                user.id!!,
                 actualReservation.id!!
             )
         ) { // 수정: existsUserIdAndReservationId 사용
