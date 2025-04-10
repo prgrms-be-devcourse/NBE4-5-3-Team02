@@ -26,13 +26,13 @@ class JwtService(
     @Value("\${jwt.secret}") private val secretKey: String // 환경 변수에서 키를 가져옴
 ) {
 
-    private val logger = LoggerFactory.getLogger(JwtService::class.java)
+    private val log = LoggerFactory.getLogger(JwtService::class.java)
 
     // JWT 생성
     fun createToken(claims: Map<String, Any>, expiration: Long): String {
         val key: SecretKey = getSecretKey(secretKey) // SecretKey 생성
 
-        logger.info("Expiration: {}", expiration)
+        log.info("Expiration: {}", expiration)
 
         return Jwts.builder()
             .claims(claims) // 클레임 설정
@@ -102,7 +102,7 @@ class JwtService(
         val cookies = request.cookies ?: return Optional.empty()
 
         cookies.forEach { cookie ->
-            logger.info("Cookie Name: {}, Value: {}", cookie.name, cookie.value)
+            log.info("Cookie Name: {}, Value: {}", cookie.name, cookie.value)
         }
 
         return cookies.asSequence()
