@@ -1,7 +1,6 @@
 package com.snackoverflow.toolgether.deposit
 
 import com.snackoverflow.toolgether.domain.deposit.controller.DepositController
-import com.snackoverflow.toolgether.domain.reservation.controller.ReservationController
 import jakarta.transaction.Transactional
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -44,7 +43,7 @@ class DepositControllerTest {
         resultAction.andExpect(status().isOk)
             .andExpect(handler().handlerType(DepositController::class.java))
             .andExpect(handler().methodName("findDepositHistoryByReservationId"))
-            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.resultCode").value("200-1"))
             .andExpect(jsonPath("$.msg").value("1번 예약의 보증금 내역이 조회되었습니다."))
             .andExpect(jsonPath("$.data.status").value("PENDING"))
     }
