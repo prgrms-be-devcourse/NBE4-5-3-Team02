@@ -39,4 +39,21 @@ public class PostAvailability {
     @Column(nullable = false)
     @Builder.Default
     private boolean isRecurring = false; // 매주 반복 여부, 기본값 false
+
+    /* TODO : 임시 */
+    public PostAvailability(
+            Post post,
+            LocalDateTime date,
+            int recurrence_days,
+            LocalDateTime startTime,
+            LocalDateTime endTime,
+            boolean isRecurring
+    ) {
+        this.post = post;
+        this.date = date;
+        this.recurrence_days = recurrence_days;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.isRecurring = isRecurring;
+    }
 }
