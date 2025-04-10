@@ -17,7 +17,6 @@ import java.util.Set;
 
 @Entity
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Post {
