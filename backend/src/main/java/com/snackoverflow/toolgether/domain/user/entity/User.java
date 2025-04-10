@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "users") // 예약어 변경
@@ -77,6 +76,36 @@ public class User {
     public int getScore() {
         return this.score;
     }
+
+    public User(
+        String username,
+        String password,
+        String email,
+        String providerId,
+        String provider,
+        String phoneNumber,
+        String nickname,
+        Address address,
+        LocalDateTime createdAt,
+        Double latitude,
+        Double longitude,
+        int score,
+        int credit) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.providerId = providerId;
+        this.provider = provider;
+        this.phoneNumber = phoneNumber;
+        this.nickname = nickname;
+        this.address = address;
+        this.createdAt = createdAt;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.score = score;
+        this.credit = credit;
+    }
+    public User() {}
 
 
     public void updateCredit(int credit) {

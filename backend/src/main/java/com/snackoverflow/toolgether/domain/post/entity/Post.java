@@ -21,7 +21,6 @@ import java.util.Set;
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Post {
@@ -95,6 +94,34 @@ public class Post {
 
     /* TODO : 마이그레이션 이후 삭제 */
 
+    public Post(
+        User user,
+        String title,
+        String content,
+        LocalDateTime createdAt,
+        LocalDateTime updateAt,
+        Category category,
+        PriceType priceType,
+        int price,
+        Double latitude,
+        Double longitude,
+        int viewCount
+    ){
+        this.user = user;
+        this.title = title;
+        this.content = content;
+        this.createdAt = createdAt;
+        this.updateAt = updateAt;
+        this.category = category;
+        this.priceType = priceType;
+        this.price = price;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.viewCount = viewCount;
+    }
+
+    public Post(){}
+
     public Long getId() {
         return id;
     }
@@ -114,4 +141,5 @@ public class Post {
     public int getPrice() {
         return price;
     }
+
 }
