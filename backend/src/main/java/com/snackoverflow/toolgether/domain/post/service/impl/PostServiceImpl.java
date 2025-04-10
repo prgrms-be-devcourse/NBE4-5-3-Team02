@@ -48,17 +48,10 @@ public class PostServiceImpl implements PostService {
             throw new BadRequestException("400-1", "제목은 필수 입력값입니다.");
         }
 
-        Post post = Post.builder()
-                .user(user)
-                .title(request.getTitle())
-                .content(request.getContent())
-                .category(request.getCategory())
-                .priceType(request.getPriceType())
-                .price(request.getPrice())
-                .latitude(request.getLatitude())
-                .longitude(request.getLongitude())
-                .viewCount(0)
-                .build();
+        Post post = Post.createPost(user,
+                request.getTitle(), request.getContent(),
+                request.getCategory(), request.getPriceType(),
+                request.getPrice(), request.getLatitude(), request.getLongitude());
 
         postRepository.save(post);
 
@@ -176,12 +169,12 @@ public class PostServiceImpl implements PostService {
         postAvailabilityRepository.saveAll(postAvailabilities);
     }
 
-    @Transactional
+/*    @Transactional
     @Override
     public Page<PostResponse> searchPosts(PostSearchRequest request, Pageable pageable) {
 //        Page<Post> posts = postQueryRepository.searchPosts(request, pageable);
         return postQueryRepository.searchPosts(request, pageable);
-    }
+    }*/
 
     // 예약에 필요한 메서드
     @Transactional(readOnly = true)
@@ -191,4 +184,8 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new RuntimeException("Post not found"));
     }
 
+    @Override
+    public Page<PostResponse> searchPosts(PostSearchRequest request, Pageable pageable) {
+        return null;
+    }
 }
