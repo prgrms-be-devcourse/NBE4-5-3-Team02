@@ -4,29 +4,29 @@ server:
     session:
       timeout: 15m
 
-client:
-  port: 3000
+spring:
+  datasource:
+    url: jdbc:h2:./db_dev;MODE=MySQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+    hikari:
+      auto-commit: false
 
-custom:
-  dev:
-    domain: localhost
-    backUrl: "http://${custom.dev.domain}:${server.port}"
-    frontUrl: "http://${custom.dev.domain}:${client.port}"
-  site:
-    backUrl: "${custom.dev.backUrl}"
-    frontUrl: "${custom.dev.frontUrl}"
+  jpa:
+    database: h2
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 
-datasource:
-  url: jdbc:h2:./db_dev;MODE=MySQL
-  username: sa
-  password:
-  driver-class-name: org.h2.Driver
-  hikari:
-    auto-commit: false
-
-websocket:
-  endpoint:
-    uri: ws://"${custom.dev.backUrl}"/chat
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 logging:
   level:
@@ -35,12 +35,11 @@ logging:
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
 
-spring:
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ON_SECRET
-            client-secret: ON_SECRET
-            redirect-uri: https://"${custom.dev.frontUrl}"/redirect
+custom:
+  dev:
+    backUrl: "http://localhost:8080"
+    frontUrl: "http://localhost:3000"
+
+websocket:
+  endpoint:
+    uri: ws://"${custom.dev.backUrl}"/chat
