@@ -28,7 +28,6 @@ import java.net.URI
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.List
 import kotlin.collections.MutableList
 
@@ -106,7 +105,7 @@ class ReservationService(
 
         // 알림 전송 (소유자에게 알림)
         notificationService.createNotification(
-            reservation.owner.getId()!!,
+            reservation.owner.id!!,
             "[${reservation.id}] '${reservation.post.getTitle()}' 새로운 예약 요청이 있습니다."
         )
 
@@ -119,8 +118,8 @@ class ReservationService(
             reservation.endTime,
             reservation.amount,
             reservation.rejectionReason.toString(),
-            reservation.owner.getId()!!,
-            reservation.renter.getId()!!
+            reservation.owner.id!!,
+            reservation.renter.id!!
         )
     }
 
@@ -133,7 +132,7 @@ class ReservationService(
 
             // 알림 전송 (대여자에게 알림)
             notificationService.createNotification(
-                reservation.renter.getId(),
+                reservation.renter.id,
                 "[${reservation.id}] '${reservation.post.getTitle()}' 예약이 승인되었습니다."
             )
 
@@ -193,13 +192,13 @@ class ReservationService(
         depositHistoryService.updateDepositHistory(depositHistory.id!!, DepositStatus.RETURNED, ReturnReason.REJECTED)
 
         // 대여자 크레딧 업데이트
-        userService.updateUserCredit(reservation.renter.getId(), depositHistory.amount)
+        userService.updateUserCredit(reservation.renter.id, depositHistory.amount)
 
         val title = reservation.post.getTitle()
 
         // 알림 전송 (대여자에게 알림)
         notificationService.createNotification(
-            reservation.renter.getId(),
+            reservation.renter.id,
             "[${reservation.id}] '${reservation.post.getTitle()}' 예약이 거절되었습니다."
         )
     }
@@ -212,11 +211,11 @@ class ReservationService(
 
         // 알림 전송
         notificationService.createNotification(
-            reservation.renter.getId(),
+            reservation.renter.id,
             "[${reservation.id}] '${reservation.post.getTitle()}' 대여가 시작되었습니다."
         )
         notificationService.createNotification(
-            reservation.owner.getId(),
+            reservation.owner.id,
             "[${reservation.id}] '${reservation.post.getTitle()}' 대여가 시작되었습니다."
         )
     }
@@ -236,15 +235,15 @@ class ReservationService(
         )
 
         // 대여자 크레딧 업데이트
-        userService.updateUserCredit(reservation.renter.getId(), depositHistory.amount)
+        userService.updateUserCredit(reservation.renter.id, depositHistory.amount)
 
         // 알림 전송
         notificationService.createNotification(
-            reservation.renter.getId(),
+            reservation.renter.id,
             "[${reservation.id}] '${reservation.post.getTitle()}' 대여가 완료되었습니다."
         )
         notificationService.createNotification(
-            reservation.owner.getId(),
+            reservation.owner.id,
             "[${reservation.id}] '${reservation.post.getTitle()}' 대여가 완료되었습니다."
         )
     }
@@ -260,11 +259,11 @@ class ReservationService(
         depositHistoryService.updateDepositHistory(depositHistory.id!!, DepositStatus.RETURNED, ReturnReason.REJECTED)
 
         // 대여자 크레딧 업데이트
-        userService.updateUserCredit(reservation.renter.getId(), depositHistory.amount)
+        userService.updateUserCredit(reservation.renter.id, depositHistory.amount)
 
         // 소유자에게 알림 전송
         notificationService.createNotification(
-            reservation.owner.getId(),
+            reservation.owner.id,
             "[${reservation.id}] '${reservation.post.getTitle()}' 예약이 취소되었습니다."
         )
     }
@@ -285,20 +284,20 @@ class ReservationService(
         if (failDue == FailDue.OWNER_ISSUE) {
             reservation.failDueToOwnerIssue()
             // 대여자 크레딧 업데이트
-            userService.updateUserCredit(reservation.renter.getId(), depositHistory.amount)
+            userService.updateUserCredit(reservation.renter.id, depositHistory.amount)
         } else if (failDue == FailDue.RENTER_ISSUE) {
             reservation.failDueToRenterIssue()
             // 소유자 크레딧 업데이트
-            userService.updateUserCredit(reservation.owner.getId(), depositHistory.amount)
+            userService.updateUserCredit(reservation.owner.id, depositHistory.amount)
         }
 
         // 알림 전송
         notificationService.createNotification(
-            reservation.renter.getId(),
+            reservation.renter.id,
             "[${reservation.id}] '${reservation.post.getTitle()}' 대여가 실패했습니다."
         )
         notificationService.createNotification(
-            reservation.owner.getId(),
+            reservation.owner.id,
             "[${reservation.id}] '${reservation.post.getTitle()}' 대여가 실패했습니다."
         )
     }
@@ -314,8 +313,8 @@ class ReservationService(
             reservation.endTime,
             reservation.amount,
             reservation.rejectionReason.toString(),
-            reservation.owner.getId(),
-            reservation.renter.getId()
+            reservation.owner.id!!,
+            reservation.renter.id!!
         )
     }
 
@@ -356,8 +355,8 @@ class ReservationService(
                         reservation.endTime,
                         reservation.amount,
                         reservation.rejectionReason.toString(),
-                        reservation.owner.getId(),
-                        reservation.renter.getId()
+                        reservation.owner.id,
+                        reservation.renter.id
                     )
                 )
             }
@@ -370,7 +369,7 @@ class ReservationService(
         val post = postRepository.findById(postId)
         return PostReservationResponse(
             post.get().getId(),
-            post.get().getUser().getId(),
+            post.get().getUser().id,
             post.get().getTitle(),
             post.get().getPriceType().name,
             post.get().getPrice()

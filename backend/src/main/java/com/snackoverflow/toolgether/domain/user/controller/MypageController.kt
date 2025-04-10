@@ -4,9 +4,9 @@ import com.snackoverflow.toolgether.domain.postimage.service.PostImageService
 import com.snackoverflow.toolgether.domain.reservation.entity.Reservation
 import com.snackoverflow.toolgether.domain.reservation.service.ReservationService
 import com.snackoverflow.toolgether.domain.review.service.ReviewService
-import com.snackoverflow.toolgether.domain.user.dto.MeInfoResponse
-import com.snackoverflow.toolgether.domain.user.dto.MyReservationInfoResponse
 import com.snackoverflow.toolgether.domain.user.dto.request.PatchMyInfoRequest
+import com.snackoverflow.toolgether.domain.user.dto.response.MeInfoResponse
+import com.snackoverflow.toolgether.domain.user.dto.response.MyReservationInfoResponse
 import com.snackoverflow.toolgether.domain.user.service.UserService
 import com.snackoverflow.toolgether.global.dto.RsData
 import com.snackoverflow.toolgether.global.filter.CustomUserDetails
@@ -122,7 +122,7 @@ class MypageController(
     ): RsData<Void> {
         val userId = customUserDetails.userId
         val user = userService.findUserById(userId)
-        val isGeoInfoValid = userService.checkGeoInfo(request)
+        val isGeoInfoValid = true // 위치 변경 로직 수정 필요
         if (!isGeoInfoValid) {
             return RsData(
                 "400-1",
@@ -133,7 +133,7 @@ class MypageController(
         if (duplicateCheck == "닉네임" || duplicateCheck == "전화번호") {
             return RsData(
                 "409-1",
-                "%s 중복".formatted(duplicateCheck)
+                "%s 중복".format(duplicateCheck)
             )
         }
         userService.updateMyInfo(user, request)

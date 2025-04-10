@@ -76,10 +76,10 @@ class ReviewScoreScheduler(
                         println("점수 변화량: $change") // 추가된 로그
                         totalChange += change
                     }
-                    val updatedScore = max(0.0, min(100.0, user.getScore() + totalChange))
+                    val updatedScore = max(0.0, min(100.0, user.score + totalChange))
                     println(
                         "유저id: " + user.id +
-                                ", 기존 점수: " + user.getScore() +
+                                ", 기존 점수: " + user.score +
                                 ", 새 리뷰 총 변화량: " + totalChange +
                                 ", 업데이트 후 점수: " + updatedScore
                     )
@@ -94,8 +94,8 @@ class ReviewScoreScheduler(
             val inactiveUsers = userService.getUsersWithoutReviewsSince(sixMonthsAgo)
             println("최근 6개월 새 리뷰가 없는 사용자 수: $inactiveUsers.size")
             for (user in inactiveUsers) {
-                if (user.getScore() > BASE_SCORE) {
-                    val decayedScore = max(BASE_SCORE, user.getScore() - DECAY_RATE)
+                if (user.score > BASE_SCORE) {
+                    val decayedScore = max(BASE_SCORE, user.score - DECAY_RATE)
                     userService.updateUserScore(user.id, decayedScore)
                 }
             }
