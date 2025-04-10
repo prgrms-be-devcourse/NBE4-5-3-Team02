@@ -21,14 +21,16 @@ class S3ServiceImpl(
     private val bucketName: String
 ) : S3Service {
 
-    override fun upload(multipartFile: MultipartFile, dirName: String): String {
+    override fun upload(multipartFile: MultipartFile?, dirName: String): String {
         val filename = "$dirName/${UUID.randomUUID()}"
         val objectMetadata = ObjectMetadata()
-        objectMetadata.contentLength = multipartFile.size
-        objectMetadata.contentType = multipartFile.contentType
+        if (multipartFile != null) {
+            objectMetadata.contentLength = multipartFile.size
+        }
+        objectMetadata.contentType = multipartFile?.contentType
 
         try {
-            val request = PutObjectRequest(bucketName, filename, multipartFile.inputStream, objectMetadata)
+            val request = PutObjectRequest(bucketName, filename, multipartFile?.inputStream, objectMetadata)
             amazonS3Client.putObject(request)
         } catch (e: IOException) {
             throw FileUploadException("500", "파일 업로드에 실패했습니다.") // HttpStatus.INTERNAL_SERVER_ERROR 전달
