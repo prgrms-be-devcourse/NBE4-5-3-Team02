@@ -1,3 +1,7 @@
 spring:
   datasource:
     url: jdbc:h2:mem:db_test;MODE=MySQL
+    driver-class-name: org.h2.Driver
+
+  config:
+    import: classpath:application-secret.yml, classpath:application-dev.yml, classpath:application.yml

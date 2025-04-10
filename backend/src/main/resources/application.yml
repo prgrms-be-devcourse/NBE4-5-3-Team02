@@ -7,7 +7,6 @@ spring:
     url: jdbc:mysql://toolgether-mysql:3306/toolgether
     username: ON_SECRET
     password: ON_SECRET
-    driver-class-name: com.mysql.cj.jdbc.Driver
 
   data:
     redis:
@@ -24,9 +23,8 @@ spring:
 
   jpa:
     database: mysql
-    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate:
@@ -43,7 +41,7 @@ spring:
           google:
             client-id: ON_SECRET
             client-secret: ON_SECRET
-            redirect-uri: https://toolgether-delta.vercel.app/redirect
+            redirect-uri: ${custom.dev.backUrl}/login/oauth2/code/google
             scope:
               - openid
               - https://www.googleapis.com/auth/userinfo.profile
@@ -53,5 +51,42 @@ spring:
           google:
             issuer-uri: https://accounts.google.com
 
+  mail:
+    username: ON_SECRET
+    password: ON_SECRET
+    host: smtp.gmail.com
+    port: 587
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+cloud:
+  aws:
+    credentials:
+      access-key: ON_SECRET
+      secret-key: ON_SECRET
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: toolgetherbucket
+
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.orm.jdbc.extract: TRACE
+    org.springframework.transaction.interceptor: TRACE
+
+custom:
+  dev:
+    domain:
+    backUrl:
+  site:
+    frontUrl:
+
+websocket:
+  endpoint:
+    uri: ws://"${custom.dev.backUrl}"/chat

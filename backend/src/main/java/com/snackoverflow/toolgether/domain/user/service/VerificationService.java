@@ -1,8 +1,7 @@
 package com.snackoverflow.toolgether.domain.user.service;
 
 import com.snackoverflow.toolgether.domain.user.dto.request.VerificationData;
-import com.snackoverflow.toolgether.global.exception.custom.mail.MailPreparationException;
-import com.snackoverflow.toolgether.global.exception.custom.mail.VerificationException;
+import com.snackoverflow.toolgether.global.exception.ServiceException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpSession;
@@ -13,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
+
+import static com.snackoverflow.toolgether.global.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -42,60 +43,59 @@ public class VerificationService {
     }
 
     // 이메일 인증을 위해 세션에 인증 정보를 저장
-    @Async // 비동기 처리 -> 이메일 발송 시간 단축, 시스템 성능 개선
+    @Async
     public void sendEmailWithCode(String email, HttpSession session) {
-        // 인증 코드 생성
-        String code = createCode();
-
         try {
-            // 인증 코드가 포함된 메일 생성
+            String code = createCode();
             MimeMessage message = mailService.createMail(email, code);
-
-            // 메일 발송
             mailService.sendMail(message);
 
-            // 세션에 저장
             session.setAttribute(SESSION_KEY, new VerificationData(email.trim(), code, false));
-            session.setMaxInactiveInterval(60 * 15); // 15분 유효시간
+            session.setMaxInactiveInterval(60 * 15);
 
             log.info("세션 저장 성공: email={}, code={}", email, code);
-
         } catch (MessagingException e) {
-            throw new MailPreparationException("메일 구성 오류: " + e.getMessage(), e); // 이메일 형식, 제목/본문 인코딩 문제
+            throw new ServiceException(MAIL_SEND_FAILED, e);
         }
     }
 
     // 인증 코드 확인 후 세션 상태 변경 verified: false -> true
-    @Transactional
     public void verifyEmail(String inputEmail, String inputCode) {
         VerificationData data = (VerificationData) session.getAttribute(SESSION_KEY);
 
-        log.info("세션 이메일: {}, 요청 이메일: {}", data.getEmail(), inputEmail);
-        log.info("세션 인증 코드: {}, 요청 인증 코드: {}", data.getCode(), inputCode);
+        log.info("세션 이메일: {}, 요청 이메일: {}", data != null ? data.getEmail() : "null", inputEmail);
+        log.info("세션 인증 코드: {}, 요청 인증 코드: {}", data != null ? data.getCode() : "null", inputCode);
 
+        checkData(inputEmail, inputCode, data);
+
+        data.setVerified(true);
+        session.setAttribute(SESSION_KEY, data);
+    }
+
+    private void checkData(String inputEmail, String inputCode, VerificationData data) {
         // 세션 데이터 검증 -> 저장된 데이터가 있는가?
         if (data == null) {
-            throw new VerificationException(VerificationException.ErrorType.REQUEST_NOT_FOUND, "인증 요청이 존재하지 않습니다.");
+            throw new ServiceException(REQUEST_NOT_FOUND); // 인증 요청이 존재하지 않음
         }
 
         // 세션에 저장된 이메일 일치 여부 확인
         if (!data.getEmail().trim().equals(inputEmail.trim())) {
-            throw new VerificationException(VerificationException.ErrorType.REQUEST_NOT_FOUND, "요청 이메일 불일치: 세션 = "
-                    + data.getEmail() + " / 입력 = " + inputEmail);
+            throw new ServiceException(NOT_VERIFIED); // 이메일 불일치
         }
 
         // 코드 검증
         if (!data.getCode().equals(inputCode)) {
-            throw new VerificationException(VerificationException.ErrorType.CODE_MISMATCH, "인증 코드 오류! 남은 시도 횟수: " + (MAX_ATTEMPTS - data.incrementAttempt()));
+            int remainingAttempts = MAX_ATTEMPTS - data.incrementAttempt();
+            if (remainingAttempts <= 0) {
+                throw new ServiceException(REQUEST_LIMIT_EXCEEDED); // 시도 횟수 초과
+            }
+            throw new ServiceException(CODE_MISMATCH); // 인증 코드 불일치
         }
 
         // 인증 만료 이전인지 검증
         if (data.isExpired()) {
-            throw new VerificationException(VerificationException.ErrorType.EXPIRED, "인증 시간이 만료되었습니다. 재전송 후 시도해 주세요.");
+            throw new ServiceException(EXPIRED); // 인증 시간 만료
         }
-
-        data.setVerified(true);
-        session.setAttribute(SESSION_KEY, data);
     }
 
     // 세션으로 이메일 인증 여부 확인
