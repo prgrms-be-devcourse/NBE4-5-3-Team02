@@ -71,12 +71,12 @@ class UserInfoControllerTest {
     @DisplayName("휴대폰 번호 인증으로 이메일을 찾는다")
     void find_email() throws Exception {
         //given:
-        String expectedEmail = "test@example.com";
+        String expectedEmail = "user1@example.com";
 
         // when & then
         mockMvc.perform(post("/api/v2/users/find-email")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("phoneNumber", "01020203030"))
+                        .param("phoneNumber", "01012345678"))
                 .andExpect(status().isOk()) // HTTP 200 상태 코드 검증
                 .andExpect(jsonPath("$.resultCode").value("200")) // 응답 코드 검증
                 .andExpect(jsonPath("$.msg").value("고객님의 이메일: " + expectedEmail)) // 응답 메시지 검증

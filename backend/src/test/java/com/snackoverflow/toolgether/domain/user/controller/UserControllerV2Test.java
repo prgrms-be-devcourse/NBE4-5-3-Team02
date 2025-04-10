@@ -4,6 +4,7 @@ import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
 import com.snackoverflow.toolgether.domain.user.service.MessageService;
 import com.snackoverflow.toolgether.domain.user.service.UserServiceV2;
+import com.snackoverflow.toolgether.global.filter.CustomUserDetails;
 import com.snackoverflow.toolgether.global.token.JwtService;
 import com.snackoverflow.toolgether.global.token.TokenService;
 import jakarta.servlet.http.Cookie;
@@ -14,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -56,6 +60,14 @@ class UserControllerV2Test {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private User testUser;
+
+
+    @BeforeEach
+    void setUp() {
+        testUser = userRepository.findByEmail("userControllerTest@example.com");
+    }
+
     @Test
     @DisplayName("회원가입 성공")
     void signup_success() throws Exception {
@@ -90,6 +102,15 @@ class UserControllerV2Test {
     @Test
     @DisplayName("로그인 성공")
     void login_success() throws Exception {
+
+        String encoded = passwordEncoder.encode("password");
+        testUser = User.createGeneralUser(
+                "userControllerTest@example.com",
+                encoded,
+                "01088882222",
+                "userControllerTest",
+                "서울 성동구");
+        userRepository.save(testUser);
         // given: 요청 본문 생성
         String requestBody = """
                 {
