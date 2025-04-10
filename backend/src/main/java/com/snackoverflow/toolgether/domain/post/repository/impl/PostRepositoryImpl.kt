@@ -105,7 +105,7 @@ class PostRepositoryImpl(
                 val imageUrls = if (p.postImages != null)
                     p.postImages.stream()
                         .map<String> { img: PostImage ->
-                            log.info("게시물 ID: ${p.id}, 이미지 ID: ${img.getId()}, URL: ${img.imageUrl}")
+                            log.info("게시물 ID: ${p.id}, 이미지 ID: ${img.id}, URL: ${img.imageUrl}")
                             img.imageUrl
                         }
                         .collect(Collectors.toSet<String>())
