@@ -5,6 +5,6 @@ import java.lang.annotation.Retention
 import java.lang.annotation.RetentionPolicy
 import java.lang.annotation.Target
 
-@Target(ElementType.PARAMETER)
-@Retention(RetentionPolicy.RUNTIME)
+@kotlin.annotation.Target(AnnotationTarget.VALUE_PARAMETER)
+@kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
 annotation class Login
