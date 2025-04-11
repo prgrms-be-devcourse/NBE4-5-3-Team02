@@ -3,8 +3,6 @@ package com.snackoverflow.toolgether.domain.chat.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.snackoverflow.toolgether.domain.chat.dto.ChatMessageDto;
-import com.snackoverflow.toolgether.domain.chat.entity.ChatMessage;
-import com.snackoverflow.toolgether.domain.chat.repository.ChatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +27,6 @@ import static com.snackoverflow.toolgether.global.constants.AppConstants.PERSONA
 @Transactional(readOnly = true)
 public class ChatService {
 
-    private final ChatRepository chatRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
 
@@ -42,10 +39,6 @@ public class ChatService {
         String receiverName = chatMessageDto.getReceiverName();
         String content = chatMessageDto.getContent();
 
-        ChatMessage chatMessage = ChatMessage
-                .create(channelName, senderId, senderName, receiverId, receiverName, content);
-
-        chatRepository.save(chatMessage);
 
         try {
             Map<String, Object> messageData = saveMessage(chatMessageDto);

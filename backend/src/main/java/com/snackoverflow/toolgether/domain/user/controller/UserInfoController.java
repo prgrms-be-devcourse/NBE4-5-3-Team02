@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
-import static com.snackoverflow.toolgether.domain.user.service.VerificationService.SESSION_KEY;
+import static com.snackoverflow.toolgether.global.constants.AppConstants.SESSION_KEY;
 
 @Slf4j
 @RestController

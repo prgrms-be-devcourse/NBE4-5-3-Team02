@@ -11,9 +11,12 @@ import java.util.Optional;
 
 interface UserRepository : JpaRepository<User, Long> {
 
-    fun findByEmail(email: String): Optional<User>
+    fun findByEmail(email: String): User?
 
     fun existsByEmail(email: String): Boolean
+
+    @Query("select u from User u where u.id = :id")
+    fun findByUserId(id: Long): User?
 
     fun existsByNickname(nickname: String): Boolean
 
@@ -25,5 +28,5 @@ interface UserRepository : JpaRepository<User, Long> {
     @Query("SELECT u.profileImage FROM User u WHERE u.profileImage IS NOT NULL")
     fun findAllProfileImageUrl(): List<String>
 
-    fun findByphoneNumber(phoneNumber: String): Optional<User>
+    fun findByphoneNumber(phoneNumber: String): User?
 }
