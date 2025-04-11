@@ -108,7 +108,7 @@ public class OauthService {
     // 소셜 로그인 회원 추가 정보 업데이트
     @Transactional
     public void updateAdditionalInfo(String email, AdditionalInfoRequest request) {
-        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail(email);
 
         Double clientLat = request.getLatitude();
         Double clientLon = request.getLongitude();
