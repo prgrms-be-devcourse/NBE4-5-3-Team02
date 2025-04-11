@@ -1,7 +1,7 @@
 package com.snackoverflow.toolgether.domain.reservation.controller
 
 import lombok.extern.slf4j.Slf4j
-import org.hibernate.query.sqm.tree.SqmNode.log
+import mu.KotlinLogging
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 @RestController
 @RequestMapping("/api/v1/sse")
 class SseController {
+    private val log = KotlinLogging.logger {}
     private val emitters: MutableMap<Long, SseEmitter> = ConcurrentHashMap()
 
     @GetMapping(value = ["/connect/{userId}"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
