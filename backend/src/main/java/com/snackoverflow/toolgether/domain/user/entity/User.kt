@@ -13,7 +13,7 @@ import kotlin.math.roundToInt
 class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    var id: Long? = null,
 
     var password: String? = null, // 암호화된 비밀번호 (일반 사용자)
 

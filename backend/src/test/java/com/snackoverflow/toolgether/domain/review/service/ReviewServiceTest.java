@@ -10,7 +10,6 @@ import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
 import com.snackoverflow.toolgether.domain.review.dto.request.ReviewRequest;
 import com.snackoverflow.toolgether.domain.review.entity.Review;
 import com.snackoverflow.toolgether.domain.review.repository.ReviewRepository;
-import com.snackoverflow.toolgether.domain.user.entity.Address;
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,45 +36,23 @@ public class ReviewServiceTest {
     @BeforeEach
     void setUp() {
         reviewService = new ReviewService(reviewRepository);
-        user1 = new User(
-                1L,
-                "human123",
-                null,
+        this.user1 = User.createGeneralUser(
                 "test1@gmail.com",
-                null,
-                null,
+                "human123",
                 "000-0000-0001",
                 "닉네임1",
-                new Address("서울시 강남구", "역삼동 123-45", "12345"),
-                LocalDateTime.now(),
-                null,
-                null,
-                true,
-                null,
-                30,
-                0,
-                null
+                "서울시 강남구"
         );
+        this.user1.setId(1L);
 
-        user2 = new User(
-                2L,
-                "seaman222",
-                null,
+        this.user2 = User.createGeneralUser(
                 "test2@gmail.com",
-                null,
-                null,
+                "seaman222",
                 "000-0000-0002",
                 "닉네임2",
-                new Address("서울시 강남구", "역삼동 123-45", "12345"),
-                LocalDateTime.now(),
-                null,
-                null,
-                true,
-                null,
-                30,
-                0,
-                null
+                "서울시 강남구 " // Address 객체에서 baseAddress 정보만 사용
         );
+        this.user2.setId(2L);
 
         post = new Post(
                 10L,

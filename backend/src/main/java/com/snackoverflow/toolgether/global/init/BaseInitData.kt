@@ -1,32 +1,31 @@
-package com.snackoverflow.toolgether.global.init;
+package com.snackoverflow.toolgether.global.init
 
-import com.snackoverflow.toolgether.domain.deposit.entity.DepositHistory;
-import com.snackoverflow.toolgether.domain.deposit.entity.DepositStatus;
-import com.snackoverflow.toolgether.domain.deposit.entity.ReturnReason;
-import com.snackoverflow.toolgether.domain.deposit.repository.DepositHistoryRepository;
-import com.snackoverflow.toolgether.domain.post.entity.Post;
-import com.snackoverflow.toolgether.domain.post.entity.enums.Category;
-import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType;
-import com.snackoverflow.toolgether.domain.post.repository.PostRepository;
-import com.snackoverflow.toolgether.domain.postavailability.entity.PostAvailability;
-import com.snackoverflow.toolgether.domain.reservation.entity.Reservation;
-import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus;
-import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository;
-import com.snackoverflow.toolgether.domain.review.entity.Review;
-import com.snackoverflow.toolgether.domain.review.repository.ReviewRepository;
-import com.snackoverflow.toolgether.domain.user.entity.User;
-import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.snackoverflow.toolgether.domain.deposit.entity.DepositHistory
+import com.snackoverflow.toolgether.domain.deposit.entity.DepositStatus
+import com.snackoverflow.toolgether.domain.deposit.entity.ReturnReason
+import com.snackoverflow.toolgether.domain.deposit.repository.DepositHistoryRepository
+import com.snackoverflow.toolgether.domain.post.entity.Post
+import com.snackoverflow.toolgether.domain.post.entity.enums.Category
+import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType
+import com.snackoverflow.toolgether.domain.post.repository.PostRepository
+import com.snackoverflow.toolgether.domain.postavailability.entity.PostAvailability
+import com.snackoverflow.toolgether.domain.reservation.entity.Reservation
+import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus
+import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository
+import com.snackoverflow.toolgether.domain.review.entity.Review
+import com.snackoverflow.toolgether.domain.review.repository.ReviewRepository
+import com.snackoverflow.toolgether.domain.user.entity.User
+import com.snackoverflow.toolgether.domain.user.repository.UserRepository
+import lombok.RequiredArgsConstructor
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.ApplicationArguments
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
-import java.util.HashSet;
+import org.springframework.boot.ApplicationRunner
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Lazy
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Configuration
 @RequiredArgsConstructor
@@ -52,7 +51,6 @@ class BaseInitData(
 
 	@Transactional
 	fun reservationInit() {
-
 //        UserInitData 전부 삭제 후 재생성 코드(AUTO_INCREMENT 초기화와 함께 주석 풀고 사용)
 //        reviewRepository.deleteAll();
 //        reservationRepository.deleteAll();
@@ -65,8 +63,8 @@ class BaseInitData(
 //        entityManager.createNativeQuery("ALTER TABLE post AUTO_INCREMENT = 1").executeUpdate();
 //        entityManager.createNativeQuery("ALTER TABLE users AUTO_INCREMENT = 1").executeUpdate();
 
-        if(userRepository.count() > 0) {
-			return;
+		if (userRepository.count() > 0) {
+			return
 		}
 		// 비밀번호 암호화
 		val password = passwordEncoder.encode("password123")
@@ -125,6 +123,7 @@ class BaseInitData(
 		val savedPost = postRepository.save(post) // post 를 먼저 저장하고 저장된 post를 받음
 
 		val sp1 = PostAvailability(
+			null,
 			savedPost,
 			LocalDateTime.of(2025, 3, 25, 0, 0, 0),
 			0,
@@ -134,8 +133,8 @@ class BaseInitData(
 		)
 
 		sp.add(sp1)
-		savedPost.updatePostAvailability(sp) // post에 postAvailability 설정
-		postRepository.save(savedPost) // post를 다시 저장
+		savedPost.postAvailabilities = sp // post에 postAvailability 설정
+		postRepository.save(savedPost) // post를 다시 저장.
 
 		val post2 = Post.createPost(
 				user2,

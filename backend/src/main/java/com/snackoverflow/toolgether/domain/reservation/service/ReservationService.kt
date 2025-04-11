@@ -28,6 +28,7 @@ import java.net.URI
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.List
 import kotlin.collections.MutableList
 
@@ -106,7 +107,7 @@ class ReservationService(
         // 알림 전송 (소유자에게 알림)
         notificationService.createNotification(
             reservation.owner.id!!,
-            "[${reservation.id}] '${reservation.post.getTitle()}' 새로운 예약 요청이 있습니다."
+            "[${reservation.id}] '${reservation.post.title}' 새로운 예약 요청이 있습니다."
         )
 
         // 5. Response 반환
@@ -133,7 +134,7 @@ class ReservationService(
             // 알림 전송 (대여자에게 알림)
             notificationService.createNotification(
                 reservation.renter.id,
-                "[${reservation.id}] '${reservation.post.getTitle()}' 예약이 승인되었습니다."
+                "[${reservation.id}] '${reservation.post.title}' 예약이 승인되었습니다."
             )
 
             // Quartz Job 등록 (Start Rental)
@@ -194,12 +195,12 @@ class ReservationService(
         // 대여자 크레딧 업데이트
         userService.updateUserCredit(reservation.renter.id, depositHistory.amount)
 
-        val title = reservation.post.getTitle()
+        val title = reservation.post.title
 
         // 알림 전송 (대여자에게 알림)
         notificationService.createNotification(
             reservation.renter.id,
-            "[${reservation.id}] '${reservation.post.getTitle()}' 예약이 거절되었습니다."
+            "[${reservation.id}] '${reservation.post.title}' 예약이 거절되었습니다."
         )
     }
 
@@ -212,11 +213,11 @@ class ReservationService(
         // 알림 전송
         notificationService.createNotification(
             reservation.renter.id,
-            "[${reservation.id}] '${reservation.post.getTitle()}' 대여가 시작되었습니다."
+            "[${reservation.id}] '${reservation.post.title}' 대여가 시작되었습니다."
         )
         notificationService.createNotification(
             reservation.owner.id,
-            "[${reservation.id}] '${reservation.post.getTitle()}' 대여가 시작되었습니다."
+            "[${reservation.id}] '${reservation.post.title}' 대여가 시작되었습니다."
         )
     }
 
@@ -240,11 +241,11 @@ class ReservationService(
         // 알림 전송
         notificationService.createNotification(
             reservation.renter.id,
-            "[${reservation.id}] '${reservation.post.getTitle()}' 대여가 완료되었습니다."
+            "[${reservation.id}] '${reservation.post.title}' 대여가 완료되었습니다."
         )
         notificationService.createNotification(
             reservation.owner.id,
-            "[${reservation.id}] '${reservation.post.getTitle()}' 대여가 완료되었습니다."
+            "[${reservation.id}] '${reservation.post.title}' 대여가 완료되었습니다."
         )
     }
 
@@ -264,7 +265,7 @@ class ReservationService(
         // 소유자에게 알림 전송
         notificationService.createNotification(
             reservation.owner.id,
-            "[${reservation.id}] '${reservation.post.getTitle()}' 예약이 취소되었습니다."
+            "[${reservation.id}] '${reservation.post.title}' 예약이 취소되었습니다."
         )
     }
 
@@ -294,11 +295,11 @@ class ReservationService(
         // 알림 전송
         notificationService.createNotification(
             reservation.renter.id,
-            "[${reservation.id}] '${reservation.post.getTitle()}' 대여가 실패했습니다."
+            "[${reservation.id}] '${reservation.post.title}' 대여가 실패했습니다."
         )
         notificationService.createNotification(
             reservation.owner.id,
-            "[${reservation.id}] '${reservation.post.getTitle()}' 대여가 실패했습니다."
+            "[${reservation.id}] '${reservation.post.title}' 대여가 실패했습니다."
         )
     }
 
@@ -308,7 +309,7 @@ class ReservationService(
         return ReservationResponse(
             reservation.id!!,
             reservation.status.name,
-            reservation.post.id,
+            reservation.post.id!!,
             reservation.startTime,
             reservation.endTime,
             reservation.amount,
@@ -350,7 +351,7 @@ class ReservationService(
                     ReservationResponse(
                         reservation.id!!,
                         reservation.status.name,
-                        reservation.post.id,
+                        reservation.post.id!!,
                         reservation.startTime,
                         reservation.endTime,
                         reservation.amount,
@@ -368,11 +369,11 @@ class ReservationService(
     fun getPostById(postId: Long): PostReservationResponse {
         val post = postRepository.findById(postId)
         return PostReservationResponse(
-            post.get().getId(),
-            post.get().getUser().id,
-            post.get().getTitle(),
-            post.get().getPriceType().name,
-            post.get().getPrice()
+            post.get().id!!,
+            post.get().user!!.id,
+            post.get().title,
+            post.get().priceType.name,
+            post.get().price
         )
     }
 
