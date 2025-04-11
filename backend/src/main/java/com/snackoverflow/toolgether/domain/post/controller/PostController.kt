@@ -5,6 +5,7 @@ import com.snackoverflow.toolgether.domain.post.dto.PostResponse
 import com.snackoverflow.toolgether.domain.post.dto.PostSearchRequest
 import com.snackoverflow.toolgether.domain.post.dto.PostUpdateRequest
 import com.snackoverflow.toolgether.domain.post.service.PostService
+import com.snackoverflow.toolgether.domain.user.entity.User
 import com.snackoverflow.toolgether.domain.user.service.UserService
 import com.snackoverflow.toolgether.global.dto.RsData
 import com.snackoverflow.toolgether.global.exception.NotFoundException
@@ -34,13 +35,10 @@ class PostController(
         @RequestPart("images") images: List<MultipartFile>
     ): RsData<PostResponse> {
         val userId = customUserDetails.userId
-        val user = userService.findByUserId(userId)
-            .orElseThrow {
-                NotFoundException(
-                    "404-1",
-                    "사용자를 찾을 수 없습니다."
-                )
-            }
+        val user: User = userService.findByUserId(userId) ?: throw NotFoundException(
+            "404-1",
+            "사용자를 찾을 수 없습니다."
+        )
 
         return RsData(
             "201-1",
