@@ -19,7 +19,7 @@ import com.snackoverflow.toolgether.global.exception.custom.CustomException
 import com.snackoverflow.toolgether.global.exception.custom.ErrorResponse
 import jakarta.annotation.PostConstruct
 import lombok.extern.slf4j.Slf4j
-import org.hibernate.query.sqm.tree.SqmNode.log
+import mu.KotlinLogging
 import org.quartz.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -44,7 +44,7 @@ class ReservationService(
     private val startRentalJobDetail: JobDetail, // Quartz JobDetail (시작)
     private val completeRentalJobDetail: JobDetail // Quartz JobDetail (종료)
 ) {
-
+    private val log = KotlinLogging.logger {}
 
     @PostConstruct
     fun init() {
