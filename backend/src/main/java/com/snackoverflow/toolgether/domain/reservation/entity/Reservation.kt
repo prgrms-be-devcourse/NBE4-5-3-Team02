@@ -1,6 +1,8 @@
 package com.snackoverflow.toolgether.domain.reservation.entity
 
 import com.snackoverflow.toolgether.domain.post.entity.Post
+import com.snackoverflow.toolgether.domain.post.entity.enums.Category
+import com.snackoverflow.toolgether.domain.post.entity.enums.PriceType
 import com.snackoverflow.toolgether.domain.user.entity.User
 import jakarta.persistence.*
 import java.time.LocalDateTime
@@ -65,7 +67,7 @@ class Reservation(
         amount: Double
     ) : this(null, post, renter, owner, createAt, startTime, endTime, status, rejectionReason, amount)
 
-    constructor() : this(null, post = Post.createPost(null, null, null, null, null, 0, null, null), User(), User(), LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), ReservationStatus.REQUESTED, null, 0.0)
+    constructor() : this(null, post = Post.createPost(null, "", "", Category.TOOL, PriceType.DAY, 0, 0.0, 0.0), User(), User(), LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), ReservationStatus.REQUESTED, null, 0.0)
 
     /* status 변경 함수 */ // 요청됨 상태 변경
     fun approve() {

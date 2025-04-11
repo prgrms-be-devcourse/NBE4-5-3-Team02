@@ -185,7 +185,7 @@ class PostServiceImpl(
     }
 
     @Transactional
-    override fun searchPosts(request: PostSearchRequest, pageable: Pageable): Page<PostResponse> {
+    override fun searchPosts(request: PostSearchRequest, pageable: Pageable): Page<PostResponse>? {
 //        Page<Post> posts = postQueryRepository.searchPosts(request, pageable);
         return null
     }

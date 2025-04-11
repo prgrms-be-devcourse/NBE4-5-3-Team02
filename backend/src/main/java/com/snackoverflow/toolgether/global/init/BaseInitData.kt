@@ -14,7 +14,6 @@ import com.snackoverflow.toolgether.domain.reservation.entity.ReservationStatus
 import com.snackoverflow.toolgether.domain.reservation.repository.ReservationRepository
 import com.snackoverflow.toolgether.domain.review.entity.Review
 import com.snackoverflow.toolgether.domain.review.repository.ReviewRepository
-import com.snackoverflow.toolgether.domain.user.entity.Address
 import com.snackoverflow.toolgether.domain.user.entity.User
 import com.snackoverflow.toolgether.domain.user.repository.UserRepository
 import lombok.RequiredArgsConstructor
