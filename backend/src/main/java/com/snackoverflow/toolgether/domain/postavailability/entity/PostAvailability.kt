@@ -28,4 +28,13 @@ data class PostAvailability (
 
     @Column(nullable = false)
     var isRecurring: Boolean = false // 매주 반복 여부, 기본값 false
-)
+) {
+    protected constructor() : this(
+        post = Post(),
+        date = null,
+        recurrence_days = 0,
+        startTime = LocalDateTime.now(), // 현재 시간으로 초기화
+        endTime = LocalDateTime.now(),   // 현재 시간으로 초기화
+        isRecurring = false
+    )
+}

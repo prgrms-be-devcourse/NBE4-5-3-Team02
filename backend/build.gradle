@@ -87,6 +87,7 @@ dependencies {
 	implementation "org.jetbrains.kotlin:kotlin-reflect:1.9.22"
 
 	implementation("io.github.microutils:kotlin-logging:1.12.0")
+	implementation("net.nurigo:sdk:4.3.0")
 }
 
 dependencyManagement { // Spring Cloud Version 명시 (Hoxton.SR6)
