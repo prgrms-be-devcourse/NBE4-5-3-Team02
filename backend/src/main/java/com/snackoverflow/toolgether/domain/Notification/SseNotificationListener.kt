@@ -2,7 +2,7 @@ package com.snackoverflow.toolgether.domain.notification
 
 import com.snackoverflow.toolgether.domain.reservation.controller.SseController
 import lombok.extern.slf4j.Slf4j
-import org.hibernate.query.sqm.tree.SqmNode.log
+import mu.KotlinLogging
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
 
@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component
 class SseNotificationListener(
     private val sseController: SseController
 ) : ApplicationListener<NotificationCreatedEvent> {
+    private val log = KotlinLogging.logger {}
     override fun onApplicationEvent(event: NotificationCreatedEvent) {
         val userId = event.userId
         val message = event.message
