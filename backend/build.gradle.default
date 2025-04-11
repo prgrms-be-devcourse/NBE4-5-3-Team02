@@ -88,6 +88,7 @@ dependencies {
 
 	implementation("io.github.microutils:kotlin-logging:1.12.0")
 	implementation("net.nurigo:sdk:4.3.0")
+	implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
 }
 
 dependencyManagement { // Spring Cloud Version 명시 (Hoxton.SR6)
