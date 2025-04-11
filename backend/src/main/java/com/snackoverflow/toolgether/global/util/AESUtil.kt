@@ -12,7 +12,6 @@ import javax.crypto.SecretKey
  * 사용자의 위도, 경도 -> 민감한 개인 정보 값, 반드시 암호화 후에 저장해야 함
  */
 object AESUtil {
-    @JvmStatic
     fun createAESKey(): SecretKey {
         val keyGen = validateAlgorithm(ALGORITHM)
         keyGen.init(KEY_SIZE)
@@ -28,7 +27,6 @@ object AESUtil {
     }
 
     // 암호화
-    @JvmStatic
     @Throws(Exception::class)
     fun encrypt(data: String, secretKey: SecretKey?): String {
         val cipher = Cipher.getInstance(ALGORITHM)
@@ -38,7 +36,6 @@ object AESUtil {
     }
 
     // 복호화
-    @JvmStatic
     @Throws(Exception::class)
     fun decrypt(encryptedData: String?, secretKey: SecretKey?): String {
         val cipher = Cipher.getInstance(ALGORITHM)

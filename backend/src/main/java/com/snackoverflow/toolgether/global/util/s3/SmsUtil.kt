@@ -4,6 +4,7 @@ import com.snackoverflow.toolgether.global.exception.ErrorCode
 import com.snackoverflow.toolgether.global.exception.ServiceException
 import jakarta.annotation.PostConstruct
 import mu.KotlinLogging
+import net.nurigo.sdk.NurigoApp
 import net.nurigo.sdk.NurigoApp.initialize
 import net.nurigo.sdk.message.model.Message
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest
