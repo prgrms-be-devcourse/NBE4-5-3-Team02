@@ -19,12 +19,12 @@ class TokenService(
     companion object {
         @JvmField // Java에서 static 필드로 접근 가능하도록
         val blacklist = ConcurrentHashMap<String, Long>()
-        private val logger = LoggerFactory.getLogger(TokenService::class.java)
+        private val log = LoggerFactory.getLogger(TokenService::class.java)
     }
 
     // id, 이메일 정보를 담은 토큰 생성 (유효 기간으로 토큰을 나눔)
     fun createTokenByEmailAndId(email: String, id: Long, expiration: Long): String {
-        logger.info("createTokenByEmailAndId 호출 토큰 생성: {}", expiration)
+        log.info("createTokenByEmailAndId 호출 토큰 생성: {}", expiration)
         val claims = hashMapOf<String, Any>(
             "email" to email,
             "userId" to id
@@ -49,7 +49,7 @@ class TokenService(
 
     // 로그아웃 시 쿠키에 있는 토큰 삭제 및 블랙 리스트에 저장
     fun deleteTokens(response: HttpServletResponse, tokenName: String, token: String) {
-        logger.info("토큰 삭제 로직 시작")
+        log.info("토큰 삭제 로직 시작")
 
         val blacklist = when (tokenName) {
             REMEMBER_ME_TOKEN -> rememberMe
@@ -67,12 +67,12 @@ class TokenService(
             path = "/" // 전체 경로에 적용
         }
         response.addCookie(newToken) // 클라이언트에 새 쿠키 전송 (기존 쿠키 덮어쓰기)
-        logger.info("토큰 쿠키가 삭제되었습니다. 쿠키 이름: {}, Value: {}", newToken.name, newToken.value)
+        log.info("토큰 쿠키가 삭제되었습니다. 쿠키 이름: {}, Value: {}", newToken.name, newToken.value)
     }
 
     fun addToBlacklist(token: String, expiration: Long) {
         val expirationTime = System.currentTimeMillis() + expiration
         blacklist[token] = expirationTime
-        logger.info("블랙리스트에 토큰 추가: {}, 만료 시간: {}", token, expirationTime)
+        log.info("블랙리스트에 토큰 추가: {}, 만료 시간: {}", token, expirationTime)
     }
 }

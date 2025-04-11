@@ -25,7 +25,7 @@ class Notification(
     private var isRead: Boolean
 ) {
     constructor() : this(null, User(), "", LocalDateTime.now(), false)
-    constructor(user: User, message: String, createdAt: LocalDateTime, isRead: Boolean) : this()
+    constructor(user: User?, message: String, createdAt: LocalDateTime, isRead: Boolean) : this()
 
     fun setIsRead(isRead: Boolean) {
         this.isRead = isRead

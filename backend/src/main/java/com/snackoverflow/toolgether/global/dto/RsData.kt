@@ -1,19 +1,11 @@
 package com.snackoverflow.toolgether.global.dto
 
-import com.fasterxml.jackson.annotation.JsonIgnore
+/**
+ * TODO 변환 이후 @JvmOverloads constructor 제거할 것
+ */
 
-data class RsData<T>(
-    val code: String,
+data class RsData<T> @JvmOverloads constructor (
+    val resultCode: String,
     val msg: String,
-    val data: T? = null
-) {
-    val statusCode: Int
-        @JsonIgnore
-        get() = code.split("-")[0].toInt()
-
-    val isSuccess: Boolean
-        @JsonIgnore
-        get() = code.startsWith("2")
-
-    constructor(code: String, msg: String) : this(code, msg, null)
-}
+    val data: T? = null // 기본값을 null로 설정
+)
