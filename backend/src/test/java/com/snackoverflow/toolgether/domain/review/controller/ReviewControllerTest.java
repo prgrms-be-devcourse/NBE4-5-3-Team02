@@ -12,7 +12,6 @@ import com.snackoverflow.toolgether.domain.reservation.service.ReservationServic
 import com.snackoverflow.toolgether.domain.review.dto.request.ReviewRequest;
 import com.snackoverflow.toolgether.domain.review.entity.Review;
 import com.snackoverflow.toolgether.domain.review.service.ReviewService;
-import com.snackoverflow.toolgether.domain.user.entity.Address;
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.service.UserService;
 import com.snackoverflow.toolgether.global.filter.CustomUserDetails;
@@ -75,45 +74,23 @@ public class ReviewControllerTest {
                 .setCustomArgumentResolvers(loginUserArgumentResolver)
                 .build();
 
-        user1 = new User(
-                1L,
-                "human123",
-                null,
+        this.user1 = User.createGeneralUser(
                 "test1@gmail.com",
-                null,
-                null,
+                "human123",
                 "000-0000-0001",
                 "닉네임1",
-                new Address("서울시 강남구", "역삼동 123-45", "12345"),
-                LocalDateTime.now(),
-                null,
-                null,
-                true,
-                null,
-                30,
-                0,
-                null
+                "서울시 강남구 역삼동 123-45, 12345"
         );
+        this.user1.setId(1L);
 
-        user2 = new User(
-                2L,
-                "seaman222",
-                null,
+        user2 = User.createGeneralUser(
                 "test2@gmail.com",
-                null,
-                null,
+                "seaman222",
                 "000-0000-0002",
                 "닉네임2",
-                new Address("서울시 강남구", "역삼동 123-45", "12345"),
-                LocalDateTime.now(),
-                null,
-                null,
-                true,
-                null,
-                30,
-                0,
-                null
+                "서울시 강남구 역삼동 123-45, 12345"
         );
+        this.user2.setId(2L);
 
         post = new Post(
                 10L,
@@ -172,7 +149,7 @@ public class ReviewControllerTest {
         String reviewRequestJson = objectMapper.writeValueAsString(reviewRequest);
 
         // 로그인을 위해 추가
-        CustomUserDetails mockUserDetails = new CustomUserDetails("human123", "test1@gmail.com", 1L);
+        CustomUserDetails mockUserDetails = new CustomUserDetails(1L, "test1@gmail.com");
         when(loginUserArgumentResolver.supportsParameter(any())).thenReturn(true);
         when(loginUserArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(mockUserDetails);
 
@@ -181,7 +158,7 @@ public class ReviewControllerTest {
         when(reviewService.findByUserIdAndReservationId(reservationId, user1.getId())).thenReturn(Optional.empty());
 
         when(userService.findUserById(1L)).thenReturn(user1);
-        when(userService.getUserForUsername("human123")).thenReturn(user1);
+//        when(userService.getUserForUsername("human123")).thenReturn(user1);
 
         doNothing().when(reviewService).create(any(ReviewRequest.class), any(Reservation.class), any(User.class));
 
@@ -206,7 +183,7 @@ public class ReviewControllerTest {
         String reviewRequestJson = objectMapper.writeValueAsString(reviewRequest);
 
         // 로그인을 위해 추가
-        CustomUserDetails mockUserDetails = new CustomUserDetails("human123", "test1@gmail.com", 1L);
+        CustomUserDetails mockUserDetails = new CustomUserDetails(1L, "test1@gmail.com");
         when(loginUserArgumentResolver.supportsParameter(any())).thenReturn(true);
         when(loginUserArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(mockUserDetails);
 
@@ -216,7 +193,7 @@ public class ReviewControllerTest {
         when(reviewService.existsUserIdAndReservationId(user1.getId(), reservation.getId())).thenReturn(true);
 
         when(userService.findUserById(1L)).thenReturn(user1);
-        when(userService.getUserForUsername("human123")).thenReturn(user1);
+//        when(userService.getUserForUsername("human123")).thenReturn(user1);
 
         doNothing().when(reviewService).create(any(ReviewRequest.class), any(Reservation.class), any(User.class));
 
