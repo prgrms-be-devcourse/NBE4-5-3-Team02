@@ -49,41 +49,41 @@ public class UserController {
     }
 
     // 이메일 인증 확인 (링크)
-    @GetMapping("/verify")
-    public RsData<?> verifyEmail(@RequestParam("code") String code,
-                              HttpSession session) {
-        // 세션에서 인증 데이터 가져오기
-        VerificationData data = (VerificationData) session.getAttribute(SESSION_KEY);
-        // 인증 코드 검증
-        if (data != null && data.getCode().equals(code)) {
-            // 인증 성공 처리
-            log.info("이메일 링크 인증 성공 - 세션 정보: {}, 입력 정보:{}", data.getCode(), code);
-            data.setVerified(true);
-            session.setAttribute(SESSION_KEY, data);
+//    @GetMapping("/verify")
+//    public RsData<?> verifyEmail(@RequestParam("code") String code,
+//                              HttpSession session) {
+//        // 세션에서 인증 데이터 가져오기
+//        VerificationData data = (VerificationData) session.getAttribute(SESSION_KEY);
+//        // 인증 코드 검증
+//        if (data != null && data.getCode().equals(code)) {
+//            // 인증 성공 처리
+//            log.info("이메일 링크 인증 성공 - 세션 정보: {}, 입력 정보:{}", data.getCode(), code);
+//            data.setVerified(true);
+//            session.setAttribute(SESSION_KEY, data);
+//
+//            return new RsData<>(
+//                    "201-1",
+//                    "이메일 인증에 성공하였습니다.",
+//                    null
+//            );
+//        }
+//        return new RsData<>(
+//                "400-1",
+//                "이메일 인증에 실패했습니다.",
+//                null
+//        );
+//    }
 
-            return new RsData<>(
-                    "201-1",
-                    "이메일 인증에 성공하였습니다.",
-                    null
-            );
-        }
-        return new RsData<>(
-                "400-1",
-                "이메일 인증에 실패했습니다.",
-                null
-        );
-    }
-
-    @GetMapping("/verification-status")
-    public RsData<?> getVerificationStatus(HttpSession session) {
-        VerificationData data = (VerificationData) session.getAttribute(SESSION_KEY);
-
-        if (data != null && data.getVerified()) {
-            return new RsData<>("200-1", "인증 완료", true);
-        }
-
-        return new RsData<>("400-1", "인증되지 않았습니다.", false);
-    }
+//    @GetMapping("/verification-status")
+//    public RsData<?> getVerificationStatus(HttpSession session) {
+//        VerificationData data = (VerificationData) session.getAttribute(SESSION_KEY);
+//
+//        if (data != null && data.getVerified()) {
+//            return new RsData<>("200-1", "인증 완료", true);
+//        }
+//
+//        return new RsData<>("400-1", "인증되지 않았습니다.", false);
+//    }
 
 /*    // 회원 가입
     @PostMapping("/signup")
