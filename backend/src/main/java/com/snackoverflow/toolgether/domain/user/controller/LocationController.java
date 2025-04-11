@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.SecretKey;
 
-import static com.snackoverflow.toolgether.global.util.AESUtil.INSTANCE;
+import static com.snackoverflow.toolgether.global.util.AESUtil.createAESKey;
+import static com.snackoverflow.toolgether.global.util.AESUtil.encrypt;
+import static com.snackoverflow.toolgether.global.util.AESUtil.decrypt;
 
 @Slf4j
 @RestController
@@ -30,7 +32,7 @@ public class LocationController {
 
     @PostConstruct
     private void init() {
-        secretKey = INSTANCE.createAESKey();
+        secretKey = createAESKey();
     }
 
     // 유저 위치 변경 change-location?lon= ... & lat= ...
@@ -54,8 +56,8 @@ public class LocationController {
                                   HttpSession session) throws Exception {
 
         // 민감 정보 암호화 후 저장
-        String encryptedLatitude = INSTANCE.encrypt(String.valueOf(request.latitude), secretKey);
-        String encryptedLongitude = INSTANCE.encrypt(String.valueOf(request.longitude), secretKey);
+        String encryptedLatitude = AESUtil.encrypt(String.valueOf(request.latitude), secretKey);
+        String encryptedLongitude = AESUtil.encrypt(String.valueOf(request.longitude), secretKey);
 
         session.setAttribute("latitude", encryptedLatitude);
         session.setAttribute("longitude", encryptedLongitude);
@@ -77,8 +79,8 @@ public class LocationController {
         String encryptedLatitude = (String) session.getAttribute("latitude");
         String encryptedLongitude = (String) session.getAttribute("longitude");
 
-        double latitude = Double.parseDouble(INSTANCE.decrypt(encryptedLatitude, secretKey));
-        double longitude = Double.parseDouble(INSTANCE.decrypt(encryptedLongitude, secretKey));
+        double latitude = Double.parseDouble(AESUtil.decrypt(encryptedLatitude, secretKey));
+        double longitude = Double.parseDouble(AESUtil.decrypt(encryptedLongitude, secretKey));
 
         return new RsData<>("200",
                 "조회 성공",
