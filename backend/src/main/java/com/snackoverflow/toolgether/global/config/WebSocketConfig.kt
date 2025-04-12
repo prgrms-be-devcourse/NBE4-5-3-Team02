@@ -14,13 +14,12 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 class WebSocketConfig(
     private val chatWebSocketHandler: ChatWebSocketHandler,
     @Value("\${custom.site.frontUrl}") private val cors: String,
-    private val log: Logger
 ) : WebSocketConfigurer {
 
     // 웹소켓의 엔드포인트 정의 및 핸들러 등록
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
         registry.addHandler(chatWebSocketHandler, "/chat")
-            .addInterceptors(CustomHandshakeInterceptor(log))
+            .addInterceptors(CustomHandshakeInterceptor())
             .setAllowedOrigins(cors)
     }
 }
