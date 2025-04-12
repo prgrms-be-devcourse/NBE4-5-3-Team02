@@ -1,51 +1,47 @@
 package com.snackoverflow.toolgether.domain.user.service;
 
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import kotlin.apply
+import kotlin.run
+import kotlin.text.format
 
-@Slf4j
 @Service
-@RequiredArgsConstructor
-public class MailService {
+class MailService (
+    private val javaMailSender: JavaMailSender
+){
 
-    @Value("${custom.dev.backUrl}")
-    private String backUrl;
+    /**
+     * 전송자 이메일 application-secret.yml 파일 설정
+     * 구글 이용 시 앱 비밀번호 발급 받고 yml 파일 [본인 이메일, 앱 비밀번호] 로 바꿔 주셔야 합니다!
+     */
+    @Value("\${custom.site.backUrl}")
+    private lateinit var BACK_URL: String
 
-    private final JavaMailSender javaMailSender;
-
-    // 전송자 이메일 application.yml 파일 설정
-    // 구글 이용 시 앱 비밀번호 발급 받고 yml 파일 [본인 이메일, 앱 비밀번호] 로 바꿔 주셔야 합니다!
-    @Value("${spring.mail.username}")
-    private String SENDER_EMAIL;
+    @Value("\${spring.mail.username}")
+    private lateinit var SERDER_EMIAL: String
 
     // 인증 이메일 생성
-    public MimeMessage createMail(String email, String code) throws MessagingException {
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-        // 발신자, 수신자, 제목 설정
-        helper.setFrom(SENDER_EMAIL);
-        helper.setTo(email);
-        helper.setSubject("Toolgether 비밀번호 변경 - 이메일 인증");
-
-        // HTML 본문 생성
-        helper.setText(buildEmailTemplate(code), true); // HTML 컨텐츠로 설정
-
-        return message;
+    fun createMail(email: String, code: String): MimeMessage {
+        return javaMailSender.createMimeMessage().apply {
+            MimeMessageHelper(this, true, "UTF-8").run {
+                setFrom(SERDER_EMIAL)
+                setTo(email)
+                subject = "Toolgether 비밀번호 변경 - 이메일 인증"
+                setText(buildEmailTemplate(code), true) // HTML 컨텐츠 설정
+            }
+        }
     }
 
-    // 회원가입 인증 이메일 전송 용도
-    public void sendMail(MimeMessage prebuiltMessage) {
-        javaMailSender.send(prebuiltMessage);
+    // 비밀번호 변경 - 인증 이메일 전송 용도
+    fun sendMail(prebuiltMessage: MimeMessage) {
+        javaMailSender.send(prebuiltMessage)
     }
 
-    private String buildEmailTemplate(String code) {
+    fun buildEmailTemplate(code: String): String {
         return """
                 <!DOCTYPE html>
                 <html lang="ko">
@@ -111,6 +107,6 @@ public class MailService {
                     </div>
                 </body>
                 </html>
-                """.formatted(backUrl, code); // 코드 동적 삽입
+                """.format(BACK_URL, code); // 코드 동적 삽입
     }
 }
