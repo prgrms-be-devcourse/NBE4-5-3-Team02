@@ -15,7 +15,7 @@ import io.jsonwebtoken.ExpiredJwtException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.slf4j.LoggerFactory
+import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -28,16 +28,11 @@ class CustomAuthenticationFilter(
     private val objectMapper: ObjectMapper,
     private val userRepository: UserRepository,
     private val tokenService: TokenService,
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
+    private val log: Logger,
+    @Value("\${jwt.access_expiration}") private val access: Long,
+    @Value("\${jwt.refresh_expiration}") private val refresh: Long
 ) : OncePerRequestFilter() {
-
-    private val log = LoggerFactory.getLogger(CustomAuthenticationFilter::class.java)
-
-    @Value("\${jwt.access_expiration}")
-    private val access: Long = 0;
-
-    @Value("\${jwt.refresh_expiration}")
-    private val refresh: Long = 0
 
     override fun doFilterInternal(
         request: HttpServletRequest,
