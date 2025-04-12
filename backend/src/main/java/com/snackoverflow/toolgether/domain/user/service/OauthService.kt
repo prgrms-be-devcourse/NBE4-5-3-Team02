@@ -83,7 +83,7 @@ class OauthService(
 
     @Transactional
     // 소셜 로그인 회원 가입
-    fun createSocialUser(userInfo: Map<String, Any>): User {
+    fun createSocialUser(userInfo: kotlin.collections.Map<String, Any>): User {
         val providerId = userInfo["sub"] as String
         val email = userInfo["email"] as String
         val nickname = userInfo["name"] as String
