@@ -8,5 +8,5 @@ data class CommunityMessage(
     var timestamp: String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), // 메시지 전송 시각
     var senderName: String = "",       // 보내는 사람 닉네임
     var region: String = "",           // 지역 정보
-    var openSessionCount: Long = 0     // 열려 있는 세션 수
+    var openSessionCount: Int = 0     // 열려 있는 세션 수
 )
