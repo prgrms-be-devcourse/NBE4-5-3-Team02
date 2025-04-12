@@ -1,134 +1,115 @@
 package com.snackoverflow.toolgether.domain.user.service;
 
-import com.snackoverflow.toolgether.domain.user.dto.request.AdditionalInfoRequest;
+import com.snackoverflow.toolgether.domain.user.dto.request.AdditionalInfoRequest
 import com.snackoverflow.toolgether.domain.user.entity.User;
+import com.snackoverflow.toolgether.domain.user.entity.User.Companion.createSocialUser
 import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
+import com.snackoverflow.toolgether.global.exception.ErrorCode
 import com.snackoverflow.toolgether.global.exception.ServiceException;
 import com.snackoverflow.toolgether.global.exception.custom.UserNotFoundException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
+import kotlin.apply
+import kotlin.takeIf
 
-import static com.snackoverflow.toolgether.global.exception.ErrorCode.TOKEN_EXPIRED;
-import static com.snackoverflow.toolgether.global.exception.ErrorCode.TOKEN_NOT_FOUND;
-
-@Slf4j
 @Service
 @Transactional(readOnly = true)
-public class OauthService {
-
-    @Autowired private WebClient webClient;
-    private final UserRepository userRepository;
-    @Autowired private  LocationService locationService;
-
-    @Value("${spring.security.oauth2.client.registration.google.client-id}")
-    private String clientId;
-
-    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
-    private String clientSecret;
-
-    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
-    private String redirectUri;
-
-    public OauthService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+class OauthService(
+    private val userRepository: UserRepository,
+    private val webClient: WebClient,
+    private val locationService: LocationService,
+    private val log: Logger,
+    @Value("\${spring.security.oauth2.client.registration.google.client-id}") private val clientId: String,
+    @Value("\${spring.security.oauth2.client.registration.google.client-secret}") private val clientSecret: String,
+    @Value("\${spring.security.oauth2.client.registration.google.redirect-uri}") private val redirectUri: String
+) {
 
     // 토큰 (액세스 토큰 + 리프레시 토큰) 가져오기
-    public Map<String, Object> getTokens(String authCode) {
+    fun getTokens(authCode: String): Map<String, Any> {
         // 구글 토큰 엔드 포인트 URL
-        String tokenUrl = "https://oauth2.googleapis.com/token";
+        val tokenUrl = "https://oauth2.googleapis.com/token"
 
-        LinkedMultiValueMap<String, String> formData = createFormData(authCode);
+        val formData = createFormData(authCode)
 
         // WebClient를 사용한 POST 요청
-        Map<String, Object> response = webClient.post()
-                .uri(tokenUrl)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(BodyInserters.fromFormData(formData))
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
-                .block();// 동기 처리
-        log.info("Google Token Response: {}", response);
-        if (response != null && response.containsKey("access_token")) {
-            return response;
-        } else {
-            throw new ServiceException(TOKEN_NOT_FOUND);
+        return webClient.post()
+            .uri(tokenUrl)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .body(BodyInserters.fromFormData(formData))
+            .retrieve()
+            .bodyToMono(object : ParameterizedTypeReference<Map<String, Any>>() {})
+            .block()
+            ?.takeIf { it.containsKey("access_token") }
+            ?: throw ServiceException(ErrorCode.TOKEN_NOT_FOUND)
+    }
+
+    private fun createFormData(authCode: String): MultiValueMap<String, String> {
+        return LinkedMultiValueMap<String, String>().apply {
+            add("code", authCode)
+            add("client_id", clientId)
+            add("client_secret", clientSecret)
+            add("redirect_uri", redirectUri)
+            add("grant_type", "authorization_code")
         }
     }
 
     // 액세스 토큰을 이용해서 유저 정보 가져오기 (Calendar API 추후 추가할 수도 있음)
-    public Map<String, Object> getUserInfo(String accessToken) {
-        final String userInfoUrl = "https://www.googleapis.com/oauth2/v3/userinfo";
+    fun getUserInfo(accessToken: String): Map<String, Any> {
+        val userInfoUrl = "https://www.googleapis.com/oauth2/v3/userinfo"
 
         return webClient.get()
-                .uri(userInfoUrl)
-                .header("Authorization", "Bearer " + accessToken)
-                .retrieve()
-                .onStatus(status -> status.is4xxClientError(),
-                        response -> Mono.error(new ServiceException(TOKEN_EXPIRED, null)))
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                .blockOptional()
-                .filter(res -> res.containsKey("sub"))
-                .orElseThrow(UserNotFoundException::new);
+            .uri(userInfoUrl)
+            .header("Authorization", "Bearer " + accessToken)
+            .retrieve()
+            .onStatus({ it.is4xxClientError }) {
+                Mono.error(ServiceException(ErrorCode.TOKEN_EXPIRED))
+            }
+            .bodyToMono(object : ParameterizedTypeReference<Map<String, Any>>() {})
+            .block()
+            ?.takeIf { it.containsKey("sub") }
+            ?: throw UserNotFoundException()
     }
 
     @Transactional
     // 소셜 로그인 회원 가입
-    public User createSocialUser(Map<String, Object> userInfo) {
-        // 필요한 값들을 userInfo에서 추출
-        String providerId = (String) userInfo.get("sub");
-        String email = (String) userInfo.get("email");
-        String nickname = (String) userInfo.get("name");
-        String phoneNumber = "임시 번호"; // 기본값 설정
-        String baseAddress = "임시 주소"; // 기본값 설정
-        String provider = "Google"; // 소셜 로그인 제공자
+    fun createSocialUser(userInfo: Map<String, Any>): User {
+        val providerId = userInfo["sub"] as String
+        val email = userInfo["email"] as String
+        val nickname = userInfo["name"] as String
+        val phoneNumber = "임시 번호"
+        val baseAddress = "임시 주소"
+        val provider = "Google"
 
-        // createSocialUser 메서드를 사용해서 User 객체 생성
-        User user = User.createSocialUser(providerId, provider, phoneNumber, email, nickname, baseAddress);
-
-        // 저장 후 반환
-        return userRepository.save(user);
+        return userRepository.save(createSocialUser(providerId, provider, phoneNumber, email, nickname, baseAddress))
     }
-
 
     // 소셜 로그인 회원 추가 정보 업데이트
     @Transactional
-    public void updateAdditionalInfo(String email, AdditionalInfoRequest request) {
-        User user = userRepository.findByEmail(email);
+    fun updateAdditionalInfo(email: String, request: AdditionalInfoRequest) {
+        val user = userRepository.findByEmail(email) ?: throw UserNotFoundException()
+        val baseAddress = getBaseAddress(request)
 
-        Double clientLat = request.getLatitude();
-        Double clientLon = request.getLongitude();
-        log.info("클라이언트 위치 정보:{}, {}", clientLat, clientLon);
-
-        String baseAddress = locationService.convertCoordinateToAddress(clientLat, clientLon);
-        user.updatePhoneNumber(request.getPhoneNumber());
-        user.updateBaseAddress(baseAddress);
-        user.updateAdditionalInfoRequired(false);
+        user.apply {
+            updatePhoneNumber(request.phoneNumber)
+            updateBaseAddress(baseAddress)
+        }
     }
 
-
-    @NotNull
-    private LinkedMultiValueMap<String, String> createFormData(String authCode) {
-        LinkedMultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("code", authCode);
-        formData.add("client_id", clientId);
-        formData.add("client_secret", clientSecret);
-        formData.add("redirect_uri", redirectUri);
-        formData.add("grant_type", "authorization_code");
-        return formData;
+    // 외부 api 호출 로직 분리
+    fun getBaseAddress(request: AdditionalInfoRequest): String {
+        return locationService.convertCoordinateToAddress(request.latitude, request.longitude)
+        log.info("클라이언트 위치 정보:{}, {}", request.latitude, request.longitude);
     }
 }
+
