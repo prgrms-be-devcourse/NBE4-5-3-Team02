@@ -32,7 +32,12 @@ enum class ErrorCode(
     MESSAGE_SEND_FAILED("500-2", "인증 메시지 전송 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // Location Errors
-    ADDRESS_CONVERSION_ERROR("400-6", "좌표를 주소로 변환할 수 없습니다.", HttpStatus.BAD_REQUEST);
+    ADDRESS_CONVERSION_ERROR("400-7", "좌표를 주소로 변환할 수 없습니다.", HttpStatus.BAD_REQUEST),
+
+    // Chat Errors
+    MESSAGE_SAVE_ERROR("500-3", "메시지 저장 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    MESSAGE_PARSE_ERROR("400-8", "메시지 파싱 중 오류가 발생했습니다.", HttpStatus.BAD_REQUEST),
+    NOT_FOUND_CHAT("404-2", "사용자가 포함된 채널이 없습니다.", HttpStatus.NOT_FOUND);
 
     fun toException(cause: Throwable? = null): ServiceException {
         return ServiceException(this, cause)
