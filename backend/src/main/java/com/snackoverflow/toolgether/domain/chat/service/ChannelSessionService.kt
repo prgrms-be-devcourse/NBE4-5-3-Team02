@@ -1,31 +1,49 @@
-package com.snackoverflow.toolgether.domain.chat.service;
+package com.snackoverflow.toolgether.domain.chat.service
 
-import org.springframework.stereotype.Service;
-import org.springframework.web.socket.WebSocketSession;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.stereotype.Service
+import org.springframework.web.socket.WebSocketSession
+import java.util.concurrent.ConcurrentHashMap
 
 @Service
-public class ChannelSessionService {
+class ChannelSessionService {
 
-    // 채널별로 세션을 관리 (동일 채팅방 생성 방지를 위해 set 적용)
-    private final Map<String, Set<WebSocketSession>> channelSessionsMap = new ConcurrentHashMap<>();
+    private val channelSessionsMap: MutableMap<String, MutableSet<WebSocketSession>> = ConcurrentHashMap()
 
-    // ConcurrentHashMap과 ConcurrentSet 를 이용해 동시성 문제 해결 및 성능 개선
-    public void addSession(String channelName, WebSocketSession session) {
-        channelSessionsMap.computeIfAbsent(channelName, k -> Collections.newSetFromMap(new ConcurrentHashMap<>())).add(session);
+    fun addSession(channelName: String, session: WebSocketSession) {
+        channelSessionsMap.computeIfAbsent(channelName) { ConcurrentHashMap.newKeySet() }.add(session)
     }
 
-    public void removeSession(WebSocketSession session) {
-        for (Set<WebSocketSession> sessions : channelSessionsMap.values()) {
-            sessions.remove(session);
+    // 특정 채널에서 세션 제거
+    fun removeSession(channelName: String, session: WebSocketSession) {
+        channelSessionsMap[channelName]?.let { sessions ->
+            sessions.remove(session)
+            if (sessions.isEmpty()) {
+                channelSessionsMap.remove(channelName) // 채널이 비었으면 제거
+            }
         }
     }
 
-    public Set<WebSocketSession> getSessions(String channelName) {
-        return channelSessionsMap.getOrDefault(channelName, Collections.emptySet());
+    // 전체 채널에서 세션 제거
+    fun removeSession(session: WebSocketSession) {
+        channelSessionsMap.keys.toSet().forEach { channelName ->
+            removeSession(channelName, session)
+        }
+    }
+
+    // 채널 이름으로 세션 조회
+    fun getSessions(channelName: String): Set<WebSocketSession> {
+        return channelSessionsMap[channelName] ?: emptySet()
+    }
+
+    // 사용자 ID 기반 채널 조회
+    fun getChannelsByUserId(userId: String): Set<String> {
+        return channelSessionsMap.entries
+            .filter { (_, sessions) ->
+                sessions.any { session ->
+                    session.principal?.name == userId
+                }
+            }
+            .map { it.key }
+            .toSet()
     }
 }
