@@ -57,7 +57,7 @@ class LocationService(
             throw ServiceException (ErrorCode.ADDRESS_CONVERSION_ERROR)
 
 
-        val roadAddress = response.documents.first.roadAddress as RoadAddress
+        val roadAddress = response.documents.first().roadAddress as RoadAddress
 
         // 예시: 서울 성동구 까지만 저장이 되도록 함 (개인정보 보호 용도)
         return "${roadAddress.region1} ${roadAddress.region2}"
