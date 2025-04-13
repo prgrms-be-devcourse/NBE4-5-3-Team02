@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.testImplementation
+
 plugins {
     kotlin("jvm") version "1.9.25" // 자바, 코틀린 동시에 이용 가능
     kotlin("plugin.spring") version "1.9.25" // 코틀린용 스프링 플러그인
@@ -16,12 +18,12 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
     }
-}
-
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "21" // ✅ KotlinCompile 태스크에 적용
+            freeCompilerArgs += "-Xjsr305=strict"
+        }
+    }
 }
 
 configurations {
@@ -60,10 +62,15 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
     testImplementation("com.h2database:h2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("io.github.hakky54:logcaptor:2.10.1")
+
+    // kotlin test
+    testImplementation("org.mockito:mockito-core")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation(kotlin("test-junit5"))
 
     // AWS S3 관련
     implementation("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
@@ -102,11 +109,7 @@ dependencies {
     kapt("jakarta.persistence:jakarta.persistence-api")
 
     // Kotlin
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-
-    // kotlin test
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.22")
 
     implementation("com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5")
     implementation("org.geolatte:geolatte-geom:1.9.0")
@@ -114,6 +117,10 @@ dependencies {
 
     // kotlin logging
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
+
+    // kotlin 용 Jackson 라이브러리
+    implementation ("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.2")
+    implementation ("com.fasterxml.jackson.core:jackson-annotations:2.17.2")
 }
 
 dependencyManagement { // Spring Cloud Version 명시 (Hoxton.SR6)
@@ -133,14 +140,6 @@ noArg {
 // Q 클래스 생성 경로 지정
 sourceSets.main {
     kotlin.srcDir("build/generated/source/kapt/main")
-}
-
-kotlin {
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions {
-            freeCompilerArgs += "-java-parameters"
-        }
-    }
 }
 
 allOpen {
