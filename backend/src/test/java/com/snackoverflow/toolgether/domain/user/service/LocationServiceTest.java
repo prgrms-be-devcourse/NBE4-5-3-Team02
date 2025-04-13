@@ -1,8 +1,7 @@
-package com.snackoverflow.toolgether.domain.user.service.service;
+package com.snackoverflow.toolgether.domain.user.service;
 
 import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
-import com.snackoverflow.toolgether.domain.user.service.LocationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("local")
 @Transactional
 class LocationServiceTest {
 

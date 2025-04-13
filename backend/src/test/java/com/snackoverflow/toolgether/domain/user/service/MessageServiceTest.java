@@ -1,6 +1,5 @@
-package com.snackoverflow.toolgether.domain.user.service.service;
+package com.snackoverflow.toolgether.domain.user.service;
 
-import com.snackoverflow.toolgether.domain.user.service.MessageService;
 import com.snackoverflow.toolgether.global.exception.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("local")
 @Transactional
 class MessageServiceTest {
 

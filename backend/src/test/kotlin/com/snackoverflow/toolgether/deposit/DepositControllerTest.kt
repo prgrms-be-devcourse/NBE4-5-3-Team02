@@ -30,7 +30,7 @@ class DepositControllerTest {
     @BeforeEach
     fun setUp() {
         MockitoAnnotations.openMocks(this)
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build()
+        mockMvc = MockMvcBuilders.webAppContextSetup(context!!).build()
     }
 
     @Test
