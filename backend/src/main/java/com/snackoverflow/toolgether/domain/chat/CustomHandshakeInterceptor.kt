@@ -18,6 +18,9 @@ class CustomHandshakeInterceptor() : HandshakeInterceptor {
 
         // URI에서 쿼리 파라미터 추출
         if (request is ServletServerHttpRequest) {
+            val let = request.headers.get("Authorization")?.let {
+                attributes["Authorization"]
+            }
             val servletRequest = request.servletRequest
             val query = servletRequest.queryString
 
