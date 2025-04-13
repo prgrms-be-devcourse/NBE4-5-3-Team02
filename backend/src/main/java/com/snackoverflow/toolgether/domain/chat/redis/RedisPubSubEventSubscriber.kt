@@ -1,7 +1,7 @@
 package com.snackoverflow.toolgether.domain.chat.redis
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.snackoverflow.toolgether.domain.chat.dto.ChatMessageDto
+import com.snackoverflow.toolgether.domain.chat.dto.ChatMessage
 import com.snackoverflow.toolgether.domain.chat.dto.CommunityMessage
 import com.snackoverflow.toolgether.domain.chat.redis.RedisPubSubEventPublisher.ChatEvent
 import com.snackoverflow.toolgether.domain.chat.redis.RedisPubSubEventPublisher.Companion.CHAT_EVENT_PREFIX
@@ -11,21 +11,23 @@ import com.snackoverflow.toolgether.domain.chat.service.ChannelSessionService
 import com.snackoverflow.toolgether.domain.chat.service.ChatNotificationService
 import com.snackoverflow.toolgether.domain.chat.service.ChatService
 import org.slf4j.Logger
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.redis.connection.Message
 import org.springframework.data.redis.connection.MessageListener
 import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import org.springframework.web.socket.TextMessage
 import kotlin.jvm.java
 
-@Component
+@Service
+@Lazy
 class RedisPubSubEventSubscriber(
     private val log: Logger,
     private val objectMapper: ObjectMapper,
     private val chatNotificationService: ChatNotificationService,
     private val channelSessionService: ChannelSessionService,
     private val chatService: ChatService,
-    private val redisTemplate: RedisTemplate<String, Any>
+    private val redisTemplate: RedisTemplate<String, Any>,
 ) : MessageListener {
 
     companion object {
@@ -33,7 +35,6 @@ class RedisPubSubEventSubscriber(
     }
 
     // 채널 패턴별 메시지 처리
-
     override fun onMessage(message: Message, pattern: ByteArray?) {
         val channel = String(message.channel)
         val body = String(message.body)
@@ -67,7 +68,7 @@ class RedisPubSubEventSubscriber(
         val event = objectMapper.readValue(messageBody, ChatEvent::class.java)
 
         // 2. 페이로드 추출
-        val chatMessageDto = objectMapper.readValue(event.payload, ChatMessageDto::class.java)
+        val chatMessageDto = objectMapper.readValue(event.payload, ChatMessage::class.java)
         log.info("보낸 사람: ${chatMessageDto.sender}, 받는 사람: ${chatMessageDto.receiver}, 내용: ${chatMessageDto.content}")
 
         // 4. 메시지 저장

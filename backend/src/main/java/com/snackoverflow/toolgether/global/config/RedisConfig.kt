@@ -46,13 +46,6 @@ class RedisConfig(
     }
 
     @Bean
-    fun objectMapper(): ObjectMapper = ObjectMapper().apply {
-
-        registerModule(KotlinModule.Builder().build())
-        propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
-    }
-
-    @Bean
     fun messageListenerAdapter(redisSubscriber: RedisPubSubEventSubscriber): MessageListenerAdapter {
         return MessageListenerAdapter(redisSubscriber, "onMessage")
     }

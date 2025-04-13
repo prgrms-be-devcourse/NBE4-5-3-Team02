@@ -1,14 +1,12 @@
 package com.snackoverflow.toolgether.domain.chat.redis
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.snackoverflow.toolgether.domain.chat.dto.ChatMessageDto
+import com.snackoverflow.toolgether.domain.chat.dto.ChatMessage
 import com.snackoverflow.toolgether.domain.chat.dto.CommunityMessage
 import com.snackoverflow.toolgether.domain.chat.service.ChatService
 import org.slf4j.Logger
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 /**
  * Pub / Sub 의 발행 흐름
@@ -38,7 +36,7 @@ class RedisPubSubEventPublisher(
      * }
      */
     // 채팅 메시지 발행
-    fun publishChatEvent(channel: String, message: ChatMessageDto) {
+    fun publishChatEvent(channel: String, message: ChatMessage) {
 
         val event = ChatEvent(
             type = "MSG",

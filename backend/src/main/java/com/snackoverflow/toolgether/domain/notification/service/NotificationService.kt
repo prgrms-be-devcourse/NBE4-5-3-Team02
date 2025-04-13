@@ -22,7 +22,7 @@ class NotificationService(
     @Transactional
     fun createNotification(userId: Long?, message: String): Notification {
         val notification: Notification = Notification(
-            userService.findByUserId(userId),
+            userService.findByUserId(userId!!),
             message,
             LocalDateTime.now(),
             false

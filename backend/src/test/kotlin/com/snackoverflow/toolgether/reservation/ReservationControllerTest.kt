@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 
 @SpringBootTest
-@ActiveProfiles("")
+@ActiveProfiles("local")
 @AutoConfigureMockMvc
 @Transactional
 class ReservationControllerTest {
@@ -39,7 +39,7 @@ class ReservationControllerTest {
     @BeforeEach
     fun setUp() {
         MockitoAnnotations.openMocks(this)
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build()
+        mockMvc = MockMvcBuilders.webAppContextSetup(context!!).build()
     }
 
     private fun requestReservation(): ResultActions {
@@ -75,7 +75,7 @@ class ReservationControllerTest {
             .andExpect(status().isOk)
             .andExpect(handler().handlerType(ReservationController::class.java))
             .andExpect(handler().methodName("createReservation"))
-            .andExpect(jsonPath("$.code").value("201-1"))
+            .andExpect(jsonPath("$.resultCode").value("201-1"))
             .andExpect(jsonPath("$.msg").value("예약 요청 성공"))
             .andExpect(jsonPath("$.data.status").value("REQUESTED"))
     }
@@ -90,7 +90,7 @@ class ReservationControllerTest {
         resultAction.andExpect(status().isOk)
             .andExpect(handler().handlerType(ReservationController::class.java))
             .andExpect(handler().methodName("approveReservation"))
-            .andExpect(jsonPath("$.code").value("201-1"))
+            .andExpect(jsonPath("$.resultCode").value("201-1"))
             .andExpect(jsonPath("$.msg").value("1번 예약 승인 성공"))
     }
 
@@ -105,7 +105,7 @@ class ReservationControllerTest {
         resultAction.andExpect(status().isOk)
             .andExpect(handler().handlerType(ReservationController::class.java))
             .andExpect(handler().methodName("rejectReservation"))
-            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.resultCode").value("200-1"))
             .andExpect(jsonPath("$.msg").value("1번 예약 거절 성공"))
     }
 
@@ -119,7 +119,7 @@ class ReservationControllerTest {
         resultAction.andExpect(status().isOk)
             .andExpect(handler().handlerType(ReservationController::class.java))
             .andExpect(handler().methodName("cancelReservation"))
-            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.resultCode").value("200-1"))
             .andExpect(jsonPath("$.msg").value("1번 예약 취소 성공"))
     }
 
@@ -132,7 +132,7 @@ class ReservationControllerTest {
             .andExpect(status().isOk)
             .andExpect(handler().handlerType(ReservationController::class.java))
             .andExpect(handler().methodName("createReservation"))
-            .andExpect(jsonPath("$.code").value("201-1"))
+            .andExpect(jsonPath("$.resultCode").value("201-1"))
             .andExpect(jsonPath("$.msg").value("예약 요청 성공"))
             .andExpect(jsonPath("$.data.status").value("REQUESTED"))
 
@@ -143,7 +143,7 @@ class ReservationControllerTest {
         resultAction.andExpect(status().isOk)
             .andExpect(handler().handlerType(ReservationController::class.java))
             .andExpect(handler().methodName("startRental"))
-            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.resultCode").value("200-1"))
             .andExpect(jsonPath("$.msg").value("2번 예약 대여 시작 성공"))
     }
 
@@ -159,7 +159,7 @@ class ReservationControllerTest {
             .andExpect(status().isOk)
             .andExpect(handler().handlerType(ReservationController::class.java))
             .andExpect(handler().methodName("ownerIssue"))
-            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.resultCode").value("200-1"))
             .andExpect(jsonPath("$.msg").value("2번 예약 소유자에 의한 이슈로 환급 성공"))
     }
 
@@ -175,7 +175,7 @@ class ReservationControllerTest {
             .andExpect(status().isOk)
             .andExpect(handler().handlerType(ReservationController::class.java))
             .andExpect(handler().methodName("renterIssue")) // 메서드 이름 수정
-            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.resultCode").value("200-1"))
             .andExpect(jsonPath("$.msg").value("2번 예약 대여자에 의한 이슈로 환급 성공"))
     }
 
@@ -193,7 +193,7 @@ class ReservationControllerTest {
             .andExpect(status().isOk)
             .andExpect(handler().handlerType(ReservationController::class.java))
             .andExpect(handler().methodName("getReservationById")) // 메서드 이름 수정
-            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.resultCode").value("200-1"))
             .andExpect(jsonPath("$.msg").value("1번 예약 조회 성공"))
     }
 
@@ -212,7 +212,7 @@ class ReservationControllerTest {
             .andExpect(status().isOk)
             .andExpect(handler().handlerType(ReservationController::class.java))
             .andExpect(handler().methodName("getReservedDates")) // 메서드 이름 수정
-            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.resultCode").value("200-1"))
             .andExpect(jsonPath("$.msg").value("1번 게시글의 예약 일정 조회 성공"))
     }
 }

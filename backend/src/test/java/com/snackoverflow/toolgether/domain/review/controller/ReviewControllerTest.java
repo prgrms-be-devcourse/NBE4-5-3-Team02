@@ -170,7 +170,7 @@ public class ReviewControllerTest {
                 .andDo(print());
 
         resultActions
-                .andExpect(jsonPath("$.code").value("200-1"))
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.msg").value("리뷰가 완료되었습니다"));
 
         verify(reviewService, times(1)).create(any(ReviewRequest.class), any(Reservation.class), any(User.class));
@@ -205,7 +205,7 @@ public class ReviewControllerTest {
                 .andDo(print());
 
         resultActions
-                .andExpect(jsonPath("$.code").value("409-1")) // 예시 에러 코드
+                .andExpect(jsonPath("$.resultCode").value("409-1")) // 예시 에러 코드
                 .andExpect(jsonPath("$.msg").value("이미 작성한 리뷰가 존재합니다")); // 예시 에러 메시지
 
         verify(reviewService, times(0)).create(any(ReviewRequest.class), any(Reservation.class), any(User.class));

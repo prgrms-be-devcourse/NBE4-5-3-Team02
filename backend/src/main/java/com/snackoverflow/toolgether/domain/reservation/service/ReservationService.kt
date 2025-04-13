@@ -193,7 +193,7 @@ class ReservationService(
         depositHistoryService.updateDepositHistory(depositHistory.id!!, DepositStatus.RETURNED, ReturnReason.REJECTED)
 
         // 대여자 크레딧 업데이트
-        userService.updateUserCredit(reservation.renter.id, depositHistory.amount)
+        userService.updateUserCredit(reservation.renter.id!!, depositHistory.amount)
 
         val title = reservation.post.title
 
@@ -236,7 +236,7 @@ class ReservationService(
         )
 
         // 대여자 크레딧 업데이트
-        userService.updateUserCredit(reservation.renter.id, depositHistory.amount)
+        userService.updateUserCredit(reservation.renter.id!!, depositHistory.amount)
 
         // 알림 전송
         notificationService.createNotification(
@@ -260,7 +260,7 @@ class ReservationService(
         depositHistoryService.updateDepositHistory(depositHistory.id!!, DepositStatus.RETURNED, ReturnReason.REJECTED)
 
         // 대여자 크레딧 업데이트
-        userService.updateUserCredit(reservation.renter.id, depositHistory.amount)
+        userService.updateUserCredit(reservation.renter.id!!, depositHistory.amount)
 
         // 소유자에게 알림 전송
         notificationService.createNotification(
@@ -285,11 +285,11 @@ class ReservationService(
         if (failDue == FailDue.OWNER_ISSUE) {
             reservation.failDueToOwnerIssue()
             // 대여자 크레딧 업데이트
-            userService.updateUserCredit(reservation.renter.id, depositHistory.amount)
+            userService.updateUserCredit(reservation.renter.id!!, depositHistory.amount)
         } else if (failDue == FailDue.RENTER_ISSUE) {
             reservation.failDueToRenterIssue()
             // 소유자 크레딧 업데이트
-            userService.updateUserCredit(reservation.owner.id, depositHistory.amount)
+            userService.updateUserCredit(reservation.owner.id!!, depositHistory.amount)
         }
 
         // 알림 전송

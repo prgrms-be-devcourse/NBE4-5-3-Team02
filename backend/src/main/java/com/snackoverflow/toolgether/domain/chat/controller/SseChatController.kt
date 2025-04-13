@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 
 @RestController
 @RequestMapping("/api/sse")
-class SseController(
+class SseChatController(
     private val sseManager: SseSubscriptionManager
 ) {
 
@@ -20,7 +20,7 @@ class SseController(
         @RequestHeader("X-User-Id") userId: String,
         response: HttpServletResponse
     ): SseEmitter {
-        response.setHeader("X-Accel-Buffering", "no") // Nginx 버퍼링 비활성화
+
         return sseManager.subscribe(userId)
     }
 }
