@@ -3,7 +3,7 @@ package com.snackoverflow.toolgether.domain.chat.dto
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-data class ChatMessageDto(
+data class ChatMessage(
     var sender: String = "",          // 보낸 사람의 ID
     var receiver: String = "",        // 받는 사람의 ID
     var content: String = "",         // 메시지 내용
