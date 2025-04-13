@@ -1,30 +1,26 @@
-package com.snackoverflow.toolgether.domain.chat.service;
+package com.snackoverflow.toolgether.domain.chat.service
 
-import com.snackoverflow.toolgether.domain.chat.redis.RedisSubscriber;
-import com.snackoverflow.toolgether.domain.chat.redis.TopicFactory;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.stereotype.Service;
+import com.snackoverflow.toolgether.domain.chat.redis.RedisPubSubEventSubscriber
+import com.snackoverflow.toolgether.domain.chat.redis.TopicFactory
+import org.springframework.data.redis.listener.ChannelTopic
+import org.springframework.data.redis.listener.RedisMessageListenerContainer
+import org.springframework.stereotype.Service
 
-@Slf4j
 @Service
-@RequiredArgsConstructor
-public class TopicSubscriptionService {
+class TopicSubscriptionService(
+    private val container: RedisMessageListenerContainer,
+    private val topicFactory: TopicFactory,
+    private val redisPubSubEventSubscriber: RedisPubSubEventSubscriber
+) {
 
-    private final RedisMessageListenerContainer redisContainer;
-    private final RedisSubscriber redisSubscriber;
-    private final TopicFactory topicFactory;
-
-    public void subscribeToChatTopic(String senderId, String receiverId) {
-        ChannelTopic topic = topicFactory.create(senderId, receiverId);
-        log.info("채널 생성={}", topic);
-        redisContainer.addMessageListener(redisSubscriber, topic);
+    // 1:1 채팅
+    fun subscribeToChatTopic(senderId: String, receiverId: String) {
+        val topic = topicFactory.create(senderId, receiverId)
+        container.addMessageListener(redisPubSubEventSubscriber, topic)
     }
 
-    public void subscriberToChatCommunity(ChannelTopic channelTopic) {
-        log.info("채널 생성={}", channelTopic);
-        redisContainer.addMessageListener(redisSubscriber, channelTopic);
+    // 커뮤니티 채팅
+    fun subscriberToChatCommunity(channelTopic: ChannelTopic) {
+        container.addMessageListener(redisPubSubEventSubscriber, channelTopic)
     }
 }
