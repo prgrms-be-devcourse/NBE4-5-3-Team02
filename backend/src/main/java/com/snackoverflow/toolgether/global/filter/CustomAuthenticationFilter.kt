@@ -15,6 +15,7 @@ import io.jsonwebtoken.ExpiredJwtException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -28,22 +29,23 @@ class CustomAuthenticationFilter(
     private val objectMapper: ObjectMapper,
     private val userRepository: UserRepository,
     private val tokenService: TokenService,
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
 ) : OncePerRequestFilter() {
 
-    private val log = LoggerFactory.getLogger(CustomAuthenticationFilter::class.java)
+    private val log: Logger = LoggerFactory.getLogger(CustomAuthenticationFilter::class.java)
 
     @Value("\${jwt.access_expiration}")
-    private val access: Long = 0;
+    private var access: Long? = null
 
     @Value("\${jwt.refresh_expiration}")
-    private val refresh: Long = 0
+    private val refresh: Long? = null
 
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
+
 
         log.info("CustomAuthenticationFilter 실행")
 
@@ -163,8 +165,8 @@ class CustomAuthenticationFilter(
     }
 
     private fun saveNewTokens(response: HttpServletResponse, userId: Long, email: String) {
-        val accessToken = tokenService.createTokenByEmailAndId(email, userId, access)
-        val refreshToken = tokenService.createTokenByEmailAndId(email, userId, refresh)
+        val accessToken = tokenService.createTokenByEmailAndId(email, userId, access!!)
+        val refreshToken = tokenService.createTokenByEmailAndId(email, userId, refresh!!)
 
         response.apply {
             setHeader("Authorization", "Bearer $accessToken") // accessToken을 header에 저장
@@ -183,7 +185,7 @@ class CustomAuthenticationFilter(
                 ?: throw ServiceException(ErrorCode.USERINFO_NOT_FOUND)
 
             val (email, userId) = extractUserInfoFromClaims(claims)
-            return tokenService.createTokenByEmailAndId(email, userId, access)
+            return tokenService.createTokenByEmailAndId(email, userId, access!!)
         }
     }
 
@@ -229,7 +231,8 @@ class CustomAuthenticationFilter(
         val excludedPaths = listOf(
             "/h2-console",
             "/login/oauth2/code/google",
-            "/api/v2/users/"
+            "/api/v2/users/",
+            "/api/chat/"
         )
         val requestURI = request.requestURI
 

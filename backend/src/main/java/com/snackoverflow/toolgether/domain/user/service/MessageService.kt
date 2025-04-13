@@ -95,10 +95,10 @@ class MessageService(
     }
 
     // 휴대폰 인증 추가 시도 횟수 증가
-    private fun addRetryCount(phoneNumber: String, retryCount: Int?) {
+    private fun addRetryCount(phoneNumber: String, retryCount: Int) {
         redisTemplate.opsForValue().apply {
             increment("retry_count:$phoneNumber").also {
-                set(("retry_count:$phoneNumber"), it, Duration.ofMinutes(5))
+                set(("retry_count:$phoneNumber"), it!!, Duration.ofMinutes(5))
             }
         }
     }

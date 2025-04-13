@@ -82,7 +82,7 @@ class ReviewScoreScheduler(
                                 ", 새 리뷰 총 변화량: " + totalChange +
                                 ", 업데이트 후 점수: " + updatedScore
                     )
-                    userService.updateUserScore(user.id, updatedScore)
+                    userService.updateUserScore(user.id!!, updatedScore)
                 }
             } else {
                 println("해당 유저의 지난 1주일 동안 새 리뷰가 없습니다.")
@@ -95,7 +95,7 @@ class ReviewScoreScheduler(
             for (user in inactiveUsers) {
                 if (user.score > BASE_SCORE) {
                     val decayedScore = max(BASE_SCORE, user.score - DECAY_RATE)
-                    userService.updateUserScore(user.id, decayedScore)
+                    userService.updateUserScore(user.id!!, decayedScore)
                 }
             }
 

@@ -32,10 +32,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ExtendWith(OutputCaptureExtension.class)
-@ActiveProfiles("test")
+@ActiveProfiles("local")
 class CustomAuthenticationFilterTest {
 
     @Value("${jwt.refresh_expiration}")
+
     private Long refresh;
 
     @Value("${jwt.rememberMe_expiration}")

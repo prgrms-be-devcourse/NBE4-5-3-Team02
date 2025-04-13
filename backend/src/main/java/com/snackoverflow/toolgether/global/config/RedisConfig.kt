@@ -1,6 +1,11 @@
 package com.snackoverflow.toolgether.global.config;
 
-import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.snackoverflow.toolgether.domain.chat.redis.RedisPubSubEventPublisher
+import com.snackoverflow.toolgether.domain.chat.redis.RedisPubSubEventSubscriber
+import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,18 +13,18 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.PatternTopic
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 class RedisConfig(
-        @Value("\${spring.data.redis.host}") private val redisHost: String,
-        @Value("\${spring.data.redis.port}") private val redisPort: Int
+    @Value("\${spring.data.redis.host}") private val redisHost: String,
+    @Value("\${spring.data.redis.port}") private val redisPort: Int,
+    private val log: Logger
 ) {
-
-    private val log = LoggerFactory.getLogger(RedisConfig::class.java)
 
     @Bean
     fun redisConnectionFactory(): RedisConnectionFactory {
@@ -41,24 +46,24 @@ class RedisConfig(
     }
 
     @Bean
-    fun gangnamTopic(): ChannelTopic = ChannelTopic("chatroom:gangnam")
+    fun messageListenerAdapter(redisSubscriber: RedisPubSubEventSubscriber): MessageListenerAdapter {
+        return MessageListenerAdapter(redisSubscriber, "onMessage")
+    }
 
     @Bean
-    fun mapoTopic(): ChannelTopic = ChannelTopic("chatroom:mapo")
+    fun redisMessageListenerContainer(
+        connectionFactory: RedisConnectionFactory,
+        listenerAdapter: MessageListenerAdapter
+    ): RedisMessageListenerContainer {
 
-    @Bean
-    fun seongdongTopic(): ChannelTopic = ChannelTopic("chatroom:seongdong")
-
-    @Bean
-    fun nowonTopic(): ChannelTopic = ChannelTopic("chatroom:nowon")
-
-    @Bean
-    fun gwanakTopic(): ChannelTopic = ChannelTopic("chatroom:gwanak")
-
-    @Bean
-    fun redisMessageListenerContainer(connectionFactory: RedisConnectionFactory): RedisMessageListenerContainer {
         return RedisMessageListenerContainer().apply {
             setConnectionFactory(connectionFactory)
+            val topics = listOf(
+                PatternTopic("${RedisPubSubEventPublisher.CHAT_EVENT_PREFIX}*"),
+                PatternTopic("${RedisPubSubEventPublisher.NOTIFICATION_PREFIX}*"),
+                PatternTopic("${RedisPubSubEventPublisher.COMMUNITY_EVENTS_CHANNEL}*"),
+            )
+            addMessageListener(listenerAdapter, topics)
         }
     }
 }

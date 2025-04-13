@@ -22,7 +22,6 @@ class AsyncConfig : AsyncConfigurer {
         executor.corePoolSize = 10 // 기본 스레드 수
         executor.maxPoolSize = 30 // 최대 스레드 수
         executor.queueCapacity = 50 // 대기 큐 크기
-        executor.threadNamePrefix = "Async-" // 스레드 이름 식별자
         executor.setTaskDecorator(SessionAwareTaskDecorator())
         executor.initialize() // 초기화
         return executor

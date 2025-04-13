@@ -8,7 +8,6 @@ import com.snackoverflow.toolgether.domain.post.dto.PostResponse
 import com.snackoverflow.toolgether.domain.post.dto.PostSearchRequest
 import com.snackoverflow.toolgether.domain.post.entity.Post
 import com.snackoverflow.toolgether.domain.post.entity.QPost
-import com.snackoverflow.toolgether.domain.post.entity.QPost.post
 import com.snackoverflow.toolgether.domain.post.repository.PostRepositoryCustom
 import com.snackoverflow.toolgether.domain.postavailability.entity.PostAvailability
 import com.snackoverflow.toolgether.domain.postavailability.entity.QPostAvailability

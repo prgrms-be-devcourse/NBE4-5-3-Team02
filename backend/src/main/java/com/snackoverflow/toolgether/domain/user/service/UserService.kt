@@ -32,7 +32,7 @@ class UserService(
         }
     }
 
-    fun findByUserId(userId: Long?): User? {
+    fun findByUserId(userId: Long): User? {
         return userRepository.findById(userId).orElse(null)
     }
 
@@ -41,7 +41,7 @@ class UserService(
     }
 
     @Transactional
-    fun updateUserCredit(userId: Long?, credit: Int) {
+    fun updateUserCredit(userId: Long, credit: Int) {
         val user = userRepository.findById(userId).orElseThrow { UserNotFoundException() }
         user.updateCredit(credit)
     }
@@ -79,7 +79,7 @@ class UserService(
     }
 
     @Transactional
-    fun updateUserScore(id: Long?, updatedScore: Double) {
+    fun updateUserScore(id: Long, updatedScore: Double) {
         val user = userRepository.findById(id).orElseThrow { UserNotFoundException() }
         user.updateScore(updatedScore)
     }

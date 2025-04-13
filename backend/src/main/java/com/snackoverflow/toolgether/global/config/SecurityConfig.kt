@@ -20,17 +20,23 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @EnableWebSecurity
 class SecurityConfig(
     private val authenticationFilter: CustomAuthenticationFilter,
-    @Value("\${custom.dev.frontUrl}") private val allowOrigin: String,
+    @Value("\${custom.site.frontUrl}") private val allowOrigin: String,
 ) {
 
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        http.cors { cors -> cors.configurationSource(corsConfigurationSource()) }.authorizeHttpRequests { authorize ->
-                authorize.requestMatchers("/").permitAll().requestMatchers("/h2-console/**").permitAll()
-                    .requestMatchers("/api/v2/users/**").permitAll().requestMatchers("/api/chat/**").permitAll()
-                    .requestMatchers("/api/*/**").permitAll().anyRequest().permitAll() // 모든 요청 허용
-            }.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+        http
+            .cors { it.configurationSource(corsConfigurationSource()) }
+            .authorizeHttpRequests {
+                it.requestMatchers("/").permitAll()
+                .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/env").permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/api/v2/users/**").permitAll()
+                .requestMatchers("/api/*/**").permitAll()
+                .anyRequest().permitAll() // 모든 요청 허용
+        }.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
             .sessionManagement { session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .headers { headers ->
                 headers.addHeaderWriter(XFrameOptionsHeaderWriter(XFrameOptionsMode.SAMEORIGIN))
