@@ -1,80 +1,84 @@
-package com.snackoverflow.toolgether.domain.chat.controller;
+package com.snackoverflow.toolgether.domain.chat.controller
 
-import com.snackoverflow.toolgether.domain.chat.dto.ChatMessageDto;
-import com.snackoverflow.toolgether.domain.chat.service.ChatService;
-import com.snackoverflow.toolgether.global.dto.RsData;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import com.snackoverflow.toolgether.domain.chat.dto.ChatMessage
+import com.snackoverflow.toolgether.domain.chat.service.ChatService
+import com.snackoverflow.toolgether.global.dto.RsData
+import org.slf4j.Logger
+import org.springframework.messaging.handler.annotation.MessageMapping
+import org.springframework.messaging.handler.annotation.SendTo
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
-import java.util.List;
-
-@Slf4j
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/chat")
-public class ChatController {
+class ChatController(
+    private val chatService: ChatService,
+    private val log: Logger
+) {
 
-    private final ChatService chatService;
+    // STOMP 메시지 발송 핸들러
+    @MessageMapping("/chat")
+    @SendTo("/topic/messages")
+    fun sendMessage(message: ChatMessage) = message
 
-    // 사용자가 포함된 전체 채팅 채널을 반환하는 엔드포인트
+    // 사용자 채널 목록 조회
     @GetMapping("/channels")
-    public RsData<?> getChannels(@RequestParam("userId") String userId) {
-        List<String> channels = chatService.getChannels(userId);
-        if (channels.isEmpty()) {
-            return new RsData<>("404-1",
-                    "사용자가 포함된 채널이 없습니다.",
-                    null);
-        }
-        for (String channel : channels) {
-            log.info("채널 목록 조회:{}", channel);
-        }
-        return new RsData<>(
-                "200-1",
-                "사용자가 포함된 채널 목록 조회 성공",
-                channels
-        );
+    fun getChannels(@RequestParam userId: String): RsData<Any> {
+
+        val channels = chatService.getChannels(userId)
+
+        return RsData(
+            resultCode = "200-1",
+            msg = "사용자가 포함된 채널 목록 조회 성공",
+            data = channels
+        )
     }
 
-    /**
-     * 특정 채널의 모든 채팅 내역을 반환하는 엔드포인트
-     *
-     * @param channelName 채널 이름
-     * @return 채팅 메시지 목록 (JSON 형태)
-     */
+    // 채팅 내역 조회
     @GetMapping("/history")
-    public RsData<?> getChatHistory(@RequestParam("channelName") String channelName,
-                                    @RequestParam("userId") String userId) {
-        List<ChatMessageDto> chatHistory = chatService.getChatHistory(channelName, userId);
-        log.info("저장한 채팅 - 채널:{}, 내역:{}", channelName, chatHistory);
-        return new RsData<>(
-                "200-1",
-                "채팅 내역 불러오기 성공",
-                chatHistory
-        );
+    fun getChatHistory(
+        @RequestParam channelName: String,
+        @RequestParam userId: String
+    ): RsData<Any> {
+
+        val chatHistory = chatService.getChatHistory(channelName, userId)
+        log.info("저장한 채팅 - 채널: {}, 내역: {}", channelName, chatHistory)
+        return RsData(
+            resultCode = "200-1",
+            msg = "채팅 내역 불러오기 성공",
+            data = chatHistory
+        )
     }
 
     // 채팅방 삭제
     @DeleteMapping("/delete")
-    public RsData<?> deleteChat(@RequestParam("channel") String channel,
-                                @RequestParam("userId") String userId) {
-        chatService.deleteChannelMessages(channel, userId);
-        return new RsData<>(
-                "201-1",
-                "채널 삭제 완료",
-                true
-        );
+    fun deleteChat(
+        @RequestParam channel: String,
+        @RequestParam userId: String
+    ): RsData<Boolean> {
+        chatService.deleteChannelMessages(channel, userId)
+        return RsData(
+            resultCode = "201-1",
+            msg = "채널 삭제 완료",
+            data = true
+        )
     }
 
     // 읽지 않은 메시지 카운트 조회
     @GetMapping("/unread-count")
-    public RsData<Integer> getUnreadCount(@RequestParam("userId") String userId) {
-        Integer unreadCount = chatService.getUnreadCount(userId);
-        log.info("읽지 않은 메시지의 개수: {}", unreadCount);
-        return new RsData<>(
-                "200-1",
-                "읽지 않은 메시지의 수 조회 성공",
-                unreadCount
-        );
+    fun getUnreadCount(
+        @RequestParam userId: String
+    ): RsData<Int> {
+        val unreadCount = chatService.getUnreadCount(userId)
+        log.info("읽지 않은 메시지의 개수: {}", unreadCount)
+        return RsData(
+            resultCode = "200-1",
+            msg = "읽지 않은 메시지의 수 조회 성공",
+            data = unreadCount
+        )
     }
+
 }
