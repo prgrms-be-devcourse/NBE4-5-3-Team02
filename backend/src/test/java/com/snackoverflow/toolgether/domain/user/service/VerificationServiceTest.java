@@ -1,8 +1,6 @@
-package com.snackoverflow.toolgether.domain.user.service.service;
+package com.snackoverflow.toolgether.domain.user.service;
 
 import com.snackoverflow.toolgether.domain.user.dto.request.VerificationData;
-import com.snackoverflow.toolgether.domain.user.service.MailService;
-import com.snackoverflow.toolgether.domain.user.service.VerificationService;
 import com.snackoverflow.toolgether.global.exception.ServiceException;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("local")
 @Transactional
 class VerificationServiceTest {
 

@@ -4,7 +4,6 @@ import com.snackoverflow.toolgether.domain.user.entity.User;
 import com.snackoverflow.toolgether.domain.user.repository.UserRepository;
 import com.snackoverflow.toolgether.domain.user.service.MessageService;
 import com.snackoverflow.toolgether.domain.user.service.UserServiceV2;
-import com.snackoverflow.toolgether.global.filter.CustomUserDetails;
 import com.snackoverflow.toolgether.global.token.JwtService;
 import com.snackoverflow.toolgether.global.token.TokenService;
 import jakarta.servlet.http.Cookie;
@@ -15,9 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -30,11 +26,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("local")
 @AutoConfigureMockMvc
 @Transactional
 class UserControllerV2Test {
@@ -142,18 +137,18 @@ class UserControllerV2Test {
 
         //when: 로그아웃 요청 실행
         ResultActions result = mockMvc.perform(get("/api/v2/logout")
-                        .header("X-Test-Auth", "test@example.com")
+                .header("X-Test-Auth", "test@example.com")
                 .cookie(new Cookie("refresh_token", refreshToken))
                 .cookie(new Cookie("remember_me_token", rememberMeToken)));
 
         // then: 응답 검증
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-3"))
-                .andExpect(jsonPath("$.msg").value("로그아웃에 성공하였습니다."));
-
-        // Then: 블랙리스트에 실제로 값을 집어넣는지 호출 검증
-        assertThat(tokenService.isTokenBlacklisted(refreshToken)).isTrue();
-        assertThat(tokenService.isTokenBlacklisted(rememberMeToken)).isTrue();
+                .andExpect(jsonPath("$.msg").value("로그아웃에 성공하였습니다."))
+                // 쿠키 검증: refresh_token의 값이 null인지 확인
+                .andExpect(cookie().value("refresh_token", (String) null))
+                // 쿠키 검증: remember_me_token의 값이 null인지 확인
+                .andExpect(cookie().value("remember_me_token", (String) null));
     }
 }
 
